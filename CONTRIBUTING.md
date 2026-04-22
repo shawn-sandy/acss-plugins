@@ -22,9 +22,10 @@ The sibling layout is for **contributors** editing plugin skill docs: open the f
 acss-plugins/
 ├── .claude-plugin/
 │   └── marketplace.json    # catalog listing all plugins
-├── acss-app-builder/       # scaffolding plugin
-├── acss-kit-builder/       # component generator plugin
-├── fpkit-developer/        # deprecated; kept for one release
+├── plugins/
+│   ├── acss-app-builder/   # scaffolding plugin
+│   ├── acss-kit-builder/   # component generator plugin
+│   └── fpkit-developer/    # deprecated; kept for one release
 ├── README.md
 ├── CONTRIBUTING.md
 └── LICENSE

@@ -10,21 +10,21 @@
   "plugins": [
     {
       "name": "fpkit-developer",
-      "source": "./fpkit-developer",
+      "source": "./plugins/fpkit-developer",
       "description": "Deprecated — superseded by acss-app-builder. Guides development of applications built with @fpkit/acss React components.",
       "category": "development",
       "tags": ["fpkit", "acss", "react", "css-variables", "accessibility", "wcag", "component-composition", "deprecated"]
     },
     {
       "name": "acss-kit-builder",
-      "source": "./acss-kit-builder",
+      "source": "./plugins/acss-kit-builder",
       "description": "Generate fpkit-style React components without installing @fpkit/acss. Reference-guided generation with CSS custom properties. Requires only React + sass.",
       "category": "development",
       "tags": ["fpkit", "acss", "react", "component-generation", "css-variables", "sass", "typescript"]
     },
     {
       "name": "acss-app-builder",
-      "source": "./acss-app-builder",
+      "source": "./plugins/acss-app-builder",
       "description": "Scaffold apps with the @fpkit/acss design system: layouts, pages, themes, forms, patterns. Works with the @fpkit/acss npm package OR generated acss-kit-builder source.",
       "category": "development",
       "tags": ["fpkit", "acss", "react", "scaffolding", "forms", "layouts", "themes", "patterns"]
