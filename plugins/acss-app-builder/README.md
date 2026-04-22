@@ -14,7 +14,7 @@ Prefers generated source when both are present.
 This plugin **replaces** the deprecated `fpkit-developer` plugin. If you installed the old one via marketplace, uninstall it first to avoid duplicate skills loading:
 
 ```
-/plugin uninstall fpkit-developer@shawn-sandy-acss
+/plugin uninstall fpkit-developer@shawn-sandy-acss-plugins
 ```
 
 All composition / extension / a11y workflows from `fpkit-developer` are preserved as sections of the `/app-compose` command in this plugin.
@@ -24,6 +24,25 @@ All composition / extension / a11y workflows from `fpkit-developer` are preserve
 - Vite + React + TypeScript project
 - `sass` or `sass-embedded` in `devDependencies`
 - Claude Code >= v1.0.33
+
+## Installation
+
+### Marketplace install (recommended)
+
+```shell
+/plugin marketplace add shawn-sandy/acss-plugins
+/plugin install acss-app-builder@shawn-sandy-acss-plugins
+```
+
+### Manual install via GitHub clone
+
+```bash
+git clone https://github.com/shawn-sandy/acss-plugins.git
+mkdir -p ~/.claude/plugins/
+cp -r acss-plugins/plugins/acss-app-builder ~/.claude/plugins/
+```
+
+For project-level install, substitute `~/.claude/plugins/` with `.claude/plugins/` inside your project.
 
 ## Commands
 
