@@ -1,0 +1,88 @@
+// App shell styles — grid-area-based layouts with CSS custom properties.
+// CSS variables follow --{component}-{element?}-{property} naming.
+// All values in rem.
+
+.app-shell {
+  min-block-size: var(--app-shell-min-block-size, 100vh);
+  display: var(--app-shell-display, grid);
+  gap: var(--app-shell-gap, 0);
+  background: var(--app-shell-bg, var(--color-background, #ffffff));
+  color: var(--app-shell-color, var(--color-text, #1a1a1a));
+
+  &__header {
+    grid-area: header;
+    padding-inline: var(--app-shell-header-padding-inline, 1.5rem);
+    padding-block: var(--app-shell-header-padding-block, 0.75rem);
+    border-block-end: var(--app-shell-header-border, 1px solid var(--color-border, #e0e0e0));
+  }
+
+  &__nav {
+    grid-area: nav;
+    padding: var(--app-shell-nav-padding, 1rem);
+    border-inline-end: var(--app-shell-nav-border, 1px solid var(--color-border, #e0e0e0));
+  }
+
+  &__main {
+    grid-area: main;
+    padding: var(--app-shell-main-padding, 1.5rem);
+    min-inline-size: 0; // allow shrink inside grid
+  }
+
+  &__aside {
+    grid-area: aside;
+    padding: var(--app-shell-aside-padding, 1rem);
+    border-inline-start: var(--app-shell-aside-border, 1px solid var(--color-border, #e0e0e0));
+  }
+
+  &__footer {
+    grid-area: footer;
+    padding-inline: var(--app-shell-footer-padding-inline, 1.5rem);
+    padding-block: var(--app-shell-footer-padding-block, 0.75rem);
+    border-block-start: var(--app-shell-footer-border, 1px solid var(--color-border, #e0e0e0));
+  }
+
+  &[data-shell="holy-grail"] {
+    grid-template-areas:
+      "header header header"
+      "nav    main   aside"
+      "footer footer footer";
+    grid-template-columns: var(--app-shell-nav-inline-size, 16rem) 1fr var(--app-shell-aside-inline-size, 18rem);
+    grid-template-rows: auto 1fr auto;
+  }
+
+  &[data-shell="sidebar"] {
+    grid-template-areas:
+      "nav header"
+      "nav main"
+      "nav footer";
+    grid-template-columns: var(--app-shell-nav-inline-size, 16rem) 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  &[data-shell="centered"] {
+    place-items: center;
+    padding: var(--app-shell-centered-padding, 2rem);
+
+    .app-shell__main {
+      inline-size: 100%;
+      max-inline-size: var(--app-shell-centered-max-inline-size, 32rem);
+    }
+  }
+}
+
+// Mobile: collapse to single column below the "md" breakpoint.
+@media (max-width: 48rem) {
+  .app-shell[data-shell="holy-grail"],
+  .app-shell[data-shell="sidebar"] {
+    grid-template-areas:
+      "header"
+      "main"
+      "footer";
+    grid-template-columns: 1fr;
+
+    .app-shell__nav,
+    .app-shell__aside {
+      display: none;
+    }
+  }
+}

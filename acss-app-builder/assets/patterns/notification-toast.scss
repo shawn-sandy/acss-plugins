@@ -1,0 +1,29 @@
+// Styles for the notification-toast pattern.
+.notification-toast {
+  display: var(--notification-toast-display, flex);
+  align-items: start;
+  gap: var(--notification-toast-gap, 0.75rem);
+  padding-block: var(--notification-toast-padding-block, 0.75rem);
+  padding-inline: var(--notification-toast-padding-inline, 1rem);
+  border-radius: var(--notification-toast-radius, 0.5rem);
+  border: var(--notification-toast-border, 1px solid var(--color-border, #e5e7eb));
+  background: var(--notification-toast-bg, var(--color-surface-raised, #ffffff));
+  color: var(--notification-toast-color, var(--color-text, inherit));
+  box-shadow: var(--notification-toast-shadow, 0 4px 12px rgb(0 0 0 / 0.08));
+  max-inline-size: var(--notification-toast-max-inline-size, 32rem);
+}
+
+.notification-toast__message {
+  flex: 1;
+  margin-block: 0;
+}
+
+.notification-toast[data-tone="success"] {
+  border-color: var(--color-success, #0a7d3b);
+}
+.notification-toast[data-tone="warning"] {
+  border-color: var(--color-warning, #ae7100);
+}
+.notification-toast[data-tone="error"] {
+  border-color: var(--color-danger, #b42318);
+}

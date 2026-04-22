@@ -1,0 +1,24 @@
+// Styles for the pricing-grid pattern.
+.pricing-grid {
+  padding-block: var(--pricing-grid-padding-block, 3rem);
+  padding-inline: var(--pricing-grid-padding-inline, 1.5rem);
+}
+
+.pricing-grid__grid {
+  display: var(--pricing-grid-grid-display, grid);
+  gap: var(--pricing-grid-gap, 1.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(var(--pricing-grid-min-column, 16rem), 1fr));
+  margin-block-start: var(--pricing-grid-grid-margin-block-start, 2rem);
+}
+
+.pricing-grid__price {
+  font-size: var(--pricing-grid-price-fs, 2rem);
+  font-weight: var(--pricing-grid-price-fw, 700);
+  margin-block: 0;
+}
+
+// Highlight a recommended tier via data-recommended attribute.
+.pricing-grid [data-recommended="true"] {
+  outline: var(--pricing-grid-recommended-outline, 2px solid var(--color-primary, #0057b7));
+  outline-offset: var(--pricing-grid-recommended-outline-offset, -2px);
+}
