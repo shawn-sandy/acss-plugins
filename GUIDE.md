@@ -26,8 +26,8 @@ End-to-end guide for installing and using the acss-plugins marketplace. Covers i
 ## 2. Prerequisites
 
 - **Claude Code >= v1.0.33** — run `claude --version` to check. Older versions do not support `/plugin marketplace add`.
-- **For `acss-app-builder`** — a Vite + React + TypeScript project with `sass` in `devDependencies`. The plugin auto-detects the project via [`detect_vite_project.py`](plugins/acss-app-builder/scripts/detect_vite_project.py) and refuses to run elsewhere.
-- **For `acss-kit-builder` alone** — just React + `sass`. No Vite requirement, no `@fpkit/acss` npm install.
+- **For `acss-app-builder`** — a Vite + React + TypeScript project with `sass` (or `sass-embedded`) in `devDependencies`. [`detect_vite_project.py`](plugins/acss-app-builder/scripts/detect_vite_project.py) enforces the Vite + React parts at preflight; `/app-init` additionally checks for sass and halts with an install hint if it's missing.
+- **For `acss-kit-builder` alone** — React + TypeScript, with `sass` (or `sass-embedded`) in `devDependencies`. No Vite requirement, no `@fpkit/acss` npm install. Components are generated as `.tsx` files, so TypeScript is required.
 - **Clean git working tree** — most commands refuse to run on a dirty tree unless you pass `--force`. Commit or stash first.
 
 If you already have a project scaffolded with Vite (`npm create vite@latest my-app -- --template react-ts`) and `sass` installed (`npm install -D sass`), you're ready.
@@ -76,7 +76,7 @@ This shows every installed plugin and the commands each exposes. Use it when a s
 /plugin update
 ```
 
-Claude Code compares the installed version against the upstream `plugin.json` and pulls newer versions. The `version` field lives in each plugin's `plugin.json` — the marketplace-level `marketplace.json` intentionally omits `version` to avoid drift.
+Claude Code compares the installed version against the upstream `plugin.json` and pulls newer versions. The authoritative per-plugin version lives in each plugin's `.claude-plugin/plugin.json`. The `plugins[]` entries inside `.claude-plugin/marketplace.json` intentionally omit a per-plugin `version` to avoid drift — the marketplace file's own top-level `version` tracks marketplace-wide releases separately.
 
 **Uninstall:**
 
@@ -106,7 +106,7 @@ Falls back to `src/components/fpkit` automatically if the file is absent.
 
 ## 5. `acss-app-builder` command reference
 
-Seven commands. Each one runs a **shared preflight** (Vite project detection, component source detection, theme base check) before taking any action, and refuses to overwrite non-empty files unless you pass `--force`.
+Seven commands. Six of them run a **shared preflight** (Vite project detection, component source detection, theme base check) before taking any action. `/app-init` is exempt — it creates the files (`.acss-target.json`, `src/styles/theme/base.css`) those checks would otherwise verify. All seven refuse to overwrite non-empty files unless you pass `--force`, and all refuse to run with a dirty git tree for the same reason.
 
 ### `/app-init`
 
@@ -230,7 +230,7 @@ Examples:
 
 ## 7. End-to-end walkthrough
 
-From zero to a running app with the full design system.
+From zero to a running app with the full design system. **Commit between scaffolding steps** — the shared preflight refuses to run on a dirty git tree (see [Section 5](#5-acss-app-builder-command-reference)), so we stage and commit after each mutation.
 
 **Step 1 — Prepare a Vite project.**
 
@@ -260,21 +260,33 @@ Expected: `/plugin list` now shows both plugins and their commands.
 
 Expected: new directories `src/app/`, `src/pages/`, `src/styles/theme/`. Base theme CSS is written. `.acss-target.json` is created at project root (you'll be prompted for the components directory the first time; accept the default `src/components/fpkit`). A light theme and a `sidebar` shell are generated via the `--with` shortcuts. The entry file gets a sentinel-bounded `import` block.
 
+Commit before moving on:
+
+```bash
+git add . && git commit -m "scaffold app shell and theme"
+```
+
 **Step 4 — Generate fpkit components locally.**
 
 ```
-/kit-add button card
+/kit-add button card link
 ```
 
-Expected: `src/components/fpkit/button/button.tsx`, `src/components/fpkit/button/button.scss`, `src/components/fpkit/cards/card.tsx`, `src/components/fpkit/cards/card.scss`, plus `ui.tsx` if this is the first run.
+Expected: `src/components/fpkit/button/button.tsx`, `src/components/fpkit/button/button.scss`, `src/components/fpkit/card/card.tsx`, `src/components/fpkit/card/card.scss`, `src/components/fpkit/link/link.tsx`, `src/components/fpkit/link/link.scss`, plus `ui.tsx` on the first run. Commit before the next command so the preflight stays happy:
 
-**Step 5 — Stamp a dashboard page.**
-
-```
-/app-page dashboard Home
+```bash
+git add . && git commit -m "generate fpkit button, card, link"
 ```
 
-Expected: `src/pages/Home.tsx` using the locally generated Button and Card. Because `ui.tsx` exists, `/app-page` detects `source=generated` and uses relative imports (no `@fpkit/acss` package required). Claude prints a wiring snippet for `src/App.tsx`.
+**Step 5 — Stamp a landing page.**
+
+```
+/app-page landing Home
+```
+
+Expected: `src/pages/Home.tsx` using the locally generated Button, Link, and Card. Because `ui.tsx` exists, `/app-page` detects `source=generated` and uses relative imports (no `@fpkit/acss` package required). Claude prints a wiring snippet for `src/App.tsx`.
+
+> **Template choice.** This walkthrough uses `landing` because all of its imports — Button, Link, Card, CardTitle, CardContent — are available in `acss-kit-builder`'s catalog. The `dashboard` template imports a table (`TBL`) that only ships via `@fpkit/acss` on npm; to use dashboard under `source=generated`, either switch this flow to `source=npm` by running `npm install @fpkit/acss` in Step 1, or pick a template listed in the [app-builder reference](plugins/acss-app-builder/skills/acss-app-builder/references/pages.md).
 
 **Step 6 — Wire the page into your entry.** Apply the snippet Claude printed in step 5 (typically an import + a route or conditional render in `src/App.tsx`).
 
@@ -285,7 +297,7 @@ npx tsc --noEmit
 npm run dev
 ```
 
-Open the dev server URL. You should see the dashboard page rendered with the light theme, sidebar shell, and the components you generated.
+Open the dev server URL. You should see the landing page rendered with the light theme, sidebar shell, and the components you generated.
 
 ## 8. Migrating from `fpkit-developer`
 
@@ -339,7 +351,7 @@ Component CSS variables must follow the pattern `--{component}-{element?}-{varia
 
 **`/plugin update` doesn't pick up a new version.**
 
-The authoritative version is in each plugin's `.claude-plugin/plugin.json`. The marketplace-level `marketplace.json` deliberately omits `version` entries — having it in both places invites drift, and Claude Code's documented behavior is "the plugin manifest wins silently." If a version bump isn't detected, confirm the upstream `plugin.json` reflects the new version.
+The authoritative per-plugin version is in each plugin's `.claude-plugin/plugin.json`. The `plugins[]` entries inside `.claude-plugin/marketplace.json` deliberately omit a per-plugin `version` — having it in both places invites drift, and Claude Code's documented behavior is "the plugin manifest wins silently." If a version bump isn't detected, confirm the upstream `plugin.json` reflects the new version.
 
 ## Further reading
 
