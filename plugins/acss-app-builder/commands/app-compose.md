@@ -11,7 +11,7 @@ Follow the `/app-compose` section of `.claude/plugins/acss-app-builder/skills/ac
 **This command replaces** the deprecated `/fpkit-developer:fpkit-dev` from the `fpkit-developer` plugin. If that plugin is still installed, uninstall it to avoid duplicate skill activation:
 
 ```
-/plugin uninstall fpkit-developer@shawn-sandy-acss
+/plugin uninstall fpkit-developer@shawn-sandy-acss-plugins
 ```
 
 **Decision tree:**
