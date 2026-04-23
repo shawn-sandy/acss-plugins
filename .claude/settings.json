@@ -52,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE '^[[:space:]]*git[[:space:]]+(commit|push)([[:space:]]|$)'; then branch=$(git branch --show-current 2>/dev/null); if [ \"$branch\" = \"main\" ]; then echo \"[main-guard] BLOCKED: direct commit/push to main is not allowed. Use a feature branch.\" >&2; exit 2; fi; fi",
+            "command": "cmd=$(jq -r '.tool_input.command // empty'); branch=$(git branch --show-current 2>/dev/null); if echo \"$cmd\" | grep -qE '^[[:space:]]*git[[:space:]]+commit([[:space:]]|$)'; then if [ \"$branch\" = \"main\" ]; then echo \"[main-guard] BLOCKED: direct commit/push to main is not allowed. Use a feature branch.\" >&2; exit 2; fi; fi; if echo \"$cmd\" | grep -qE '^[[:space:]]*git[[:space:]]+push([[:space:]]|$)'; then if [ \"$branch\" = \"main\" ] || echo \"$cmd\" | grep -qE '(^|[[:space:]]):?refs/heads/main($|[[:space:]])|(^|[[:space:]])[^[:space:]]+:refs/heads/main($|[[:space:]])|(^|[[:space:]])[^[:space:]]+:main($|[[:space:]])|^[[:space:]]*git[[:space:]]+push([[:space:]]+[^[:space:]]+)?[[:space:]]+(main|refs/heads/main)([[:space:]]|$)'; then echo \"[main-guard] BLOCKED: direct commit/push to main is not allowed. Use a feature branch.\" >&2; exit 2; fi; fi",
             "timeout": 5,
             "statusMessage": "Checking branch guard..."
           }
