@@ -6,9 +6,9 @@ Claude Code plugins for building applications with [@fpkit/acss](https://github.
 
 | Plugin | Purpose |
 |---|---|
-| [`acss-app-builder`](./acss-app-builder) | Scaffold apps with the fpkit design system — layouts, pages, themes, forms, patterns. Works with the `@fpkit/acss` npm package OR generated source. |
-| [`acss-kit-builder`](./acss-kit-builder) | Generate fpkit-style React components directly into your project — no `@fpkit/acss` npm install required. |
-| [`fpkit-developer`](./fpkit-developer) | **Deprecated** — superseded by `acss-app-builder`. Kept for one release cycle. |
+| [`acss-app-builder`](./plugins/acss-app-builder) | Scaffold apps with the fpkit design system — layouts, pages, themes, forms, patterns. Works with the `@fpkit/acss` npm package OR generated source. |
+| [`acss-kit-builder`](./plugins/acss-kit-builder) | Generate fpkit-style React components directly into your project — no `@fpkit/acss` npm install required. |
+| [`fpkit-developer`](./plugins/fpkit-developer) | **Deprecated** — superseded by `acss-app-builder`. Kept for one release cycle. |
 
 See [GUIDE.md](./GUIDE.md) for the full end-user guide — install, choose a plugin, run commands, troubleshoot.
 
