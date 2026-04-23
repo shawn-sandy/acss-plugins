@@ -7,12 +7,12 @@ All notable changes to the `acss-app-builder` plugin are documented here. Format
 ### Added
 
 - `CHANGELOG.md` (this file).
-- `scripts/README.md` — index of the four Python helper scripts (Vite detection, component-source detection, CSS variable validation, theme contrast validation) with I/O contracts and exit codes.
+- `scripts/README.md` — index of the four Python helpers. Documents the split between detection scripts (JSON on stdout) and validator scripts (plain text + exit-code semantics), including correct field names on each output path.
 - `## Installation` section in README with marketplace + manual install instructions.
 
 ### Fixed
 
-- Typo in README migration snippet — the `/plugin uninstall` example now uses the correct marketplace name `shawn-sandy-acss-plugins`.
+- Typo in the `/plugin uninstall` migration snippet — now uses the correct marketplace name `shawn-sandy-acss-plugins`. Corrected in two places: `README.md` (line 17) and `commands/app-compose.md` (line 14). Copy-pasting either snippet will now actually uninstall the deprecated plugin instead of silently no-opping.
 
 ## [0.1.1]
 
