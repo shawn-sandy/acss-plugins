@@ -23,7 +23,7 @@ Run these in order for each `plugins/*/` directory.
 ### 1. Manifest exists and has required fields
 
 ```bash
-jq -e '.name != "" and .version != "" and .description != ""' plugins/<plugin>/.claude-plugin/plugin.json
+jq -e '(.name | type == "string" and length > 0) and (.version | type == "string" and length > 0) and (.description | type == "string" and length > 0)' plugins/<plugin>/.claude-plugin/plugin.json
 ```
 
 - PASS if file exists and all three fields are non-null/non-empty strings.
