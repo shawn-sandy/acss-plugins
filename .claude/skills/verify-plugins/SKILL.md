@@ -23,15 +23,26 @@ Run these in order for each `plugins/*/` directory.
 ### 1. Manifest exists and has required fields
 
 ```bash
-jq -e '.name and .version and .description' plugins/<plugin>/.claude-plugin/plugin.json
+jq -e '.name != "" and .version != "" and .description != ""' plugins/<plugin>/.claude-plugin/plugin.json
 ```
 
 - PASS if file exists and all three fields are non-null/non-empty strings.
-- FAIL if file is missing or any field absent.
+- FAIL if file is missing or any field is absent or empty.
 
 ### 2. Marketplace entry has no `version` key
 
-Read `.claude-plugin/marketplace.json`, find the entry whose `name` matches the plugin directory.
+Read `.claude-plugin/marketplace.json`. Run two checks in sequence.
+
+First, verify the entry exists:
+
+```bash
+jq -e --arg p "<plugin>" '.plugins | map(.name) | index($p) != null' .claude-plugin/marketplace.json
+```
+
+- FAIL if entry is absent: "marketplace.json has no entry for <plugin> — add one."
+- If absent, skip the next check for this plugin.
+
+Then, verify no `version` key:
 
 ```bash
 jq -e '.plugins[] | select(.name == "<plugin>") | has("version") | not' .claude-plugin/marketplace.json

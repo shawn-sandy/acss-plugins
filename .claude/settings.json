@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; if [[ \"$f\" =~ plugins/[^/]+/\\.claude-plugin/plugin\\.json ]]; then result=$(jq -e '.name and .version and .description' \"$f\" 2>&1); if [ $? -ne 0 ]; then echo \"[plugin.json hook] FAIL: $f is missing one or more required fields (name, version, description). Got: $result\"; fi; fi; }",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; if [[ \"$f\" =~ plugins/[^/]+/\\.claude-plugin/plugin\\.json ]]; then result=$(jq -e '.name != \"\" and .version != \"\" and .description != \"\"' \"$f\" 2>&1); if [ $? -ne 0 ]; then echo \"[plugin.json hook] FAIL: $f is missing one or more required fields (name, version, description). Got: $result\" >&2; exit 2; fi; fi; }",
             "timeout": 10,
             "statusMessage": "Checking plugin.json schema..."
           }
@@ -52,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cmd=$(echo '$CLAUDE_TOOL_INPUT' | jq -r '.command // empty'); if echo \"$cmd\" | grep -qE 'git (commit|push)'; then branch=$(git branch --show-current 2>/dev/null); if [ \"$branch\" = \"main\" ]; then echo \"[main-guard] BLOCKED: direct commit/push to main is not allowed. Use a feature branch.\"; exit 2; fi; fi",
+            "command": "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE '^[[:space:]]*git[[:space:]]+(commit|push)([[:space:]]|$)'; then branch=$(git branch --show-current 2>/dev/null); if [ \"$branch\" = \"main\" ]; then echo \"[main-guard] BLOCKED: direct commit/push to main is not allowed. Use a feature branch.\" >&2; exit 2; fi; fi",
             "timeout": 5,
             "statusMessage": "Checking branch guard..."
           }
