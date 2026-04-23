@@ -64,6 +64,8 @@ Before committing any plugin change:
 
 Feature branches + PR. Branch from `main`, open a PR, merge when ready. No direct commits to `main` for plugin changes.
 
+`.claude/worktrees/` is Claude Code session scratch — ignored by git.
+
 ## Testing locally
 
 ```bash
@@ -76,12 +78,19 @@ Full validation: manual SKILL.md review → local install → smoke-test slash c
 
 ## Python scripts
 
-Scripts in `scripts/` (e.g. `detect_vite_project.py`, `detect_component_source.py`) follow this contract:
+Scripts in `plugins/acss-app-builder/scripts/` follow this contract:
 
 - Python 3 stdlib only, no external dependencies
 - Output JSON to stdout
 - Exit 0 on success, 1 on failure
 - Include a `"reasons"` array in JSON output for human-readable error messages
+
+Current scripts:
+
+- `detect_vite_project.py` — detects whether the target directory is a Vite project
+- `detect_component_source.py` — locates fpkit component source files in the project tree
+- `validate_css_vars.py` — validates SCSS CSS custom properties against fpkit naming conventions and unit rules
+- `validate_theme.py` — checks theme CSS files (light/dark/brand) for WCAG AA contrast on semantic role pairs
 
 ## CSS variable naming (generated SCSS)
 
