@@ -1,0 +1,6 @@
+{
+  "name": "acss-theme-builder",
+  "version": "0.1.0",
+  "description": "Generate and update CSS themes for @fpkit/acss projects — create from seed colors, scaffold brand presets, update roles in place, and extract tokens from images or Figma.",
+  "author": "Shawn Sandy"
+}
