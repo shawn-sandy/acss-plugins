@@ -29,8 +29,10 @@ Collect the list of changed files scoped to `plugins/<plugin>/`.
 
 ### 3. Check version bump
 
-- Read `plugins/<plugin>/.claude-plugin/plugin.json` from `main` (via `git show main:...`) and from `HEAD`.
-- PASS if the `version` field differs between the two.
+- Attempt to read `plugins/<plugin>/.claude-plugin/plugin.json` from `main` via `git show main:plugins/<plugin>/.claude-plugin/plugin.json`.
+- If the command exits non-zero (file does not exist on `main`): PASS with note "New plugin — initial version establishes the baseline." Skip the version-diff check.
+- Otherwise read the same file from `HEAD` and compare `version` fields.
+- PASS if the `version` field differs between `main` and `HEAD`.
 - FAIL if version is unchanged: "plugin.json version not bumped — run `/release-plugin <name> <new-version>` first."
 
 ### 4. Check CHANGELOG touched
@@ -52,7 +54,13 @@ Then `plugins/<plugin>/README.md` must also be in the diff.
 
 ### 6. Check marketplace.json description (informational)
 
-If `plugins/<plugin>/.claude-plugin/marketplace.json` appears in the diff, note it as touched. If not touched, remind: "Consider updating marketplace.json description if this change is user-facing."
+The root marketplace.json lives at `.claude-plugin/marketplace.json` — not inside the plugin directory — so it never appears in the scoped diff from step 2. Run a separate unscoped diff:
+
+```bash
+git diff main...HEAD --name-only
+```
+
+If `.claude-plugin/marketplace.json` appears in this diff, note it as touched. If not touched, remind: "Consider updating `.claude-plugin/marketplace.json` description if this change is user-facing."
 
 ## Output
 
