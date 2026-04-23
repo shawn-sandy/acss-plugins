@@ -10,6 +10,8 @@ Claude Code plugins for building applications with [@fpkit/acss](https://github.
 | [`acss-kit-builder`](./acss-kit-builder) | Generate fpkit-style React components directly into your project — no `@fpkit/acss` npm install required. |
 | [`fpkit-developer`](./fpkit-developer) | **Deprecated** — superseded by `acss-app-builder`. Kept for one release cycle. |
 
+See [GUIDE.md](./GUIDE.md) for the full end-user guide — install, choose a plugin, run commands, troubleshoot.
+
 ## Install
 
 ```shell
