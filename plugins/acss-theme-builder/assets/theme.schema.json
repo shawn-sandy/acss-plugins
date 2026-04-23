@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "acss-theme-builder theme tokens",
+  "description": "Schema for theme.tokens.json — hex-color semantic role definitions for light/dark modes and optional brand overrides.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "modes": {
+      "type": "object",
+      "description": "Light and dark palette definitions.",
+      "additionalProperties": false,
+      "properties": {
+        "light": { "$ref": "#/$defs/palette" },
+        "dark":  { "$ref": "#/$defs/palette" }
+      }
+    },
+    "brands": {
+      "type": "object",
+      "description": "Optional named brand color overrides. Keys are brand slugs (e.g. 'forest'). Values override only primary/accent roles.",
+      "additionalProperties": { "$ref": "#/$defs/brand-overrides" }
+    }
+  },
+  "$defs": {
+    "hex-color": {
+      "type": "string",
+      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+      "description": "Hex color: #rrggbb or #rgb."
+    },
+    "palette": {
+      "type": "object",
+      "description": "Full set of semantic role tokens for one color mode.",
+      "required": [
+        "--color-background",
+        "--color-surface",
+        "--color-surface-raised",
+        "--color-text",
+        "--color-text-muted",
+        "--color-text-inverse",
+        "--color-border",
+        "--color-border-strong",
+        "--color-primary",
+        "--color-primary-hover",
+        "--color-success",
+        "--color-warning",
+        "--color-danger",
+        "--color-info",
+        "--color-focus-ring"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "--color-background":    { "$ref": "#/$defs/hex-color" },
+        "--color-surface":       { "$ref": "#/$defs/hex-color" },
+        "--color-surface-raised":{ "$ref": "#/$defs/hex-color" },
+        "--color-surface-subtle":{ "$ref": "#/$defs/hex-color" },
+        "--color-text":          { "$ref": "#/$defs/hex-color" },
+        "--color-text-muted":    { "$ref": "#/$defs/hex-color" },
+        "--color-text-inverse":  { "$ref": "#/$defs/hex-color" },
+        "--color-text-subtle":   { "$ref": "#/$defs/hex-color" },
+        "--color-border":        { "$ref": "#/$defs/hex-color" },
+        "--color-border-strong": { "$ref": "#/$defs/hex-color" },
+        "--color-primary":       { "$ref": "#/$defs/hex-color" },
+        "--color-primary-hover": { "$ref": "#/$defs/hex-color" },
+        "--color-success":       { "$ref": "#/$defs/hex-color" },
+        "--color-warning":       { "$ref": "#/$defs/hex-color" },
+        "--color-danger":        { "$ref": "#/$defs/hex-color" },
+        "--color-info":          { "$ref": "#/$defs/hex-color" },
+        "--color-focus-ring":    { "$ref": "#/$defs/hex-color" },
+        "--color-brand-accent":  { "$ref": "#/$defs/hex-color" }
+      }
+    },
+    "brand-overrides": {
+      "type": "object",
+      "description": "Brand color overrides. Only primary and accent roles. Background, text, and border roles must not appear here.",
+      "additionalProperties": false,
+      "properties": {
+        "--color-primary":      { "$ref": "#/$defs/hex-color" },
+        "--color-primary-hover":{ "$ref": "#/$defs/hex-color" },
+        "--color-focus-ring":   { "$ref": "#/$defs/hex-color" },
+        "--color-brand-accent": { "$ref": "#/$defs/hex-color" }
+      }
+    }
+  }
+}
