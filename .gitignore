@@ -8,3 +8,7 @@ node_modules/
 .idea/
 *.tmp
 *.swp
+
+# Claude Code
+.claude/worktrees/
+CLAUDE.local.md

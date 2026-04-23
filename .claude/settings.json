@@ -11,6 +11,28 @@
             "statusMessage": "Validating JSON..."
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; if [[ \"$f\" =~ plugins/[^/]+/\\.claude-plugin/plugin\\.json ]]; then result=$(jq -e '.name and .version and .description' \"$f\" 2>&1); if [ $? -ne 0 ]; then echo \"[plugin.json hook] FAIL: $f is missing one or more required fields (name, version, description). Got: $result\"; fi; fi; }",
+            "timeout": 10,
+            "statusMessage": "Checking plugin.json schema..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; if [[ \"$f\" =~ plugins/[^/]+/commands/[^/]+\\.md ]]; then head -10 \"$f\" | grep -q '^description:' || echo \"[commands hook] WARN: $f is missing 'description:' in front-matter.\"; head -10 \"$f\" | grep -q '^allowed-tools:' || echo \"[commands hook] WARN: $f is missing 'allowed-tools:' in front-matter.\"; fi; }",
+            "timeout": 5,
+            "statusMessage": "Checking command front-matter..."
+          }
+        ]
       }
     ]
   }
