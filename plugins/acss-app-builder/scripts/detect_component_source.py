@@ -10,18 +10,57 @@ Resolution (first match wins):
 componentsDir comes from .acss-target.json at project root, falling back to
 "src/components/fpkit".
 
+The "npm" source path is **deprecated** as of acss-app-builder v0.2.0. It
+remains functional through a soft-deprecation window but is scheduled for
+removal in a future major version. When source == "npm", the JSON output
+adds:
+  - "deprecated": true
+  - "sunsetVersion": "<captured @fpkit/acss version>"
+  - a "reasons" array entry recommending migration via /kit-add
+
+This is a strict JSON-only signal — nothing is written to stderr. Slash
+commands consuming this script's output should surface the deprecation in
+the chat UI when "deprecated" is true.
+
 Usage:
     python detect_component_source.py [project_root]
 
 Output (JSON to stdout):
+
+    Generated path (preferred):
     {
-      "source": "generated" | "npm" | "none",
+      "source": "generated",
       "projectRoot": "/abs/path",
       "componentsDir": "src/components/fpkit",
-      "importMapHint": "...one example import line..."
+      "importMapHint": "import Button from '../src/components/fpkit/button/button'"
     }
 
-Exit code 0 = source detected, 1 = none.
+    Deprecated npm path:
+    {
+      "source": "npm",
+      "projectRoot": "/abs/path",
+      "componentsDir": "src/components/fpkit",
+      "importMapHint": "import { Button } from '@fpkit/acss'",
+      "deprecated": true,
+      "sunsetVersion": "6.6.0",
+      "reasons": [
+        "@fpkit/acss npm path is deprecated; vendor components via /kit-add to migrate.",
+        "Sunset version: 6.6.0"
+      ]
+    }
+
+    No source found:
+    {
+      "source": "none",
+      "projectRoot": null,
+      "componentsDir": "src/components/fpkit",
+      "importMapHint": "",
+      "reasons": ["No project root containing react was found."]
+    }
+
+Exit code 0 = source detected (generated or npm), 1 = none.
+The "deprecated" path returns 0 — the plugin keeps working while users
+migrate.
 """
 from __future__ import annotations
 
@@ -32,6 +71,12 @@ from typing import Optional
 
 
 DEFAULT_COMPONENTS_DIR = "src/components/fpkit"
+
+# Captured @fpkit/acss version that anchors the deprecation window.
+# Update this constant when re-running `npm view @fpkit/acss version` for a
+# future plugin release. Closest tagged ref in shawn-sandy/acss is
+# @fpkit/acss@6.5.0; npm publish 6.6.0 outpaced git tagging.
+NPM_SUNSET_VERSION = "6.6.0"
 
 
 def find_project_root(start: Path) -> Optional[Path]:
@@ -96,19 +141,42 @@ def main() -> int:
     if has_generated:
         source = "generated"
         hint = f"import Button from '../{components_dir}/button/button'"
+        result = {
+            "source": source,
+            "projectRoot": str(root),
+            "componentsDir": components_dir,
+            "importMapHint": hint,
+        }
     elif has_npm:
         source = "npm"
         hint = "import { Button } from '@fpkit/acss'"
+        result = {
+            "source": source,
+            "projectRoot": str(root),
+            "componentsDir": components_dir,
+            "importMapHint": hint,
+            "deprecated": True,
+            "sunsetVersion": NPM_SUNSET_VERSION,
+            "reasons": [
+                "@fpkit/acss npm path is deprecated; vendor components via /kit-add to migrate.",
+                f"Sunset version: {NPM_SUNSET_VERSION}",
+            ],
+        }
     else:
         source = "none"
         hint = ""
+        result = {
+            "source": source,
+            "projectRoot": str(root),
+            "componentsDir": components_dir,
+            "importMapHint": hint,
+            "reasons": [
+                "No fpkit component source found.",
+                "Vendor components via /kit-add, or install @fpkit/acss (deprecated).",
+            ],
+        }
 
-    print(json.dumps({
-        "source": source,
-        "projectRoot": str(root),
-        "componentsDir": components_dir,
-        "importMapHint": hint,
-    }, indent=2))
+    print(json.dumps(result, indent=2))
     return 0 if source != "none" else 1
 
 

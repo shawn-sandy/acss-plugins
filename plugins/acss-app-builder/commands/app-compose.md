@@ -30,3 +30,10 @@ Follow the `/app-compose` section of `.claude/plugins/acss-app-builder/skills/ac
 - Run `scripts/validate_css_vars.py` on any new SCSS.
 
 **Testing:** generated samples use `vitest-axe` (not `jest-axe`) because Vitest is the test runner.
+
+**Deprecation surfacing:** if the shared preflight (in SKILL.md) reports `deprecated: true` for the project's component source (the @fpkit/acss npm path), append this nudge after the generated component is presented:
+
+```
+Note: this project still uses the @fpkit/acss npm path (deprecated;
+sunset in <sunsetVersion>). Run /kit-add to vendor components.
+```
