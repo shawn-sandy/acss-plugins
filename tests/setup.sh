@@ -76,7 +76,14 @@ npm install --silent --save-dev sass
 echo "Initializing git and committing the bootstrap state..."
 git init -q
 git add -A
-git commit -q -m "initial sandbox"
+# Pass a synthetic identity scoped to this one commit so the script works on
+# fresh machines with no global user.name/user.email configured. The contributor's
+# normal git config still applies to any subsequent commits they make in the
+# sandbox (the -c flags only affect this single git invocation). The .invalid
+# TLD is reserved by RFC 2606 to signal a non-real address.
+git -c user.name="acss-plugins sandbox" \
+    -c user.email="sandbox@acss-plugins.invalid" \
+    commit -q -m "initial sandbox"
 
 # --- Recipe --------------------------------------------------------------
 
