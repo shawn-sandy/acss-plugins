@@ -8,6 +8,7 @@ Developers using the plugin to generate fpkit-style components into their own pr
 
 | Guide | What it covers |
 |-------|---------------|
+| [tutorial.md](tutorial.md) | A guided walkthrough: generate, import, and customize your first component |
 | [concepts.md](concepts.md) | The mental model: UI base component, data-\* variants, CSS-var fallbacks, aria-disabled, generation flow, and cross-plugin coordination |
 | [commands.md](commands.md) | Full reference for `/kit-add` and `/kit-list` |
 | [recipes.md](recipes.md) | Step-by-step walkthroughs for the most common tasks |
