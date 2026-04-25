@@ -95,8 +95,8 @@ Read [`plugins/acss-app-builder/README.md`](../plugins/acss-app-builder/README.m
 What to verify:
 
 - `/kit-list` is read-only — prints the component catalog with no file changes.
-- `/kit-add badge` creates `src/components/fpkit/badge/badge.tsx` + `badge.scss`, plus `src/components/fpkit/ui.tsx` (re-exports) on first run, plus `.acss-target.json` config.
-- `/kit-add button card` adds two components in one invocation.
+- `/kit-add badge` creates `<componentsDir>/badge/badge.tsx` + `badge.scss`, plus `<componentsDir>/ui.tsx` (re-exports) and a top-level `.acss-target.json` recording the chosen path on first run. `<componentsDir>` defaults to `src/components/fpkit/` and is configurable on first run.
+- `/kit-add button card` adds two components in one invocation under the same `<componentsDir>`.
 
 ### acss-theme-builder
 
