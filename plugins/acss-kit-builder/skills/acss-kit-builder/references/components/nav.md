@@ -1,3 +1,5 @@
+> **Legacy reference** — This bundled reference is superseded by `acss-component-specs/specs/nav.md` when that plugin is installed. Prefer the spec-based workflow: `/spec-add nav` then `/spec-render nav`. The spec wins when both are present (kit-builder B0 bridge).
+
 # Component: Nav
 
 ## Overview

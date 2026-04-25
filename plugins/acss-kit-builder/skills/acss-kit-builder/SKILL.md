@@ -1,3 +1,11 @@
+---
+name: acss-kit-builder
+description: Use when generating fpkit-style React components into a developer's project. No @fpkit/acss package required — only React + sass.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+metadata:
+  version: "0.1.2"
+---
+
 # SKILL: acss-kit-builder
 
 Generate fpkit-style React components directly into a developer's project. No `@fpkit/acss` npm package required. Only React + sass needed.
@@ -67,6 +75,17 @@ If not found:
 ---
 
 ## Step B — Component Generation Workflow
+
+### B0. Probe acss-component-specs (bridge)
+
+Before reading bundled reference docs, check if `acss-component-specs` specs are available.
+
+1. Probe `$CLAUDE_PLUGIN_ROOT/../acss-component-specs/skills/acss-component-specs/specs/<component>.md`
+2. If absent, try `~/.claude/plugins/cache/acss-component-specs/skills/acss-component-specs/specs/<component>.md`
+3. If a spec is found: **use it in place of the bundled reference doc.** Spec wins.
+4. If no spec is found: fall back to bundled references silently (no warning to the developer).
+
+When a spec is found, read its frontmatter for the Generation Contract fields (`display_name`, `props`, `css_vars`, `framework_notes.react`) and proceed to B4.
 
 ### B1. Lookup the component
 

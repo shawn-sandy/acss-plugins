@@ -13,21 +13,63 @@
       "source": "./plugins/acss-kit-builder",
       "description": "Generate fpkit-style React components without installing @fpkit/acss. Reference-guided generation with CSS custom properties. Requires only React + sass.",
       "category": "development",
-      "tags": ["fpkit", "acss", "react", "component-generation", "css-variables", "sass", "typescript"]
+      "tags": [
+        "fpkit",
+        "acss",
+        "react",
+        "component-generation",
+        "css-variables",
+        "sass",
+        "typescript"
+      ]
     },
     {
       "name": "acss-app-builder",
       "source": "./plugins/acss-app-builder",
       "description": "Scaffold apps with the @fpkit/acss design system: layouts, pages, themes, forms, patterns. Works with the @fpkit/acss npm package OR generated acss-kit-builder source.",
       "category": "development",
-      "tags": ["fpkit", "acss", "react", "scaffolding", "forms", "layouts", "themes", "patterns"]
+      "tags": [
+        "fpkit",
+        "acss",
+        "react",
+        "scaffolding",
+        "forms",
+        "layouts",
+        "themes",
+        "patterns"
+      ]
     },
     {
       "name": "acss-theme-builder",
       "source": "./plugins/acss-theme-builder",
       "description": "Generate and update CSS themes for @fpkit/acss projects — create from seed colors via OKLCH, scaffold brand presets, update roles in place with WCAG re-validation, and extract tokens from images or Figma.",
       "category": "development",
-      "tags": ["fpkit", "acss", "css-variables", "themes", "wcag", "accessibility", "oklch", "design-tokens"]
+      "tags": [
+        "fpkit",
+        "acss",
+        "css-variables",
+        "themes",
+        "wcag",
+        "accessibility",
+        "oklch",
+        "design-tokens"
+      ]
+    },
+    {
+      "name": "acss-component-specs",
+      "source": "./plugins/acss-component-specs",
+      "description": "Framework-agnostic component specs for fpkit/acss projects. Author once, render to React+SCSS, HTML+CSS, or Astro+SCSS. Ships 6 components: Button, Card, Dialog, Alert, Stack, Nav.",
+      "category": "development",
+      "tags": [
+        "fpkit",
+        "acss",
+        "react",
+        "astro",
+        "html",
+        "component-specs",
+        "multi-framework",
+        "css-variables"
+      ]
     }
   ]
 }
