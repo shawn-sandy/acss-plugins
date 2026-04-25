@@ -81,23 +81,11 @@ npm install --silent
 echo "Adding sass (required by every acss plugin that writes SCSS)..."
 npm install --silent --save-dev sass
 
-# --- Bootstrap commit ----------------------------------------------------
-# Some plugin commands refuse to run on a dirty tree. Initializing a git repo
-# with one commit gives those guards a clean anchor for the developer's first run.
-
-echo "Initializing git and committing the bootstrap state..."
-git init -q
-git add -A
-# Pass a synthetic identity scoped to this one commit so the script works on
-# fresh machines with no global user.name/user.email configured. The contributor's
-# normal git config still applies to any subsequent commits they make in the
-# sandbox (the -c flags only affect this single git invocation). The .invalid
-# TLD is reserved by RFC 2606 to signal a non-real address.
-git -c user.name="acss-plugins sandbox" \
-    -c user.email="sandbox@acss-plugins.invalid" \
-    commit -q -m "initial sandbox"
-
-# --- Recipe --------------------------------------------------------------
+# --- Recipe (written before commit so it's part of the bootstrap) --------
+# Generated first, ahead of the bootstrap commit, so RECIPE.md is included in
+# the initial commit. If we wrote it after, the sandbox would have an untracked
+# file from the start — defeating the "clean anchor" the bootstrap commit is
+# meant to provide for plugin dirty-tree guards.
 
 cat > "$SANDBOX/RECIPE.md" <<EOF
 # Local plugin testing recipe
@@ -127,13 +115,37 @@ Then exercise the plugins. Suggested smoke flow:
 /kit-add badge
 \`\`\`
 
-Verify file changes appear under \`src/\`: \`app/\`, \`pages/\`, \`styles/theme/\`, plus your kit components directory (default: \`components/fpkit/\`, configurable on first \`/kit-add\` run via \`.acss-target.json\`).
+Verify file changes appear under \`src/\`: \`app/\`, \`pages/\`, \`styles/theme/\`, plus your kit components directory (default: \`src/components/fpkit/\`, configurable on first \`/kit-add\` run via \`.acss-target.json\`).
 
 Reset this sandbox with:
 \`\`\`
 "$REPO_ROOT/tests/setup.sh" --reset
 \`\`\`
 EOF
+
+# --- Bootstrap commit ----------------------------------------------------
+# Some plugin commands refuse to run on a dirty tree. Initializing a git repo
+# with one commit (including RECIPE.md, written above) gives those guards a
+# clean anchor for the developer's first run.
+
+echo "Initializing git and committing the bootstrap state..."
+git init -q
+git add -A
+# Per-invocation -c flags cover three failure modes contributors hit on real
+# machines without polluting their global config:
+#   - synthetic identity: works on fresh machines with no user.name/user.email
+#   - commit.gpgsign=false: signing a synthetic identity would be misleading,
+#     and contributors who enforce signing globally would otherwise hard-fail
+#   - --no-verify: the bootstrap commit predates any project hooks the dev
+#     might add later; running pre-commit or commit-msg hooks against vite
+#     scaffolding output is not meaningful
+# The .invalid TLD is reserved by RFC 2606 to signal a non-real address.
+# Subsequent commits the contributor makes inside tests/sandbox/ use their
+# normal git config — the overrides only affect this one invocation.
+git -c user.name="acss-plugins sandbox" \
+    -c user.email="sandbox@acss-plugins.invalid" \
+    -c commit.gpgsign=false \
+    commit --no-verify -q -m "initial sandbox"
 
 echo ""
 echo "================================================================"
