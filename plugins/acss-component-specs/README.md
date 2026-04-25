@@ -81,6 +81,17 @@ Scripts in `scripts/` follow the repo contract: stdlib only, JSON to stdout, exi
 | `verify_contract_subset.py` | Confirm kit-builder Generation Contracts covered by spec shape |
 | `fetch_fpkit_source.py` | Fetch and cache fpkit source from GitHub |
 
+## Developer Guide
+
+Detailed guides are in [`docs/`](docs/):
+
+- [concepts.md](docs/concepts.md) — mental model: specs as source of truth, 7-kind `maps_to`, a11y block, 3-step render flow, atomic failure, version stamps
+- [commands.md](docs/commands.md) — full reference for all six `/spec-*` commands
+- [spec-authoring.md](docs/spec-authoring.md) — how to author a new component spec end-to-end
+- [recipes.md](docs/recipes.md) — step-by-step walkthroughs for common tasks
+- [troubleshooting.md](docs/troubleshooting.md) — concrete failure modes and fixes
+- [architecture.md](docs/architecture.md) — contributor guide: scripts reference, compound parts, render pipeline, cross-plugin wiring
+
 ## v0.1 Limitations
 
 - `format_version: 1` is experimental — breaking schema changes are possible until v1.0.0.
