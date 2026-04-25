@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# Scaffold a disposable Vite + React + TypeScript sandbox at tests/sandbox/
+# for smoke-testing the acss-plugins marketplace locally.
+#
+# Usage:
+#   tests/setup.sh           # first-time setup (errors if sandbox exists)
+#   tests/setup.sh --reset   # wipe and recreate the sandbox
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SANDBOX="$REPO_ROOT/tests/sandbox"
+RESET=0
+
+if [[ "${1:-}" == "--reset" ]]; then
+  RESET=1
+elif [[ -n "${1:-}" ]]; then
+  echo "Unknown argument: $1" >&2
+  echo "Usage: tests/setup.sh [--reset]" >&2
+  exit 1
+fi
+
+# --- Preflight -----------------------------------------------------------
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "Error: 'node' not found on PATH." >&2
+  echo "Install Node 20+ from https://nodejs.org or via your version manager." >&2
+  exit 1
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "Error: 'npm' not found on PATH." >&2
+  exit 1
+fi
+
+if [[ ! -f "$REPO_ROOT/.claude-plugin/marketplace.json" ]]; then
+  echo "Error: marketplace.json not found at $REPO_ROOT/.claude-plugin/" >&2
+  echo "Run this script from inside the acss-plugins repo." >&2
+  exit 1
+fi
+
+if [[ -d "$SANDBOX" && "$RESET" -eq 0 ]]; then
+  echo "Sandbox already exists at: $SANDBOX"
+  echo "Re-run with --reset to wipe and recreate it."
+  exit 1
+fi
+
+# --- Scaffold ------------------------------------------------------------
+
+if [[ -d "$SANDBOX" ]]; then
+  echo "Removing existing sandbox..."
+  rm -rf "$SANDBOX"
+fi
+
+mkdir -p "$REPO_ROOT/tests"
+
+echo "Scaffolding Vite + React + TypeScript at $SANDBOX..."
+# create-vite mishandles absolute paths in some versions (it treats them as relative
+# to cwd, producing a nested duplicate). Workaround: cd to the parent and pass a
+# bare directory name. NPM_CONFIG_YES skips the "Ok to proceed?" exec prompt.
+cd "$REPO_ROOT/tests"
+NPM_CONFIG_YES=true npm create vite@latest sandbox -- --template react-ts
+
+cd "$SANDBOX"
+
+echo "Installing dependencies..."
+npm install --silent
+
+echo "Adding sass (required by every acss plugin that writes SCSS)..."
+npm install --silent --save-dev sass
+
+# --- Bootstrap commit ----------------------------------------------------
+# Some plugin commands refuse to run on a dirty tree. Initializing a git repo
+# with one commit gives those guards a clean anchor for the developer's first run.
+
+echo "Initializing git and committing the bootstrap state..."
+git init -q
+git add -A
+git commit -q -m "initial sandbox"
+
+# --- Recipe --------------------------------------------------------------
+
+cat > "$SANDBOX/RECIPE.md" <<EOF
+# Local plugin testing recipe
+
+This sandbox is a disposable Vite + React + TypeScript project. From here:
+
+\`\`\`
+claude
+\`\`\`
+
+Inside the Claude Code session, paste these commands:
+
+\`\`\`
+/plugin marketplace add $REPO_ROOT
+/plugin install acss-app-builder@acss-plugins
+/plugin install acss-kit-builder@acss-plugins
+/plugin install acss-theme-builder@acss-plugins
+/plugin install acss-component-specs@acss-plugins
+\`\`\`
+
+Then exercise the plugins. Suggested smoke flow:
+
+\`\`\`
+/app-init
+/app-page dashboard
+/theme-create "#4f46e5"
+/kit-add badge
+\`\`\`
+
+Verify file changes appear under \`src/\` (\`app/\`, \`pages/\`, \`styles/theme/\`, \`components/fpkit/\`).
+
+Reset this sandbox with:
+\`\`\`
+$REPO_ROOT/tests/setup.sh --reset
+\`\`\`
+EOF
+
+echo ""
+echo "================================================================"
+cat "$SANDBOX/RECIPE.md"
+echo "================================================================"
+echo ""
+echo "Sandbox ready. cd tests/sandbox && claude"

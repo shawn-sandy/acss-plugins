@@ -21,6 +21,17 @@ See [GUIDE.md](./GUIDE.md) for the full end-user guide — install, choose a plu
 /plugin install acss-kit-builder@shawn-sandy-acss-plugins
 ```
 
+## Testing locally
+
+Contributors can smoke-test plugin changes against a disposable sandbox without leaking artifacts into the repo:
+
+```sh
+tests/setup.sh
+cd tests/sandbox && claude
+```
+
+The sandbox is gitignored. See [`tests/README.md`](./tests/README.md) for the full workflow, the `--reset` flag, and troubleshooting.
+
 ## Relationship to the main fpkit repo
 
 Plugin development references the live fpkit source at [`shawn-sandy/acss`](https://github.com/shawn-sandy/acss). Contributors should keep both repos available side-by-side — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the workflow.
