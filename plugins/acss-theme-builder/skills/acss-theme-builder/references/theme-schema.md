@@ -1,6 +1,14 @@
 # Theme JSON Schema
 
-`assets/theme.schema.json` is a JSON Schema (Draft-07) describing the structure of a `theme.tokens.json` file. This file is **optional** — CSS remains the on-disk source of truth unless the user opts into JSON authoring.
+> **⚠️ Deprecated as a user-facing contract — sunset in `acss-theme-builder@0.3.0`.**
+>
+> The going-forward authoring format is the **CSS Token Convention** documented in [`SKILL.md`](../SKILL.md). Users edit CSS theme files (`light.css`, `dark.css`, `brand-*.css`) directly — no JSON authoring is required or recommended.
+>
+> The JSON schema is retained as an **internal contract** for [`scripts/tokens_to_css.py`](../../../scripts/tokens_to_css.py) and [`scripts/css_to_tokens.py`](../../../scripts/css_to_tokens.py), which use it to translate between the OKLCH palette generator's output and CSS theme files. End users do not need to read or write JSON conforming to this schema.
+>
+> This document is preserved as a reference for contributors maintaining the round-trip scripts. End-user-facing instructions to author `theme.tokens.json` have been removed from `SKILL.md` and the slash-command docs as of v0.2.0. The schema file itself (`assets/theme.schema.json`) carries `"deprecated": true` and `"x-sunset-version": "0.3.0"` markers.
+
+`assets/theme.schema.json` is a JSON Schema (Draft-07) describing the structure of a `theme.tokens.json` file. As of v0.2.0 this file is **internal-only** — the round-trip scripts read/write JSON conforming to it, but no user-facing flow asks the developer to author one.
 
 ## Top-level structure
 
