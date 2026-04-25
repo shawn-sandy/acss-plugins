@@ -2,6 +2,8 @@
 
 # Component: Button
 
+> **Verified against fpkit source:** `@fpkit/acss@6.5.0` (closest tagged ref to npm `6.6.0`; no matching tag for `6.6.0` exists upstream). Intentional divergences from upstream: `useDisabledState` and `resolveDisabledState` are inlined into the generated `button.tsx` rather than imported from `../../hooks/use-disabled-state` and `../../utils/accessibility`; `ButtonProps` is expressed as an explicit shape with `Omit<...,'disabled'>` rather than `Partial<React.ComponentProps<typeof UI>> & DisabledStateProps`. These divergences are deliberate — they let `/kit-add` produce a self-contained component without pulling a hook, util, and shared-types tree.
+
 ## Overview
 
 The primary interactive element. Supports size, style, and color variants via data attributes. Uses `aria-disabled` instead of native `disabled` to maintain keyboard accessibility (WCAG 2.1.1).
@@ -113,7 +115,7 @@ const dataBtnValue = [size, block ? 'block' : undefined, dataBtnProp]
   .filter(Boolean).join(' ') || undefined
 ```
 
-## Full Implementation Reference
+## TSX Template
 
 ```tsx
 import UI from '../ui'
@@ -225,7 +227,7 @@ Button.displayName = 'Button'
 --btn-disabled-cursor: not-allowed;
 ```
 
-## SCSS Pattern
+## SCSS Template
 
 ```scss
 // button.scss
@@ -321,6 +323,44 @@ Button.displayName = 'Button'
   }
 }
 ```
+
+## Accessibility
+
+WCAG 2.2 AA compliance for the generated `Button` component.
+
+**Keyboard interaction**
+- `Enter` and `Space` activate the button (native `<button>` behavior; preserved by not overriding the element type).
+- The button stays in tab order when disabled — see "Disabled state" below.
+
+**ARIA & screen reader**
+- Native `<button>` provides an implicit `role="button"`; do not add an explicit `role` attribute.
+- Disabled state uses `aria-disabled="true"` instead of the native `disabled` attribute. Screen readers announce as "dimmed" / "unavailable" while the element remains keyboard-discoverable (WCAG 2.1.1 Keyboard).
+- The `is-disabled` class is paired with `aria-disabled` so visual and assistive-tech states stay in sync.
+- For icon-only buttons (`variant="icon"`), always pass an `aria-label` — the icon glyph is not an accessible name on its own.
+
+**Focus management**
+- `:focus-visible` outline at `var(--btn-focus-outline, 2px solid currentColor)` with `var(--btn-focus-outline-offset, 2px)`. The outline color is `currentColor` so it inherits a visible value across light and dark themes.
+- Focus styling is distinct from disabled styling so a focused-disabled button is still visible.
+- Pointer and keyboard handlers are gated by `useDisabledState`'s wrappers — the handlers no-op while disabled but the focus state itself is preserved.
+
+**Target size**
+- Default size (`md`) with `--btn-padding-block` / `--btn-padding-inline` produces a touch target ≥ 44×44 px, meeting WCAG 2.5.8 Target Size Minimum (Level AA).
+- Smaller sizes (`xs`, `sm`) may fall below 44 px. Use them only in dense UI where surrounding spacing or input precision compensates.
+
+**Color contrast**
+- Disabled opacity `0.6` reduces the effective contrast of the button against its background. Confirm the disabled appearance still meets WCAG 1.4.11 Non-text Contrast (3:1) for UI components in both light and dark theme modes.
+- Color variants (`primary`, `danger`, `success`, `warning`) rely on the project's `--color-*` tokens — see the `acss-theme-builder` CSS Token Convention for required contrast pairings between button surface and label text.
+
+**Disabled state**
+- Always pass the typed `disabled?: boolean` prop, never the raw HTML `disabled`. The component renders `aria-disabled="true"` and keeps the element focusable.
+- `pointer-events: none` on `[aria-disabled="true"]` blocks click activation; keyboard activation is short-circuited inside `useDisabledState`'s wrappers. The element remains in the tab order so users discovering it via keyboard learn the action exists but is currently unavailable.
+
+**WCAG 2.2 AA criteria addressed**
+- 1.4.11 Non-text Contrast (UI states stay legible)
+- 2.1.1 Keyboard (full keyboard operability, including disabled state)
+- 2.4.7 Focus Visible (`:focus-visible` outline)
+- 2.5.8 Target Size Minimum (default size meets 44 px)
+- 4.1.2 Name, Role, Value (native button + accessible name when icon-only)
 
 ## Usage Examples
 
