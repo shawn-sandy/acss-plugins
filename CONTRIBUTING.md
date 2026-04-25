@@ -49,11 +49,19 @@ Bump the version in `plugin.json` when shipping changes — `/plugin update` use
 
 ## Testing locally
 
-```bash
-# In a disposable project or a Claude Code test session:
-/plugin marketplace add /absolute/path/to/acss-plugins
-/plugin install acss-app-builder@<local-marketplace-name>
+Run `tests/setup.sh` from the repo root to scaffold a disposable Vite + React + TypeScript sandbox at `tests/sandbox/` (gitignored). The script prints a copy-pasteable Claude Code recipe that adds the local marketplace and installs all four plugins.
+
+```sh
+tests/setup.sh
+cd tests/sandbox && claude
 ```
+
+See [`tests/README.md`](./tests/README.md) for the full workflow:
+
+- Per-plugin smoke flows with what to verify after each command
+- A verification checklist (including `npm run build` in the sandbox)
+- Reset and custom-recipe guidance
+- Troubleshooting
 
 Local-path marketplaces work the same as git-hosted ones. When satisfied, push to GitHub and let users install from `shawn-sandy/acss-plugins`.
 

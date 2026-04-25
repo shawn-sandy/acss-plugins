@@ -74,11 +74,7 @@ Feature branches + PR. Branch from `main`, open a PR, merge when ready. No direc
 
 ## Testing locally
 
-```bash
-# In a disposable project or Claude Code test session:
-/plugin marketplace add /absolute/path/to/acss-plugins
-/plugin install acss-app-builder@<local-marketplace-name>
-```
+Run `tests/setup.sh` from the repo root to scaffold a disposable Vite+React+TS sandbox at `tests/sandbox/` (gitignored), then `cd tests/sandbox && claude` and paste the recipe the script printed. See [`tests/README.md`](./tests/README.md) for the full workflow, including the `--reset` flag.
 
 Full validation: manual SKILL.md review → local install → smoke-test slash commands → run Python scripts against a sample project.
 

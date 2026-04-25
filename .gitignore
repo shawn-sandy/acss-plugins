@@ -12,3 +12,6 @@ node_modules/
 # Claude Code
 .claude/worktrees/
 CLAUDE.local.md
+
+# Local plugin testing
+tests/sandbox/
