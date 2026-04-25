@@ -21,3 +21,9 @@ Follow the `/app-layout` section of `.claude/plugins/acss-app-builder/skills/acs
 3. Compute relative paths from `src/app/AppShell.tsx` depth.
 4. Write the shell + its SCSS (refuse on conflict without `--force`).
 5. Print import snippet for `src/App.tsx`.
+6. If the shared preflight reported `deprecated: true` (project on the @fpkit/acss npm path), append a single-line migration nudge:
+
+   ```
+   Note: this project still uses the @fpkit/acss npm path (deprecated;
+   sunset in <sunsetVersion>). Run /kit-add to vendor components.
+   ```

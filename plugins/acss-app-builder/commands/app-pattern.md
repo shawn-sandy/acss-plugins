@@ -22,3 +22,9 @@ Follow the `/app-pattern` section of `.claude/plugins/acss-app-builder/skills/ac
 3. Substitute imports based on `scripts/detect_component_source.py` output.
 4. Write the file or perform the inline insert.
 5. If the pattern ships a `.scss`, write it alongside or ensure it's imported.
+6. If the shared preflight reported `deprecated: true` (project on the @fpkit/acss npm path), append a single-line migration nudge after the file is written:
+
+   ```
+   Note: this project still uses the @fpkit/acss npm path (deprecated;
+   sunset in <sunsetVersion>). Run /kit-add to vendor components.
+   ```

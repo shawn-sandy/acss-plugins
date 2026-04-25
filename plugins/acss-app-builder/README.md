@@ -68,11 +68,40 @@ Every command:
 
 The plugin detects which source to import from on every run:
 
-1. If `<componentsDir>/ui.tsx` exists → use **generated** source (relative imports like `../components/fpkit/button/button`). **This wins on tie.**
-2. Else if `@fpkit/acss` is in `dependencies` → use **npm** source (`import { Button } from '@fpkit/acss'`).
-3. Else → prompt to install or run `/kit-add`.
+1. **`generated`** *(preferred)* — `<componentsDir>/ui.tsx` exists locally. Relative imports like `../components/fpkit/button/button`. **Wins on tie** even if `@fpkit/acss` is also installed.
+2. **`npm`** *(deprecated as of v0.2.0)* — `@fpkit/acss` in `dependencies`. Imports like `import { Button } from '@fpkit/acss'`.
+3. **`none`** — neither present. Command halts with `/kit-add` recommendation.
 
 The components target directory is persisted to `.acss-target.json` at the project root (committed to git) so `/kit-add` and `/app-*` stay in sync.
+
+### `@fpkit/acss` npm path — deprecation
+
+> **Compatibility ceiling:** `@fpkit/acss@6.6.0` (captured at v0.2.0 release).
+
+The npm path is **deprecated as of v0.2.0**. Projects on the npm path keep working through a soft-deprecation window — `detect_component_source.py` continues returning `source: "npm"` and exits 0 — but the JSON output now includes `"deprecated": true` and `"sunsetVersion": "6.6.0"`. Slash commands surface a one-line migration suggestion in chat after generating their artifact:
+
+```
+Note: this project still uses the @fpkit/acss npm path (deprecated;
+sunset in 6.6.0). Run /kit-add to vendor components.
+```
+
+The npm path will be removed in a future major release. To migrate now:
+
+1. Run `/kit-add <component>` (from the companion `acss-kit-builder` plugin) for each component the project uses.
+2. The kit-builder generates self-contained `.tsx` + `.scss` files into `<componentsDir>` and writes `.acss-target.json`.
+3. Re-run any `/app-*` command and confirm `source: "generated"` (no deprecation flag in the JSON).
+4. Remove `@fpkit/acss` from `package.json` once all components have been vendored.
+
+## Form scaffolding (cross-plugin)
+
+`/app-form` delegates to the `acss-kit-builder:component-form` skill — a per-component skill pilot in `acss-kit-builder` v0.2.0. The slash command is the user-facing entry point (and surfaces deprecation nudges); the kit-builder skill owns the form template, field renderers, and accessibility patterns.
+
+Both authoring modes are supported:
+
+- **Natural language** *(preferred)*: `/app-form "signup form with email, password, and a role select"`. The skill derives the field list, asking via `AskUserQuestion` when ambiguous.
+- **Legacy JSON schema** *(preserved for backward compatibility)*: `/app-form path/to/schema.json`. Example schema at `assets/forms/schema.example.json`. The shape is documented in `references/forms.md`.
+
+Both modes converge on the same internal field-list contract and produce identical output: a single self-contained `src/forms/<FormName>.tsx` file using `Field`, `Input`, and `Checkbox` from the active component source. See the "Cross-plugin skill invocation" subsection in `skills/acss-app-builder/SKILL.md` for the contract, or [`acss-kit-builder/skills/component-form/SKILL.md`](../acss-kit-builder/skills/component-form/SKILL.md) for the generation logic.
 
 ## Plugin contents
 

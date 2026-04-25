@@ -16,6 +16,7 @@ A single-skill workflow for scaffolding apps with the **@fpkit/acss** design sys
 
 1. **Detect Vite+React** — run `scripts/detect_vite_project.py`. Halt if not detected.
 2. **Detect component source** — run `scripts/detect_component_source.py`. Returns `generated` | `npm` | `none`. Generated wins on tie. On `none`, halt with install hints.
+   - **Deprecation handling**: if the JSON output includes `"deprecated": true` (set when `source == "npm"`), don't halt — generation continues — but **after** the command writes its artifact, append a single-line migration nudge to the chat output: *"Note: this project still uses the @fpkit/acss npm path (deprecated; sunset in `<sunsetVersion>`). Run `/kit-add` to vendor components."* The script never writes to stderr; the deprecation flag is the single signal.
 3. **Check theme base** — if `src/styles/theme/base.css` is missing, prompt the developer to run `/app-theme light` first.
 
 **Safety contract — applied to every command:**
@@ -124,24 +125,52 @@ A single-skill workflow for scaffolding apps with the **@fpkit/acss** design sys
 
 ---
 
-## `/app-form <schema.json> [--name=FormName] [--force]`
+## `/app-form <description-or-schema> [--name=FormName] [--force]`
+
+**Delegates to** the kit-builder pilot skill `acss-kit-builder:component-form`. The slash command is the user-facing entry point; the kit-builder skill owns the form template, field renderers, and authoring modes. See "Cross-plugin skill invocation" below for the contract.
 
 ### Workflow
 
 1. Run shared preflight.
-2. Read the schema file. Validate required keys (`name`, `fields`). Each field must have `name`, `label`, `type`.
-3. Resolve `--name` or fall back to `schema.name`.
-4. Read `assets/forms/form-from-schema.tsx.tmpl` and `assets/forms/field-renderers.tsx`.
-5. For each field, pick the renderer per the type→renderer mapping (see `references/forms.md`). Generate unique ids (`<FormName>-<fieldName>`).
-6. Substitute `{{IMPORT_SOURCE:Field,Input,Checkbox,Button}}` and the rendered field list.
-7. Write to `src/forms/<FormName>.tsx`. Refuse without `--force` on conflict.
-8. Print a usage snippet for the developer.
+2. **Detect input mode**:
+   - If the argument ends in `.json` (legacy schema path), read the schema file. Validate required keys (`name`, `fields`); each field must have `name`, `label`, `type`. Build the structured field list.
+   - Otherwise (natural-language path), pass the argument as the description directly.
+3. **Invoke the kit-builder skill** via the Skill tool:
+   ```
+   Skill {
+     skill: "acss-kit-builder:component-form"
+     args: <description string>  OR  { fields: [...], formName: "..." }
+   }
+   ```
+   The skill handles ambiguity-clarification (`AskUserQuestion` when fields aren't specified), dependency resolution (Field, Input, Checkbox via `/kit-add`), atomic file writing, and the post-generation summary.
+4. **Surface the deprecation nudge** if shared preflight step 2 reported `deprecated: true` — append the migration suggestion in chat after the skill returns.
+5. **Print the kit-builder skill's summary** verbatim. The slash command itself doesn't write any files.
+
+### Cross-plugin skill invocation
+
+The `/app-form` command lives in `acss-app-builder` because that's where users expect form scaffolding to be discoverable. The component-form **skill** lives in `acss-kit-builder` because that's where every component template lives — the kit-builder is the single source of truth for component code. The Skill tool bridges them.
+
+**Why this split:**
+- Users invoking `/app-form "..."` get a familiar entry point.
+- Users typing "create a signup form" without a slash command also get the right behavior, because the kit-builder skill auto-triggers on those phrases via its frontmatter `description`.
+- All component template logic stays in one home (`acss-kit-builder`); no duplication between plugins.
+
+**Argument contract:**
+- Pass either a description string (natural-language mode) OR a `{ fields: [...], formName, heading?, submitLabel? }` object (legacy JSON mode).
+- The skill normalizes both into its internal field-list contract before generating.
+
+**Return contract:**
+- The kit-builder skill writes `src/forms/<FormName>.tsx` and prints a structured summary to stdout.
+- `/app-form` does not transform the output; it surfaces the skill's summary directly to the user.
+
+This pattern is documented in `acss-kit-builder/skills/component-form/SKILL.md` Step F. If trigger reliability proves out, additional kit-builder component skills (Dialog, Card, Table, Popover) may be promoted to skills in a future release; this same cross-plugin invocation contract applies to all of them.
 
 ### References
 
-- `references/forms.md` — verified Field API, schema shape.
+- `references/forms.md` — legacy JSON schema shape (preserved for backward compatibility).
 - `references/accessibility.md`.
 - `references/composition.md`.
+- `acss-kit-builder/skills/component-form/SKILL.md` — the actual generation logic.
 
 ---
 

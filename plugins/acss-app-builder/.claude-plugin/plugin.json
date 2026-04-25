@@ -1,7 +1,7 @@
 {
   "name": "acss-app-builder",
   "description": "Scaffold apps with the @fpkit/acss design system: layouts, pages, themes, forms, patterns. Works with the @fpkit/acss npm package OR generated acss-kit-builder source. Supersedes the deprecated fpkit-developer plugin.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "author": {
     "name": "Shawn Sandy",
     "url": "https://github.com/shawn-sandy/acss"

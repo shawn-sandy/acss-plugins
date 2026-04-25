@@ -19,5 +19,11 @@ Follow the `/app-page` section of `.claude/plugins/acss-app-builder/skills/acss-
 5. Substitute `{{IMPORT_SOURCE:...}}` and `{{NAME}}` tokens.
 6. Write to `src/pages/<Name>.tsx` (refuse non-empty without `--force`).
 7. Print a wiring snippet for `src/App.tsx`.
+8. If the shared preflight reported `deprecated: true` (project on the @fpkit/acss npm path), append a single-line migration nudge after the wiring snippet:
+
+   ```
+   Note: this project still uses the @fpkit/acss npm path (deprecated;
+   sunset in <sunsetVersion>). Run /kit-add to vendor components.
+   ```
 
 **Reference:** `references/pages.md` — includes the tab-pattern clarification for the `settings` template (it uses `role="tablist"`, NOT the `Details` disclosure widget).
