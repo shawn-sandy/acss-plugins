@@ -57,6 +57,17 @@
             "statusMessage": "Checking branch guard..."
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE '^[[:space:]]*git[[:space:]]+commit'; then changed=$(git diff --cached --name-only 2>/dev/null | grep 'acss-component-specs.*specs/'); if [ -n \"$changed\" ]; then for spec in $changed; do comp=$(basename \"$spec\" .md); kitref=\"plugins/acss-kit-builder/skills/acss-kit-builder/references/components/${comp}.md\"; if [ -f \"$kitref\" ]; then python3 plugins/acss-component-specs/scripts/check_kitbuilder_parity.py \"$comp\" 2>/dev/null || echo \"[parity-hook] WARN: ${comp} spec may have drifted from kit-builder reference\" >&2; fi; done; fi; fi",
+            "timeout": 30,
+            "statusMessage": "Checking spec/kit-builder parity..."
+          }
+        ]
       }
     ]
   }

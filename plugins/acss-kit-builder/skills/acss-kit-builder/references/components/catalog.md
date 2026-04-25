@@ -1,3 +1,5 @@
+> **Legacy reference** — When `acss-component-specs` is installed, check for a spec first (kit-builder B0 bridge). Components in this catalog that have specs in v0.1: Button, Card, Dialog, Alert, Nav. Stack is new in acss-component-specs and not in this catalog.
+
 # Component Catalog
 
 Simple and medium-complexity components. Each entry includes the Generation Contract, props, CSS variables, and a usage snippet.

@@ -1,3 +1,5 @@
+> **Legacy reference** — This bundled reference is superseded by `acss-component-specs/specs/button.md` when that plugin is installed. Prefer the spec-based workflow: `/spec-add button` then `/spec-render button`. The spec wins when both are present (kit-builder B0 bridge).
+
 # Component: Button
 
 ## Overview

@@ -1,3 +1,5 @@
+> **Legacy reference** — When `acss-component-specs` is installed, prefer spec-based generation for components that have specs. Form does not yet have a spec in v0.1; it will be added in v0.2. This reference remains the active path for form generation until then.
+
 # Component: Form
 
 ## Overview

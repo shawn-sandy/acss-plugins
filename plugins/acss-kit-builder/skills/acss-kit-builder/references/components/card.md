@@ -1,3 +1,5 @@
+> **Legacy reference** — This bundled reference is superseded by `acss-component-specs/specs/card.md` when that plugin is installed. Prefer the spec-based workflow: `/spec-add card` then `/spec-render card`. The spec wins when both are present (kit-builder B0 bridge).
+
 # Component: Card
 
 ## Overview
