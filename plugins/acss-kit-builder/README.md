@@ -79,12 +79,13 @@ List available components or inspect a specific one.
 
 | Category | Components | Dependencies |
 |----------|-----------|--------------|
-| **Simple** | badge, tag, heading, text, link, icon | None (leaf components) |
-| **Interactive** | button | None (uses inlined `useDisabledState`) |
+| **Simple** | badge, tag, heading, text, link, list, icon, img | None (leaf components) |
+| **Interactive** | button, icon-button | `icon-button` depends on button; both use inlined `useDisabledState` |
+| **Form** | field, input, checkbox | `checkbox` depends on input |
 | **Layout** | card, nav | None (compound components) |
-| **Complex** | alert, dialog, form (input, textarea, select, checkbox, toggle) | Varies (e.g., dialog needs button + icon-button + icon) |
+| **Complex** | alert, dialog, popover, table, form (legacy bundled — superseded by `component-form` skill in v0.2.0) | Varies (e.g., dialog needs button + icon-button + icon) |
 
-Run `/kit-list` for the full categorized listing with descriptions.
+Run `/kit-list` for the full categorized listing with descriptions. The catalog at [`skills/acss-kit-builder/references/components/catalog.md`](skills/acss-kit-builder/references/components/catalog.md) tracks per-component verification status against the upstream `@fpkit/acss` source.
 
 ## Generated Code
 
@@ -210,6 +211,53 @@ CSS variable naming follows the pattern: `--{component}-{element?}-{variant?}-{p
 
 All generated components build on top of `UI`. It is copied to your target directory on first `/kit-add` run and should not be deleted.
 
+## Adding a New Component (contributor recipe)
+
+When adding or updating a component reference doc, follow the canonical embedded-markdown shape introduced in v0.2.0. Each component is a single markdown document — spec, code, and accessibility guidance all in one file.
+
+### 1. Verify against fpkit source
+
+1. Capture the current `@fpkit/acss` version: `npm view @fpkit/acss version`.
+2. Resolve to the matching git tag in [`shawn-sandy/acss`](https://github.com/shawn-sandy/acss). If no matching tag exists, use the closest (typically `@fpkit/acss@<previous-version>`) and note the gap.
+3. Fetch the upstream source from `https://github.com/shawn-sandy/acss/blob/<tag-or-sha>/packages/fpkit/src/components/<component>/<component>.tsx` (full GitHub URL, never `blob/main`).
+4. Compare upstream behavior to what you intend to vendor. Note any intentional divergence (inlined hooks, simplified compound APIs, dropped subcomponents) — these are features, not bugs.
+
+### 2. Author the canonical sections
+
+Create `skills/acss-kit-builder/references/components/<name>.md` with these sections in order:
+
+- **Verification banner** — top-of-file blockquote starting `**Verified against fpkit source:** \`@fpkit/acss@<version>\``. Document any intentional divergence.
+- **`## Overview`** — one-paragraph summary.
+- **`## Generation Contract`** — `export_name`, `file`, `scss`, `imports`, `dependencies`.
+- **`## Props Interface`** — TypeScript types.
+- **`## TSX Template`** — fenced ```tsx``` block with the full implementation. Imports use relative paths only; never `@fpkit/acss`.
+- **`## CSS Variables`** — fenced ```scss``` listing custom properties.
+- **`## SCSS Template`** — fenced ```scss``` with the actual rules.
+- **`## Accessibility`** — required. Cover keyboard interaction, ARIA, focus management, target size, color contrast, and the WCAG 2.2 AA criteria addressed.
+- **`## Usage Examples`** — fenced ```tsx``` with common patterns.
+
+The required `## Accessibility` section is load-bearing — don't strip a11y patterns from the TSX/SCSS. Reviewers reject reference docs without it.
+
+### 3. Reference vs Skill (hybrid packaging)
+
+Most components live as reference docs. Composable, complex, or high-iteration components can be promoted to their own skill at `skills/component-<name>/SKILL.md` with discovery-friendly trigger phrases in the frontmatter `description`.
+
+In v0.2.0 the **only** component promoted to a skill is `Form` (see `skills/component-form/SKILL.md`). It serves as a pilot — adopt the per-component skill pattern for additional components only after observing trigger reliability in real usage.
+
+### 4. Log verification status
+
+Add an entry to the verification status table in [`catalog.md`](skills/acss-kit-builder/references/components/catalog.md):
+
+```md
+| Foo | [`foo.md`](foo.md) | `@fpkit/acss@<version>` | New / Verified — <intentional divergences if any> |
+```
+
+This table is the single source of truth for which components have been migrated to the canonical shape. PR reviewers check it.
+
+### 5. Verify locally
+
+Bootstrap a sandbox via `tests/setup.sh` from the repo root, then `cd tests/sandbox && claude` and run `/kit-add <component>`. Confirm the generated `.tsx` and `.scss` match what your reference doc declared, and that the component renders correctly without `@fpkit/acss` in `node_modules`.
+
 ## Plugin Structure
 
 ```
@@ -231,13 +279,25 @@ All generated components build on top of `UI`. It is copied to your target direc
         composition.md                   # Compound component patterns, decision tree
         css-variables.md                 # Naming conventions, fallback strategy
         components/
-          alert.md                       # Alert reference + Generation Contract
-          button.md                      # Button reference + Generation Contract
-          card.md                        # Card reference + Generation Contract
-          catalog.md                     # Badge, Tag, Heading, Text, Link, Icon
-          dialog.md                      # Dialog reference + Generation Contract
-          form.md                        # Form controls reference + Generation Contract
-          nav.md                         # Nav reference + Generation Contract
+          alert.md                       # Alert — canonical shape (v0.2.0+)
+          button.md                      # Button — canonical shape
+          card.md                        # Card — canonical shape
+          catalog.md                     # Verification status + remaining inline components
+          checkbox.md                    # Checkbox — canonical shape
+          dialog.md                      # Dialog — canonical shape
+          field.md                       # Field — canonical shape
+          form.md                        # Form (legacy bundled; superseded by component-form skill)
+          icon-button.md                 # IconButton — canonical shape
+          icon.md                        # Icon — canonical shape
+          img.md                         # Img — canonical shape
+          input.md                       # Input — canonical shape
+          link.md                        # Link — canonical shape
+          list.md                        # List + List.ListItem — canonical shape
+          nav.md                         # Nav (legacy shape)
+          popover.md                     # Popover — canonical shape
+          table.md                       # Table compound — canonical shape
+    component-form/                      # Per-component skill (pilot, v0.2.0+)
+      SKILL.md
 ```
 
 ## How It Differs from fpkit-developer

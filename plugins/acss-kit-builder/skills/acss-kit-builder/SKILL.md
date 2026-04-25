@@ -110,6 +110,16 @@ dependencies: [dep1, dep2]
 
 This tells Claude exactly what files to create and what dependencies to resolve.
 
+### B2.1. Read the canonical sections (v0.2.0+)
+
+Reference docs that follow the canonical embedded-markdown shape have three required sections beyond the Generation Contract — read them all before writing any files:
+
+- **`## TSX Template`** — fenced ```tsx``` block with the full component implementation. Copy this verbatim into the generated `.tsx` file. Substitute `{{IMPORT_SOURCE:...}}` / `{{NAME}}` / `{{FIELDS}}` placeholders at write time when present.
+- **`## SCSS Template`** — fenced ```scss``` block with the canonical styles. Copy verbatim into the generated `.scss` file.
+- **`## Accessibility`** — WCAG 2.2 AA criteria the component addresses (keyboard, ARIA, focus, contrast, target size). Don't strip a11y patterns out of the TSX/SCSS during generation; they're load-bearing.
+
+If a reference doc is missing any of these three sections, fall back to the older "Key Pattern" / "Full Implementation Reference" / "SCSS Pattern" shape. The catalog.md "Verification Status" table records which components have been migrated to the canonical shape; treat any others as legacy and synthesize from the available pieces.
+
 ### B3. Resolve the dependency tree
 
 Walk dependencies recursively using each dependency's own Generation Contract. Build the full list of files that will be created.
@@ -379,13 +389,23 @@ Read these before generating components:
 | `references/css-variables.md` | CSS variable naming conventions, fallback strategy |
 | `references/accessibility.md` | WCAG patterns, aria-disabled, condensed useDisabledState |
 | `references/composition.md` | Compound components, generation decision tree |
-| `references/components/button.md` | Button props, variants, data attributes |
-| `references/components/dialog.md` | Dialog with native `<dialog>`, dependency tree |
-| `references/components/alert.md` | Alert with severity levels, auto-dismiss |
-| `references/components/card.md` | Card compound component (Title, Content, Footer) |
-| `references/components/form.md` | Form controls: input, textarea, select, checkbox |
-| `references/components/nav.md` | Nav compound component (List, Item) |
-| `references/components/catalog.md` | Badge, Tag, Heading, Text, Link, Icon, and others |
+| `references/components/catalog.md` | Verification status table + remaining inline components (Badge, Tag, Heading, Text, Details, Progress) |
+| `references/components/button.md` | Button — canonical shape ✓ |
+| `references/components/icon-button.md` | IconButton (wraps Button + XOR aria-label/aria-labelledby) — canonical shape ✓ |
+| `references/components/alert.md` | Alert with severity levels, auto-dismiss — canonical shape ✓ |
+| `references/components/card.md` | Card compound component (Title, Content, Footer) — canonical shape ✓ |
+| `references/components/dialog.md` | Dialog with native `<dialog>` — canonical shape ✓ |
+| `references/components/popover.md` | Popover via native HTML Popover API — canonical shape ✓ |
+| `references/components/table.md` | Table compound (Caption, Head, Body, Row, HeaderCell, Cell) — canonical shape ✓ |
+| `references/components/img.md` | Img with lazy loading + SVG-gradient placeholder — canonical shape ✓ |
+| `references/components/icon.md` | Icon with built-in 9-icon SVG dispatch — canonical shape ✓ |
+| `references/components/link.md` | Link with auto security defaults — canonical shape ✓ |
+| `references/components/list.md` | List + List.ListItem (ul/ol/dl) — canonical shape ✓ |
+| `references/components/field.md` | Field (label + control wrapper) — canonical shape ✓ |
+| `references/components/input.md` | Input with validation states — canonical shape ✓ |
+| `references/components/checkbox.md` | Checkbox (wraps Input) — canonical shape ✓ |
+| `references/components/form.md` | Form composition (legacy bundled reference; superseded by `component-form` skill in v0.2.0) |
+| `references/components/nav.md` | Nav compound component (List, Item) — legacy shape |
 
 ---
 
@@ -399,3 +419,50 @@ Read these before generating components:
 6. **Skip existing** — if a file exists, import from it, don't overwrite
 7. **Bottom-up order** — generate leaf dependencies before composites
 8. **Condensed utilities** — inline useDisabledState as ~50 lines, not 247
+
+---
+
+## Authoring New Components (for contributors)
+
+When adding or updating a component reference doc, follow the canonical embedded-markdown shape.
+
+### Required sections
+
+Every component reference doc must contain (in order):
+
+1. **Verification banner** — top of file, blockquote starting with `**Verified against fpkit source:**`. Records the upstream ref (e.g. `@fpkit/acss@6.5.0`) and any intentional divergences from upstream (inlined hooks, simplified compound APIs, dropped subcomponents). Future maintainers read this to understand *why* the vendored version diverges.
+2. **`## Overview`** — one-paragraph summary of the component's purpose.
+3. **`## Generation Contract`** — `export_name`, `file`, `scss`, `imports`, `dependencies`. The `/kit-add` workflow reads these fields verbatim.
+4. **`## Props Interface`** — TypeScript interface or type alias the component accepts.
+5. **`## TSX Template`** — fenced ```tsx``` block containing the full component code. Self-contained: imports only `UI from '../ui'`, React, and other vendored components via relative paths. Never `@fpkit/acss`.
+6. **`## CSS Variables`** — fenced ```scss``` block listing the component's CSS custom properties with default values.
+7. **`## SCSS Template`** — fenced ```scss``` block containing the actual SCSS rules.
+8. **`## Accessibility`** — required. Document keyboard interaction, ARIA, focus management, target size, color contrast, and the WCAG 2.2 AA criteria addressed. The Accessibility section is load-bearing — don't strip a11y patterns out of the TSX/SCSS during generation.
+9. **`## Usage Examples`** — fenced ```tsx``` block showing common usage patterns.
+
+### Reference vs Skill (hybrid packaging)
+
+Most components live as reference docs at `references/components/<name>.md`. Composable, complex, or high-iteration components can be promoted to their own skill at `skills/component-<name>/SKILL.md` with discovery-friendly trigger phrases in the frontmatter `description`.
+
+In v0.2.0 the **only** component promoted to a skill is `Form` (see `skills/component-form/SKILL.md`). It serves as a pilot — adopt the per-component skill pattern for additional components only after observing the Form skill's trigger reliability in real-world usage.
+
+### Verification log
+
+Every new or migrated component gets an entry in `references/components/catalog.md` under "Verification Status":
+
+```
+| Component | Reference | Verified against | Status |
+|-----------|-----------|------------------|--------|
+| Foo | [`foo.md`](foo.md) | `@fpkit/acss@<version>` | New / Verified — <intentional divergences if any> |
+```
+
+This table is the single source of truth for which components have been migrated to the canonical shape.
+
+### fpkit verification workflow
+
+Before authoring or backfilling a reference doc:
+
+1. Resolve the captured `@fpkit/acss` ceiling version to the matching git tag/SHA in the `shawn-sandy/acss` repo. If no matching tag exists for that npm version, use the closest tag and document the gap in the verification banner.
+2. Fetch the canonical fpkit source from `https://github.com/shawn-sandy/acss/blob/<tag-or-sha>/packages/fpkit/src/<component>/...` (full GitHub URL per repo policy — never `blob/main`).
+3. Compare the upstream behavior to what the existing reference doc describes. Note any intentional divergence (inlined hooks, simplified compound APIs, dropped subcomponents) in the verification banner.
+4. Author the canonical sections to match fpkit semantics with relative-path imports — never `@fpkit/acss`.
