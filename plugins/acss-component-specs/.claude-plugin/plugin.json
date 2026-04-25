@@ -1,0 +1,10 @@
+{
+  "name": "acss-component-specs",
+  "description": "Framework-agnostic component specs for fpkit/acss projects. Author once, render to React+SCSS, HTML+CSS, or Astro+SCSS.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Shawn Sandy",
+    "url": "https://github.com/shawn-sandy/acss"
+  },
+  "license": "MIT"
+}
