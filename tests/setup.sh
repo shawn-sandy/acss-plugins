@@ -12,13 +12,19 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SANDBOX="$REPO_ROOT/tests/sandbox"
 RESET=0
 
-if [[ "${1:-}" == "--reset" ]]; then
-  RESET=1
-elif [[ -n "${1:-}" ]]; then
-  echo "Unknown argument: $1" >&2
+if [[ $# -gt 1 ]]; then
+  echo "Too many arguments: $*" >&2
   echo "Usage: tests/setup.sh [--reset]" >&2
   exit 1
 fi
+
+case "${1:-}" in
+  --reset) RESET=1 ;;
+  "")      ;;
+  *)       echo "Unknown argument: $1" >&2
+           echo "Usage: tests/setup.sh [--reset]" >&2
+           exit 1 ;;
+esac
 
 # --- Preflight -----------------------------------------------------------
 
@@ -30,6 +36,12 @@ fi
 
 if ! command -v npm >/dev/null 2>&1; then
   echo "Error: 'npm' not found on PATH." >&2
+  exit 1
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "Error: 'git' not found on PATH." >&2
+  echo "git is required for the bootstrap commit inside the sandbox." >&2
   exit 1
 fi
 
@@ -96,10 +108,10 @@ This sandbox is a disposable Vite + React + TypeScript project. From here:
 claude
 \`\`\`
 
-Inside the Claude Code session, paste these commands:
+Inside the Claude Code session, paste these commands (the path is quoted so it works even if your repo lives under a directory with spaces):
 
 \`\`\`
-/plugin marketplace add $REPO_ROOT
+/plugin marketplace add "$REPO_ROOT"
 /plugin install acss-app-builder@acss-plugins
 /plugin install acss-kit-builder@acss-plugins
 /plugin install acss-theme-builder@acss-plugins
@@ -115,11 +127,11 @@ Then exercise the plugins. Suggested smoke flow:
 /kit-add badge
 \`\`\`
 
-Verify file changes appear under \`src/\` (\`app/\`, \`pages/\`, \`styles/theme/\`, \`components/fpkit/\`).
+Verify file changes appear under \`src/\`: \`app/\`, \`pages/\`, \`styles/theme/\`, plus your kit components directory (default: \`components/fpkit/\`, configurable on first \`/kit-add\` run via \`.acss-target.json\`).
 
 Reset this sandbox with:
 \`\`\`
-$REPO_ROOT/tests/setup.sh --reset
+"$REPO_ROOT/tests/setup.sh" --reset
 \`\`\`
 EOF
 
