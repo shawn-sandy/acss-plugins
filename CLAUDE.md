@@ -4,11 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A Claude Code **plugin marketplace** — not a Node.js or Python package. There are no build scripts, no `npm install`, and no CI pipeline. The repo contains three plugins:
+A Claude Code **plugin marketplace** — not a Node.js or Python package. There are no build scripts, no `npm install`, and no CI pipeline.
+
+**Stack:** Claude Code plugin format, Python 3 (scripts), SCSS/CSS custom properties (generated output).
+
+The repo contains three plugins:
 
 - `plugins/acss-app-builder` — scaffolds Vite+React+TS apps with the fpkit design system
 - `plugins/acss-kit-builder` — generates fpkit-style components without an npm install
-- `plugins/fpkit-developer` — **deprecated**; kept for one release cycle, then remove
+- `plugins/acss-theme-builder` — generates and updates CSS themes for fpkit/acss projects
 
 Install plugins from a Claude Code session:
 ```
@@ -66,6 +70,8 @@ Feature branches + PR. Branch from `main`, open a PR, merge when ready. No direc
 
 `.claude/worktrees/` is Claude Code session scratch — ignored by git.
 
+`CLAUDE.local.md` (not committed) — use for machine-local or personal overrides.
+
 ## Testing locally
 
 ```bash
@@ -85,18 +91,7 @@ Scripts in `plugins/acss-app-builder/scripts/` follow this contract:
 - Exit 0 on success, 1 on failure
 - Include a `"reasons"` array in JSON output for human-readable error messages
 
-Current scripts:
-
-- `detect_vite_project.py` — detects whether the target directory is a Vite project
-- `detect_component_source.py` — locates fpkit component source files in the project tree
-- `validate_css_vars.py` — validates SCSS CSS custom properties against fpkit naming conventions and unit rules
-- `validate_theme.py` — checks theme CSS files (light/dark/brand) for WCAG AA contrast on semantic role pairs
-
-## CSS variable naming (generated SCSS)
-
-Pattern: `--{component}-{element?}-{variant?}-{property}`
-Every `var()` must include a hardcoded fallback: `var(--btn-bg, transparent)`
-Disabled state: `[aria-disabled="true"]` selector — never the native `disabled` attribute
+See `plugins/acss-app-builder/scripts/` for the current script list and individual docstrings.
 
 ## fpkit/acss cross-references
 

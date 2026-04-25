@@ -1,0 +1,27 @@
+/* brand-<name>.css — brand color overrides.
+ * Layer this import AFTER light.css and dark.css.
+ * Rename the file to brand-<your-brand-slug>.css.
+ *
+ * Only override primary and accent roles here.
+ * Do NOT redefine background, text, or border roles — those live in light.css / dark.css.
+ */
+
+:root {
+  /* Replace with your brand's primary hex color. Must achieve 3.0:1 contrast vs #ffffff. */
+  --color-primary:       #REPLACE_LIGHT_PRIMARY;
+  --color-primary-hover: #REPLACE_LIGHT_PRIMARY_HOVER;
+  --color-focus-ring:    #REPLACE_LIGHT_PRIMARY;
+
+  /* Optional: secondary accent (used by some kit-builder components) */
+  /* --color-brand-accent: #REPLACE_ACCENT; */
+}
+
+[data-theme="dark"] {
+  /* Replace with a lighter version of your brand color for dark backgrounds.
+   * Must achieve 3.0:1 contrast vs your dark --color-background. */
+  --color-primary:       #REPLACE_DARK_PRIMARY;
+  --color-primary-hover: #REPLACE_DARK_PRIMARY_HOVER;
+  --color-focus-ring:    #REPLACE_DARK_PRIMARY;
+
+  /* --color-brand-accent: #REPLACE_DARK_ACCENT; */
+}
