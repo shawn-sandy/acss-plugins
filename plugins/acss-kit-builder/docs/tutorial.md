@@ -13,7 +13,6 @@ Prerequisites:
 - React + TypeScript project with a `package.json`
 - `sass` or `sass-embedded` in `devDependencies`
 - `acss-kit-builder` installed via `/plugin install acss-kit-builder@shawn-sandy-acss-plugins`
-- Clean git working tree (commands refuse a dirty tree unless you pass `--force`)
 
 If sass is not installed:
 
@@ -21,7 +20,7 @@ If sass is not installed:
 npm install -D sass
 ```
 
-This walkthrough uses **Button**. It is a single-file component with no fpkit dependencies, so the only first-run extra is the shared `ui.tsx` foundation — perfect for seeing the setup flow in one command.
+This walkthrough uses **Button**. It has no component dependencies — only the shared `ui.tsx` foundation is copied on first run — so you see the full setup flow in a single command.
 
 ---
 
@@ -35,10 +34,10 @@ Open Claude Code in your project directory and run:
 
 Output groups every available component into four categories:
 
-- **Simple** — leaf components with no dependencies (Badge, Tag, Heading, Text, Link, Icon)
-- **Interactive** — Button, Form controls, focus-managed elements
-- **Layout** — Card, layout primitives
-- **Complex** — Dialog, Nav and other components that depend on simpler ones
+- **Simple** — leaf components with no dependencies (Badge, Tag, Heading, Text)
+- **Interactive** — components built on the `useDisabledState` pattern (Button, Link)
+- **Layout** — structural and compound components (Card, Nav)
+- **Complex** — components that depend on multiple simpler components (Alert, Dialog, Form)
 
 Why look first? You don't write what you can generate. The catalog tells you exactly what's available before you commit to writing anything yourself.
 
@@ -50,14 +49,14 @@ Why look first? You don't write what you can generate. The catalog tells you exa
 /kit-list button
 ```
 
-This prints Button's full Generation Contract without writing any files:
+This prints Button's Generation Contract without writing any files. Highlights the output covers:
 
-- **Dependencies:** none — Button only imports the `UI` foundation from `../ui`
-- **Props:** `type` (required), `children`, `disabled`, `size`, `variant`, `color`, `block`, plus standard event handlers
-- **CSS variables:** `--btn-bg`, `--btn-color`, `--btn-radius`, `--btn-padding-inline`, `--btn-primary-bg`, `--btn-primary-hover-bg`, size tokens (`--btn-size-xs` through `--btn-size-xl`), and state tokens (`--btn-focus-outline`, `--btn-disabled-opacity`)
+- **Dependencies:** Button has none — it only imports the `UI` foundation from `../ui`
+- **Props:** including `type` (required), `children`, `disabled`, `size`, `variant`, `color`, `block`, plus the standard event handlers
+- **CSS variables:** including base tokens (`--btn-bg`, `--btn-color`, `--btn-radius`, `--btn-padding-inline`), size tokens, color variants (`--btn-primary-bg` and friends), and state tokens (`--btn-focus-outline`, `--btn-disabled-opacity`)
 - **Usage snippet** — a JSX example you can copy
 
-Reading this first means no surprises in the next step.
+Treat the `/kit-list button` output itself as the authoritative list — these bullets are highlights so you know what shape to expect before running `/kit-add`.
 
 ---
 
