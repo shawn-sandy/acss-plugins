@@ -20,6 +20,9 @@ Tracks each component reference doc's verification against canonical fpkit sourc
 | Img | [`img.md`](img.md) | `@fpkit/acss@6.5.0` | New — lazy-loading default + memoized SVG-gradient placeholder fallback (zero network requests on error); `alt` prop required by type |
 | Popover | [`popover.md`](popover.md) | `@fpkit/acss@6.5.0` | New — uses native HTML Popover API (`popover` attribute + `popovertarget`); no `floating-ui` / `@radix-ui/popover` dependency. Trigger is a raw `<button>` to avoid coupling to `button.tsx` |
 | Table | [`table.md`](table.md) | `@fpkit/acss@6.5.0` | New — **intentional divergence**: vendored uses a compound API (`Table`, `Table.Caption`, `Table.Head`, `Table.Body`, `Table.Row`, `Table.HeaderCell`, `Table.Cell`) instead of the upstream `RenderTable` / `TBL` utility; same semantics, more idiomatic, single file |
+| Field | [`field.md`](field.md) | `@fpkit/acss@6.5.0` | New — promoted from `form.md`; small label+control wrapper with required `labelFor` (compile-time accessible-name guarantee). Doesn't render error/hint text — that's the wrapped control's job |
+| Input | [`input.md`](input.md) | `@fpkit/acss@6.5.0` | New — promoted from `form.md`; full validation state surface (`validationState`, `errorMessage`, `hintText` with auto-generated `aria-describedby` ids) plus inlined `useDisabledState` / `resolveDisabledState` matching the Button vendoring pattern |
+| Checkbox | [`checkbox.md`](checkbox.md) | `@fpkit/acss@6.5.0` | New — promoted from `form.md`; thin wrapper over `Input` with boolean `onChange` API, size presets (xs/sm/md/lg via `data-checkbox-size`), and a dev-only controlled/uncontrolled mode-flip warning |
 
 Components not yet listed have not been verified against fpkit source under the new canonical shape; their existing reference doc content remains usable as the legacy generation guide.
 
