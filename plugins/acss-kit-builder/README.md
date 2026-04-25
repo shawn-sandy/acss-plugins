@@ -251,6 +251,16 @@ All generated components build on top of `UI`. It is copied to your target direc
 | **Bundle size** | Entire package ships | Only generated components ship |
 | **Updates** | npm version bumps | Re-run `/kit-add` or edit directly |
 
+## Developer Guide
+
+Detailed guides are in [`docs/`](docs/):
+
+- [concepts.md](docs/concepts.md) — mental model: UI base, data-\* variants, CSS-var fallbacks, aria-disabled, generation flow
+- [commands.md](docs/commands.md) — full `/kit-add` and `/kit-list` reference
+- [recipes.md](docs/recipes.md) — step-by-step walkthroughs for common tasks
+- [troubleshooting.md](docs/troubleshooting.md) — concrete failure modes and fixes
+- [architecture.md](docs/architecture.md) — contributor guide: adding components, cross-plugin wiring, version-bump checklist
+
 ## License
 
 MIT
