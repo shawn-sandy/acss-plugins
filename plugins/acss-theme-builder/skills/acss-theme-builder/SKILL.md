@@ -10,10 +10,76 @@ metadata:
 
 Theme generation and management for **@fpkit/acss** projects. Routes between four flows depending on which slash command was invoked.
 
-**Token and role conventions:** see `references/role-catalogue.md`.
+**Token and role conventions:** see `references/role-catalogue.md` and the CSS Token Convention below.
 **OKLCH palette algorithm:** see `references/palette-algorithm.md`.
-**JSON Schema and round-tripping:** see `references/theme-schema.md`.
+**JSON Schema and round-tripping:** see `references/theme-schema.md`. **Note: as of v0.2.0 the JSON schema is deprecated as a user-facing contract** — see "CSS Token Convention" below for the going-forward authoring format. The schema is retained as an internal contract for `tokens_to_css.py` / `css_to_tokens.py`.
 **Three-layer token cascade:** https://github.com/shawn-sandy/acss-plugins/blob/main/plugins/acss-app-builder/skills/acss-app-builder/references/themes.md
+
+---
+
+## CSS Token Convention (v0.2.0+)
+
+The going-forward authoring format for theme tokens is **CSS custom properties** — not JSON. Users edit `light.css` / `dark.css` / `brand-*.css` files directly; the JSON schema at `assets/theme.schema.json` is internal to the round-trip scripts and is not a user-facing contract anymore. Existing CSS theme files remain byte-compatible with this convention.
+
+### Semantic role names
+
+`assets/theme.schema.json` `$defs/palette` declares **18 defined `--color-*` properties** total: **15 required roles** plus 3 optional roles (`--color-surface-subtle`, `--color-text-subtle`, `--color-brand-accent`). Names stay byte-compatible with [`assets/themes/*.css`](../../../assets/themes/) — no renames, no removals, ever. Group them by purpose, matching `ROLE_GROUPS` in [`scripts/tokens_to_css.py`](../../../scripts/tokens_to_css.py):
+
+**Backgrounds**
+- `--color-background` *(required)* — page background
+- `--color-surface` *(required)* — card / panel surface
+- `--color-surface-raised` *(required)* — elevated surface (modals, popovers)
+- `--color-surface-subtle` *(optional)* — table-stripe / hover surface
+
+**Text**
+- `--color-text` *(required)* — body text
+- `--color-text-muted` *(required)* — secondary text
+- `--color-text-inverse` *(required)* — text on primary background
+- `--color-text-subtle` *(optional)* — tertiary text (timestamps, footnotes)
+
+**Borders**
+- `--color-border` *(required)* — default border
+- `--color-border-strong` *(required)* — emphasized border (form-field focus)
+
+**Brand & semantic**
+- `--color-primary` *(required)* — brand primary
+- `--color-primary-hover` *(required)* — primary hover state
+- `--color-success` *(required)* — success / valid state
+- `--color-warning` *(required)* — caution state
+- `--color-danger` *(required)* — destructive / error state
+- `--color-info` *(required)* — informational state
+- `--color-brand-accent` *(optional)* — secondary brand color
+
+**Focus**
+- `--color-focus-ring` *(required)* — focus indicator color (inputs, buttons)
+
+Full role catalog with contrast pairings is in [`references/role-catalogue.md`](references/role-catalogue.md).
+
+### Required Contrast Pairings (WCAG 2.2 AA)
+
+Every theme must pass these pairings — the validator at [`scripts/validate_theme.py`](../../../scripts/validate_theme.py) checks them automatically on every `/theme-create`, `/theme-brand`, `/theme-update`, and `/theme-extract`:
+
+| Foreground | Background | Min ratio | Why |
+|---|---|---|---|
+| `--color-text` | `--color-background` | 4.5:1 | Body text on page (WCAG 1.4.3) |
+| `--color-text-muted` | `--color-background` | 4.5:1 | Secondary text on page (WCAG 1.4.3) |
+| `--color-text` | `--color-surface` | 4.5:1 | Body text on cards/panels |
+| `--color-text-inverse` | `--color-primary` | 4.5:1 | Label text on primary buttons |
+| `--color-text-inverse` | `--color-success` | 4.5:1 | Success state buttons / badges |
+| `--color-text-inverse` | `--color-danger` | 4.5:1 | Destructive buttons / error chips |
+| `--color-text-inverse` | `--color-warning` | 4.5:1 | Warning chips / banners |
+| `--color-text-inverse` | `--color-info` | 4.5:1 | Info chips / banners |
+| `--color-focus-ring` | `--color-background` | 3:1 | Focus indicator on page (WCAG 1.4.11) |
+| `--color-border-strong` | `--color-surface` | 3:1 | Form-field focus border (WCAG 1.4.11) |
+
+The validator's full pair list (10 pairs at default thresholds) is in `scripts/validate_theme.py:PAIRS`. Any theme that fails one of these pairings should be revised — usually by adjusting the seed color or manually tuning the OKLCH lightness on the failing role.
+
+### Authoring flow (v0.2.0+)
+
+1. **Generate or edit a CSS theme file directly.** `/theme-create` and `/theme-brand` write `light.css` / `dark.css` / `brand-*.css` using the convention above. `/theme-update` edits role values in place.
+2. **The user never authors JSON.** No `theme.tokens.json` to write or maintain.
+3. **Round-trip scripts (`tokens_to_css.py`, `css_to_tokens.py`) remain internal.** They use the JSON schema to translate between the OKLCH palette generator's output and CSS, but the JSON shape is no longer a user-facing contract.
+4. **Validation runs automatically** at the end of every theme command (no separate step). Failures are surfaced inline.
 
 ---
 

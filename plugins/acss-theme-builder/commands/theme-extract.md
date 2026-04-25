@@ -19,4 +19,4 @@ Follow the `/theme-extract` section of `.claude/plugins/acss-theme-builder/skill
 2. Both extractors return a JSON object with at minimum a `primary` hex color. Map to `--color-primary` in the seed.
 3. Run `scripts/generate_palette.py <primary-hex> --mode=both` to build the full palette around the extracted primary.
 4. Run `scripts/tokens_to_css.py` to write theme files. Validate with `scripts/validate_theme.py`.
-5. Optionally write `theme.tokens.json` alongside the CSS files for round-trip authoring.
+5. The CSS theme files (`light.css`, `dark.css`, `brand-*.css`) are the authoritative output. JSON export via `scripts/css_to_tokens.py` is available for round-trip tooling, but is not a user-facing input format — see the CSS Token Convention in SKILL.md for the canonical authoring approach.

@@ -58,22 +58,28 @@ Generated files follow the three-layer token cascade used across all acss-plugin
 
 Toggle dark mode by setting `data-theme="dark"` on the `<html>` element.
 
-## JSON round-tripping
+## CSS Token Convention (v0.2.0+)
 
-Export CSS to JSON:
+The going-forward authoring format is **CSS custom properties**, not JSON. Users edit `light.css` / `dark.css` / `brand-*.css` files directly. The full convention — 18 defined `--color-*` properties (15 required + 3 optional), grouped by purpose, with the WCAG 2.2 AA Required Contrast Pairings table — is documented in [`skills/acss-theme-builder/SKILL.md`](skills/acss-theme-builder/SKILL.md#css-token-convention-v020).
+
+The slash commands (`/theme-create`, `/theme-brand`, `/theme-update`, `/theme-extract`) all produce CSS theme files that conform to this convention; users never need to author JSON.
+
+## JSON round-tripping (internal)
+
+> **Deprecated as a user-facing contract — sunset in `acss-theme-builder@0.3.0`.** The CSS Token Convention above is the canonical authoring format.
+
+Round-trip scripts are retained as **internal utilities** for tooling that needs to translate between OKLCH palette JSON and CSS:
 
 ```bash
+# Export CSS to JSON (internal export utility)
 python3 scripts/css_to_tokens.py src/styles/theme/light.css src/styles/theme/dark.css \
   > theme.tokens.json
-```
 
-Import JSON to CSS:
-
-```bash
+# Import JSON to CSS (internal — used by /theme-create internally)
 python3 scripts/tokens_to_css.py theme.tokens.json --out-dir src/styles/theme/
 ```
 
-The JSON format is validated against `assets/theme.schema.json`.
+The JSON format is validated against `assets/theme.schema.json`, which carries `"deprecated": true` and `"x-sunset-version": "0.3.0"` markers as of v0.2.0. End users should not author JSON conforming to this schema; the schema and round-trip scripts are internal to the plugin's pipeline.
 
 ## WCAG AA contrast
 

@@ -1,7 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "acss-theme-builder theme tokens",
-  "description": "Schema for theme.tokens.json — hex-color semantic role definitions for light/dark modes and optional brand overrides.",
+  "description": "DEPRECATED as a user-facing contract since acss-theme-builder v0.2.0. Retained as an internal contract for tokens_to_css.py / css_to_tokens.py only. The going-forward authoring format is the CSS Token Convention documented in skills/acss-theme-builder/SKILL.md — users edit CSS theme files (light.css, dark.css, brand-*.css) directly. Scheduled for removal in v0.3.0; see references/theme-schema.md for the migration banner.",
+  "deprecated": true,
+  "x-sunset-version": "0.3.0",
   "type": "object",
   "additionalProperties": false,
   "properties": {
