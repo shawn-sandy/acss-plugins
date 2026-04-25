@@ -2,6 +2,8 @@
 
 # Component: Card
 
+> **Verified against fpkit source:** `@fpkit/acss@6.5.0` (closest tagged ref to npm `6.6.0`). Card uses the compound pattern (`Card`, `Card.Title`, `Card.Content`, `Card.Footer`) in a single `card.tsx` — same structure as upstream. Generated locally via `Object.assign(CardRoot, { Title, Content, Footer })`.
+
 ## Overview
 
 A flexible container for grouping related content. Uses the compound component pattern: `Card`, `Card.Title`, `Card.Content`, `Card.Footer` — all in a single generated file. Supports an interactive (clickable) variant with keyboard support.
@@ -82,6 +84,99 @@ The interactive card pattern:
 - Responds to Enter/Space via `onKeyDown`
 - Uses `data-card="interactive"` for SCSS targeting
 
+## TSX Template
+
+```tsx
+import UI from '../ui'
+import React from 'react'
+
+// --- Sub-components ---
+const CardTitle = ({
+  as = 'h3',
+  children,
+  className,
+  id,
+  ...props
+}: CardTitleProps) => (
+  <UI as={as} classes={`card-title${className ? ' ' + className : ''}`} id={id} {...props}>
+    {children}
+  </UI>
+)
+CardTitle.displayName = 'Card.Title'
+
+const CardContent = ({
+  as = 'article',
+  children,
+  ...props
+}: CardContentProps) => (
+  <UI as={as} classes="card-content" {...props}>
+    {children}
+  </UI>
+)
+CardContent.displayName = 'Card.Content'
+
+const CardFooter = ({
+  as = 'div',
+  children,
+  ...props
+}: CardFooterProps) => (
+  <UI as={as} classes="card-footer" {...props}>
+    {children}
+  </UI>
+)
+CardFooter.displayName = 'Card.Footer'
+
+// --- Root component ---
+const CardRoot = ({
+  as = 'div',
+  children,
+  interactive,
+  onClick,
+  classes,
+  styles,
+  ...props
+}: CardProps) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (interactive && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault()
+      onClick?.()
+    }
+  }
+
+  return (
+    <UI
+      as={as}
+      classes={`card${classes ? ' ' + classes : ''}`}
+      styles={styles}
+      data-card={interactive ? 'interactive' : undefined}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onClick={interactive ? onClick : undefined}
+      onKeyDown={interactive ? handleKeyDown : undefined}
+      {...props}
+    >
+      {children}
+    </UI>
+  )
+}
+CardRoot.displayName = 'Card'
+
+// --- Compound assembly ---
+type CardComponent = typeof CardRoot & {
+  Title: typeof CardTitle
+  Content: typeof CardContent
+  Footer: typeof CardFooter
+}
+
+export const Card = Object.assign(CardRoot, {
+  Title: CardTitle,
+  Content: CardContent,
+  Footer: CardFooter,
+}) as CardComponent
+
+export default Card
+```
+
 ## CSS Variables
 
 ```scss
@@ -121,7 +216,7 @@ The interactive card pattern:
 --card-focus-outline-offset: 2px;
 ```
 
-## SCSS Pattern
+## SCSS Template
 
 ```scss
 // card.scss
@@ -172,6 +267,49 @@ The interactive card pattern:
   border-top: var(--card-footer-border-top, 1px solid #e0e0e0);
 }
 ```
+
+## Accessibility
+
+WCAG 2.2 AA compliance for the generated `Card` component.
+
+**Non-interactive cards**
+- Default rendering uses `<div>` (or whatever `as` prop specifies — typically `<article>` or `<section>`). No interactive semantics.
+- For semantic association of the card with its title, use `as="article"` and link via `aria-labelledby`:
+  ```tsx
+  <Card as="article" aria-labelledby="title-1">
+    <Card.Title id="title-1">Product</Card.Title>
+    ...
+  </Card>
+  ```
+
+**Interactive cards (whole-card click)**
+- When `interactive` is true, the card receives `role="button"`, `tabIndex={0}`, and an `onKeyDown` handler that activates `onClick` on Enter/Space. The `e.preventDefault()` on Space prevents the page scroll that would otherwise fire.
+- Always pass an `aria-label` describing what activating the card does (e.g. `aria-label="View article: 5 Tips for Better Code"`). The card's text content is not necessarily a complete accessible name, especially if the title and content are long.
+- A native `<button>` would be more semantically correct, but it blocks nesting other interactive descendants (links, buttons inside the card). The `role="button"` + `tabIndex` pattern preserves the visual flexibility while supporting keyboard activation.
+- If the card needs nested interactive elements (a "Like" button inside, for example), prefer a non-interactive card with a clearly placed link/button that handles the primary action — avoid the click-target ambiguity.
+
+**Heading hierarchy**
+- `Card.Title` defaults to `<h3>`. Pass `as="h2"`, `as="h4"`, etc. to maintain document outline within the surrounding section. Never skip levels (e.g. `<h2>` directly to `<h4>`) without an intervening structural reason.
+
+**Focus management**
+- Interactive cards show `:focus-visible` outline at `var(--card-focus-outline, 2px solid var(--color-primary, #0066cc))` with `var(--card-focus-outline-offset, 2px)`. The outline color uses the project's primary color so it inherits the active theme.
+- Hover transform (`translateY(-2px)`) is purely visual; focus state is independent and remains visible regardless of pointer state.
+
+**Color contrast**
+- Card title at `--card-title-color` on `--card-bg` must meet 4.5:1 (WCAG 1.4.3 Contrast Minimum, AA).
+- Footer at `--card-footer-bg` may differ from card body; ensure footer text still meets 4.5:1 against the footer background, not just the card body background.
+- Border at `--card-border` must meet 3:1 against the page background (WCAG 1.4.11 Non-text Contrast) when the border is the sole indicator of the card boundary. With the default subtle shadow, the contrast requirement on the border alone relaxes — but in flat designs without shadow, the border carries the load.
+
+**Target size**
+- Interactive cards naturally meet WCAG 2.5.8 Target Size Minimum (44 px) since cards are typically much larger than 44 px in both dimensions.
+
+**WCAG 2.2 AA criteria addressed**
+- 1.4.3 Contrast Minimum (title on card background; text on footer background)
+- 1.4.11 Non-text Contrast (card border when it is the sole boundary indicator)
+- 2.1.1 Keyboard (interactive cards activate via Enter/Space)
+- 2.4.7 Focus Visible (`:focus-visible` outline on interactive cards)
+- 2.5.8 Target Size Minimum (interactive cards exceed 44 px)
+- 4.1.2 Name, Role, Value (interactive: explicit role + accessible name via aria-label)
 
 ## Usage Examples
 

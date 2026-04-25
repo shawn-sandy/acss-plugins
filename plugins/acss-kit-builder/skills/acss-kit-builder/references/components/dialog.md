@@ -104,7 +104,7 @@ const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
 }
 ```
 
-## Full Implementation Reference
+## TSX Template
 
 ```tsx
 import UI from '../ui'
@@ -247,7 +247,7 @@ export default Dialog
 --dialog-backdrop-bg: rgba(0, 0, 0, 0.5);
 ```
 
-## SCSS Pattern
+## SCSS Template
 
 ```scss
 // dialog.scss
@@ -320,6 +320,46 @@ export default Dialog
   flex-shrink: 0;
 }
 ```
+
+## Accessibility
+
+WCAG 2.2 AA compliance for the generated `Dialog` component. Most affordances come for free from the native `<dialog>` element; the listed criteria document where the implementation explicitly addresses each one.
+
+**Keyboard interaction**
+- `showModal()` traps focus inside the dialog automatically. Tab and Shift+Tab cycle within the dialog only.
+- `Escape` fires the native `cancel` event; the implementation calls `handleClose()` in response. No JavaScript keybinding needed.
+- Closing (close button, backdrop, or Escape) returns focus to the element that called `showModal()` — also native browser behavior.
+
+**ARIA & screen reader**
+- Native `<dialog>` provides implicit `role="dialog"` and `aria-modal="true"` when opened with `showModal()`. Do not add either attribute explicitly.
+- `aria-labelledby` references the generated title id, so screen readers announce the dialog title on open.
+- `aria-describedby` (when `description` prop is set) points at the description paragraph for additional context.
+- Close button has an explicit `aria-label="Close dialog"` since the visual `×` glyph is not an accessible name.
+
+**Focus management**
+- Initial focus on open: the browser focuses the first focusable element inside the dialog. Because the close button is rendered first when `showCloseButton` is true, it usually receives initial focus — acceptable, but to avoid users immediately tabbing into a destructive close, the actionable footer button is a better target. Pass `autoFocus` to the desired footer button or programmatically focus inside `useEffect` if a different element should be initial focus.
+- Focus cannot escape the dialog while open via `showModal()`. Do not call modeless `show()` — it does not enforce the trap.
+- On close, focus returns to the trigger element automatically.
+
+**Backdrop & dismissal**
+- `::backdrop` pseudo-element renders the overlay; `handleBackdropClick` compares `e.target === e.currentTarget` to detect a click on the backdrop (vs inner content) and closes.
+- Backdrop click is a convenience for pointer users — keyboard users have `Escape` and the close button, so no a11y dependency on backdrop dismissal.
+
+**Color contrast**
+- Dialog title at `--dialog-title-color` on `--dialog-bg` must meet 4.5:1 (WCAG 1.4.3 Contrast Minimum, AA).
+- Description text at `var(--color-text-subtle)` must meet 4.5:1 against `--dialog-bg`. The default `#555` on `#fff` ratio is approximately 7.5:1 — passes.
+- Backdrop overlay at `--dialog-backdrop-bg` (rgba(0,0,0,0.5)) provides visual separation; not subject to text-contrast rules.
+
+**Document outline**
+- Dialog title renders as `<h2>` by default. If the dialog appears within a section that already has an `<h2>`, consider passing `title=""` and rendering a custom `<h3>` inside the dialog body to maintain heading hierarchy.
+
+**WCAG 2.2 AA criteria addressed**
+- 1.4.3 Contrast Minimum (title and description on dialog background)
+- 2.1.1 Keyboard (full keyboard operability via native dialog)
+- 2.1.2 No Keyboard Trap (the trap is intentional and releases on close)
+- 2.4.3 Focus Order (initial focus inside dialog; returns to trigger on close)
+- 2.4.7 Focus Visible (close button + footer Buttons inherit `:focus-visible` from button.scss)
+- 4.1.2 Name, Role, Value (native dialog + aria-labelledby + close button aria-label)
 
 ## Usage Examples
 

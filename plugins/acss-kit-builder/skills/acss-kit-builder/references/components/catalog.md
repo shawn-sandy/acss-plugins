@@ -13,6 +13,9 @@ Tracks each component reference doc's verification against canonical fpkit sourc
 | Component | Reference | Verified against | Status |
 |-----------|-----------|------------------|--------|
 | Button | [`button.md`](button.md) | `@fpkit/acss@6.5.0` (closest tagged ref to npm `6.6.0`) | Verified — intentional divergences noted in `button.md` (inlined `useDisabledState` / `resolveDisabledState` for self-contained vendoring) |
+| Alert | [`alert.md`](alert.md) | `@fpkit/acss@6.5.0` | Verified — TSX Template + SCSS Template authored from existing fragments; severity icon SVGs and `useAlertBehavior` hook inlined for self-contained vendoring (no `Icon` component dependency) |
+| Card | [`card.md`](card.md) | `@fpkit/acss@6.5.0` | Verified — compound assembly (`Card`, `Card.Title`, `Card.Content`, `Card.Footer`) authored as a single `card.tsx`; matches upstream compound pattern |
+| Dialog | [`dialog.md`](dialog.md) | `@fpkit/acss@6.5.0` | Verified — uses native `<dialog>` + `showModal()` for focus trap; close button uses `Button` with `variant="icon"` instead of `IconButton` to keep dependency tree shallow |
 
 Components not yet listed have not been verified against fpkit source under the new canonical shape; their existing reference doc content remains usable as the legacy generation guide.
 
