@@ -4,7 +4,7 @@
 
 ## Overview
 
-An accessible icon-only (or icon + label) button. Built on top of `Button` from the same generated component set. Enforces the WCAG 1.1.1 (Non-text Content) accessible-name requirement at compile time via a TypeScript XOR type that requires exactly one of `aria-label` or `aria-labelledby`.
+An accessible icon-only (or icon + label) button. Built on top of `Button` from the same generated component set. A TypeScript XOR type requires exactly one of `aria-label` or `aria-labelledby` at compile time, providing both the icon's text alternative (WCAG 1.1.1 Non-text Content) and the button's accessible name (WCAG 4.1.2 Name, Role, Value).
 
 ## Generation Contract
 
@@ -38,7 +38,7 @@ export type IconButtonProps = Omit<ButtonProps, 'children'> &
   }
 ```
 
-The XOR constraint means passing both `aria-label` AND `aria-labelledby` (or neither) is a TypeScript compile-time error. This satisfies WCAG 1.1.1 Non-text Content at the type level — the icon glyph alone is never a sufficient accessible name.
+The XOR constraint means passing both `aria-label` AND `aria-labelledby` (or neither) is a TypeScript compile-time error. This guarantees the icon glyph has a programmatic text alternative (WCAG 1.1.1) and the button has an accessible name (WCAG 4.1.2) at the type level — the icon alone is never sufficient.
 
 ## TSX Template
 
@@ -139,7 +139,7 @@ export default IconButton
 WCAG 2.2 AA compliance for the generated `IconButton` component.
 
 **Accessible name (required)**
-- The `IconButtonProps` XOR type requires exactly one of `aria-label` or `aria-labelledby` at compile time. Passing both — or neither — is a TypeScript error. This makes WCAG 1.1.1 Non-text Content a build-time guarantee.
+- The `IconButtonProps` XOR type requires exactly one of `aria-label` or `aria-labelledby` at compile time. Passing both — or neither — is a TypeScript error. This makes both the icon's text alternative (WCAG 1.1.1) and the button's accessible name (WCAG 4.1.2) build-time guarantees.
 - The icon glyph is decorative as far as assistive tech is concerned; the accessible name comes entirely from `aria-label` / `aria-labelledby`.
 - When the optional `label` is also passed, it stays in the accessibility tree at every viewport size. If `label` and `aria-label` say different things, screen readers may announce both — keep them consistent or omit `label` for icon-only.
 
@@ -158,7 +158,7 @@ WCAG 2.2 AA compliance for the generated `IconButton` component.
 - The optional `label` is hidden visually below `48rem` via a media query, but stays in the accessibility tree (positioned off-screen with `clip`, not `display: none`). Screen readers announce it at every viewport size.
 
 **WCAG 2.2 AA criteria addressed**
-- 1.1.1 Non-text Content (XOR-enforced accessible name)
+- 1.1.1 Non-text Content (XOR-enforced text alternative for icon glyph)
 - 1.4.11 Non-text Contrast (icon glyph at 3:1)
 - 2.1.1 Keyboard (inherited from Button)
 - 2.4.7 Focus Visible (inherited from Button)

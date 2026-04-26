@@ -7,9 +7,9 @@ All notable changes to the `acss-kit` plugin are documented here. Format follows
 ### Fixed
 
 - **Plugin README** — documented `/kit-list` command. The command file (`commands/kit-list.md`) and full reference (`docs/commands.md`) already shipped in 0.3.0, but the plugin-level README omitted it from both the Component commands section and the Plugin Structure file-tree diagram.
-- **WCAG success-criterion citations** — corrected three SC name/number mismatches in reference docs and developer guides:
-  - `docs/concepts.md` — `WCAG 2.1.1 (Non-text Contrast)` → `WCAG 2.1.1 (Keyboard)`. Non-text Contrast is SC 1.4.11; the surrounding text was about keyboard tab order.
-  - `skills/components/references/components/icon-button.md` (×2) — `WCAG 2.1.1` references for the accessible-name XOR constraint → `WCAG 1.1.1 (Non-text Content)`, the SC the type-level constraint actually addresses.
+- **WCAG success-criterion citations** — corrected ambiguous and overstated SC references across reference docs and developer guides:
+  - `docs/concepts.md` and `skills/components/SKILL.md` — softened the `aria-disabled` rationale. Previous "fails / violates WCAG 2.1.1" framing was stronger than WCAG actually states (a control being unfocusable when disabled is not automatically a 2.1.1 keyboard-operability failure). Replaced with concrete UX framing — unfocusable disabled controls can't be reached by keyboard or screen-reader users to discover state or read any explanation.
+  - `skills/components/references/components/icon-button.md` (×4) and `catalog.md` — clarified the XOR type's accessible-name guarantee. The constraint genuinely covers two SCs simultaneously: WCAG 1.1.1 (text alternative for the non-text icon glyph) and WCAG 4.1.2 (programmatic accessible name for the interactive button). Previous wording cited only 1.1.1 (later 2.1.1, in the original incorrect form) and was inconsistent with the file's own "criteria addressed" section that already lists 4.1.2.
   - `skills/styles/references/role-catalogue.md` — `WCAG 2.1 AA` → `WCAG 2.2 AA` for plugin-wide consistency. Contrast ratio targets (4.5:1 normal, 3.0:1 large/UI) are identical across both spec versions; this is a wording fix only.
 
 ## [0.3.0] - 2026-04-26
