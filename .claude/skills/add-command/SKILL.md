@@ -8,7 +8,7 @@ disable-model-invocation: false
 
 Usage: `/add-command <plugin-name> <command-name>`
 
-Example: `/add-command acss-app-builder app-export`
+Example: `/add-command acss-kit theme-export`
 
 ## Steps
 
@@ -18,6 +18,7 @@ Example: `/add-command acss-app-builder app-export`
    - One-line description of what the command does
    - Argument hint (e.g., `<name> [--force]`) — leave empty if none
    - Which tools the command needs (default: `Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion`)
+   - Which skill owns the workflow (for `acss-kit`, usually `components` or `styles`)
 
 3. **Create `<plugin>/commands/<command-name>.md`**:
 
@@ -30,8 +31,8 @@ allowed-tools: <tools>
 
 <One sentence summary of what this command does.>
 
-Follow the `/<command-name>` workflow in the plugin's master SKILL.md:
-`.claude/plugins/<plugin>/skills/<plugin>/SKILL.md`
+Follow the `/<command-name>` workflow in the owning skill:
+`plugins/<plugin>/skills/<skill>/SKILL.md`
 
 **Quick checklist:**
 
@@ -41,7 +42,7 @@ Follow the `/<command-name>` workflow in the plugin's master SKILL.md:
 **Safety:** refuse on dirty git tree and on any existing non-empty target file unless `--force`.
 ```
 
-4. **Add a stub section to `<plugin>/skills/<plugin>/SKILL.md`** at the end of the file:
+4. **Add a stub section to `plugins/<plugin>/skills/<skill>/SKILL.md`** at the end of the file:
 
 ```markdown
 ## /<command-name>

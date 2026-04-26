@@ -9,7 +9,7 @@ disable-model-invocation: false
 
 Usage: `/release-check <plugin-name>`
 
-Example: `/release-check acss-app-builder`
+Example: `/release-check acss-kit`
 
 This skill audits whether the release paperwork is complete on the current branch. It does **not** perform the version bump — use `/release-plugin <name> <version>` for that. Run this after `/release-plugin` and before opening a PR.
 
@@ -29,7 +29,7 @@ Collect the list of changed files scoped to `plugins/<plugin>/`.
 
 ### 3. Check version bump
 
-- Attempt to read `plugins/<plugin>/.Codex-plugin/plugin.json` from `main` via `git show main:plugins/<plugin>/.Codex-plugin/plugin.json`.
+- Attempt to read `plugins/<plugin>/.claude-plugin/plugin.json` from `main` via `git show main:plugins/<plugin>/.claude-plugin/plugin.json`.
 - If the command exits non-zero (file does not exist on `main`): PASS with note "New plugin — initial version establishes the baseline." Skip the version-diff check.
 - Otherwise read the same file from `HEAD` and compare `version` fields.
 - PASS if the `version` field differs between `main` and `HEAD`.
@@ -45,7 +45,7 @@ Collect the list of changed files scoped to `plugins/<plugin>/`.
 If any of these paths are in the diff:
 
 - `plugins/<plugin>/commands/*.md`
-- `plugins/<plugin>/skills/<plugin>/SKILL.md`
+- `plugins/<plugin>/skills/**/SKILL.md`
 
 Then `plugins/<plugin>/README.md` must also be in the diff.
 
@@ -54,20 +54,20 @@ Then `plugins/<plugin>/README.md` must also be in the diff.
 
 ### 6. Check marketplace.json description (informational)
 
-The root marketplace.json lives at `.Codex-plugin/marketplace.json` — not inside the plugin directory — so it never appears in the scoped diff from step 2. Run a separate unscoped diff:
+The root marketplace.json lives at `.claude-plugin/marketplace.json` — not inside the plugin directory — so it never appears in the scoped diff from step 2. Run a separate unscoped diff:
 
 ```bash
 git diff main...HEAD --name-only
 ```
 
-If `.Codex-plugin/marketplace.json` appears in this diff, note it as touched. If not touched, remind: "Consider updating `.Codex-plugin/marketplace.json` description if this change is user-facing."
+If `.claude-plugin/marketplace.json` appears in this diff, note it as touched. If not touched, remind: "Consider updating `.claude-plugin/marketplace.json` description if this change is user-facing."
 
 ## Output
 
 Print a checklist:
 
 ```
-Release checklist for acss-app-builder (main...HEAD)
+Release checklist for acss-kit (main...HEAD)
 
   [PASS] plugin.json version bumped (0.2.1 → 0.3.0)
   [FAIL] CHANGELOG.md not updated

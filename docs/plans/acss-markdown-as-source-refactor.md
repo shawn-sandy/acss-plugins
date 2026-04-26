@@ -1,5 +1,9 @@
 # Refactor: markdown-as-source for components + sunset @fpkit/acss + retire JSON schemas
 
+> **⚠️ Superseded by [`acss-consolidate-to-acss-kit.md`](./acss-consolidate-to-acss-kit.md).**
+>
+> Phases 0, 1, and 4 of this plan were inherited and shipped as part of the consolidation in `acss-kit@0.3.0`. Phases 2 and 3 (npm soft-deprecation in `acss-app-builder` + cross-plugin `/app-form` delegation) were dropped because `acss-app-builder` was deleted entirely. This document is preserved as a historical record of the markdown-as-source design decisions.
+
 ## Context
 
 Today the three acss plugins carry a mixed internal representation: TSX template files in `assets/`, an `@fpkit/acss` npm fallback path, and JSON schemas as user-facing input contracts. This refactor unifies the internal representation around **markdown specs as the source of truth**: each component is a markdown document containing the Generation Contract plus the actual TSX/SCSS code embedded as fenced code blocks, plus a required `## Accessibility` section. The model reads markdown and emits React TSX into the user's Vite+React+TS project — the plugin still scaffolds React apps, but the source-of-truth shifts from `.tsx.tmpl` files and an npm package to markdown.

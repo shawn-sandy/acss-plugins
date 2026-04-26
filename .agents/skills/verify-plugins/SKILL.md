@@ -23,7 +23,7 @@ Run these in order for each `plugins/*/` directory.
 ### 1. Manifest exists and has required fields
 
 ```bash
-jq -e '(.name | type == "string" and length > 0) and (.version | type == "string" and length > 0) and (.description | type == "string" and length > 0)' plugins/<plugin>/.Codex-plugin/plugin.json
+jq -e '(.name | type == "string" and length > 0) and (.version | type == "string" and length > 0) and (.description | type == "string" and length > 0)' plugins/<plugin>/.claude-plugin/plugin.json
 ```
 
 - PASS if file exists and all three fields are non-null/non-empty strings.
@@ -31,12 +31,12 @@ jq -e '(.name | type == "string" and length > 0) and (.version | type == "string
 
 ### 2. Marketplace entry has no `version` key
 
-Read `.Codex-plugin/marketplace.json`. Run two checks in sequence.
+Read `.claude-plugin/marketplace.json`. Run two checks in sequence.
 
 First, verify the entry exists:
 
 ```bash
-jq -e --arg p "<plugin>" '.plugins | map(.name) | index($p) != null' .Codex-plugin/marketplace.json
+jq -e --arg p "<plugin>" '.plugins | map(.name) | index($p) != null' .claude-plugin/marketplace.json
 ```
 
 - FAIL if entry is absent: "marketplace.json has no entry for <plugin> — add one."
@@ -45,7 +45,7 @@ jq -e --arg p "<plugin>" '.plugins | map(.name) | index($p) != null' .Codex-plug
 Then, verify no `version` key:
 
 ```bash
-jq -e '.plugins[] | select(.name == "<plugin>") | has("version") | not' .Codex-plugin/marketplace.json
+jq -e '.plugins[] | select(.name == "<plugin>") | has("version") | not' .claude-plugin/marketplace.json
 ```
 
 - PASS if no `version` key present.
@@ -56,7 +56,7 @@ jq -e '.plugins[] | select(.name == "<plugin>") | has("version") | not' .Codex-p
 Check that each of these paths exists:
 
 - `plugins/<plugin>/README.md`
-- `plugins/<plugin>/skills/<plugin>/SKILL.md`
+- `plugins/<plugin>/skills/` directory containing at least one `SKILL.md`
 - `plugins/<plugin>/commands/` directory containing at least one `.md` file
 
 Report each missing path as a separate FAIL line.
@@ -70,20 +70,14 @@ Do not re-implement the logic from `validate-plugin` — keep this skill fast an
 ## Output format
 
 ```
-plugins/acss-app-builder
+plugins/acss-kit
   PASS  Manifest fields (name, version, description)
   PASS  Marketplace entry has no version key
   PASS  README.md present
-  PASS  skills/acss-app-builder/SKILL.md present
+  PASS  skills/ contains SKILL.md files
   PASS  commands/ has .md files
 
-plugins/acss-kit-builder
-  PASS  Manifest fields (name, version, description)
-  FAIL  Marketplace entry has a version key — remove it
-  PASS  README.md present
-  ...
-
-Summary: 2 plugins checked, 1 failure total.
+Summary: 1 plugin checked, 0 failures total.
 ```
 
 If all pass: "All plugins passed structural checks."

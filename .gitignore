@@ -15,3 +15,7 @@ CLAUDE.local.md
 
 # Local plugin testing
 tests/sandbox/
+
+# Python bytecode
+__pycache__/
+*.pyc
