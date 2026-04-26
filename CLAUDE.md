@@ -51,11 +51,15 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
 
 Body delegates to the master SKILL.md, never re-implements logic inline.
 
+### SKILL.md front-matter
+
+Required: `name:` and `description:`. The PostToolUse hook validates both on every Write/Edit to a SKILL.md file.
+
 ## Version bumps
 
 Plugin versions live in **two places** — keep them in sync:
 
-- `<plugin>/.claude-plugin/plugin.json` — **authoritative**; Claude Code and `/plugin update` read this
+- `<plugin>/.claude-plugin/plugin.json` — **authoritative**; Claude Code and `/plugin update` read this. Required fields: `name`, `version`, `description`.
 - `.claude-plugin/marketplace.json` — **omit the `version` field here** (the manifest always wins silently)
 
 Bump only `plugin.json`. Do not add a `version` key to `marketplace.json` entries.
@@ -94,6 +98,8 @@ The default check is `tests/run.sh` from the repo root — automated structural 
 For end-to-end smoke testing of slash commands (rendering output, exercising `/kit-add` and `/theme-create`), `tests/setup.sh` scaffolds a disposable Vite+React+TS sandbox at `tests/sandbox/` (gitignored). For render-sensitive changes, `tests/storybook.sh` runs the optional Storybook + axe-playwright deep check (~3–4 min). See [`tests/README.md`](./tests/README.md) for the full workflow.
 
 Full validation: manual SKILL.md review → local install → smoke-test slash commands → run Python scripts against a sample project.
+
+To test a local plugin install without publishing: `claude --plugin-dir ./plugins/acss-kit` from the repo root.
 
 ## Python scripts
 
