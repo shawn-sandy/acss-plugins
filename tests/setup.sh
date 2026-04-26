@@ -100,22 +100,19 @@ Inside the Claude Code session, paste these commands (the path is quoted so it w
 
 \`\`\`
 /plugin marketplace add "$REPO_ROOT"
-/plugin install acss-app-builder@acss-plugins
-/plugin install acss-kit-builder@acss-plugins
-/plugin install acss-theme-builder@acss-plugins
-/plugin install acss-component-specs@acss-plugins
+/plugin install acss-kit@acss-plugins
 \`\`\`
 
-Then exercise the plugins. Suggested smoke flow:
+Then exercise the plugin. Suggested smoke flow:
 
 \`\`\`
-/app-init
-/app-page dashboard
-/theme-create "#4f46e5"
-/kit-add badge
+/plugin list
+/kit-list
+/kit-add button card
+/theme-create "#4f46e5" --mode=both
 \`\`\`
 
-Verify file changes appear under \`src/\`: \`app/\`, \`pages/\`, \`styles/theme/\`, plus your kit components directory (default: \`src/components/fpkit/\`, configurable on first \`/kit-add\` run via \`.acss-target.json\`).
+Verify file changes appear under \`src/\`: \`styles/theme/light.css\`, \`styles/theme/dark.css\`, plus your kit components directory (default: \`src/components/fpkit/\`, configurable on first \`/kit-add\` run via \`.acss-target.json\`).
 
 Reset this sandbox with:
 \`\`\`

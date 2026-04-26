@@ -9,14 +9,6 @@ metadata:
 
 # SKILL: component-form
 
-> **⚠️ Known issues — tracked in [issue #15](https://github.com/shawn-sandy/acss-plugins/issues/15)**
->
-> Two outstanding bugs (the third — hard-coded script path — was resolved in 0.3.0 by colocating the script with this plugin):
-> 1. **Non-required radio fields are not normalized in `handleSubmit`** — submitting a form without selecting an option produces `undefined` where the `{{NAME}}Values` type promises `string`.
-> 2. **Textarea/select renderers reference undefined placeholders (`{{rows ?? 4}}`, `{{required}}`)** — generators following the documented contract literally produce TSX with raw `{{...}}` tokens.
->
-> Until these are fixed: avoid generating forms with non-required radio groups or textarea/select fields. See issue #15 for full context.
-
 Generate a self-contained, accessible React form component into the developer's project. The form is composed from the components skill's `Field`, `Input`, and `Checkbox` reference components; if any of those don't yet exist in the target directory, this skill walks the user through `/kit-add field input checkbox` first.
 
 > **Verified against fpkit source:** `@fpkit/acss@6.5.0` (closest tagged ref to npm `6.6.0`). The form composition pattern follows the upstream `components/form/form.tsx` structure (a top-level `<form>` with composed Fields), but the vendored version targets a single self-contained generated file rather than the multi-file upstream split (`form.tsx` + `fields.tsx` + `inputs.tsx` + `checkbox.tsx` + `form.types.ts`).
@@ -194,6 +186,7 @@ export default function {{NAME}}({
       const values = {
         ...raw,
 {{CHECKBOX_COERCION}}
+{{RADIO_COERCION}}
       } as unknown as {{NAME}}Values
       await onSubmit?.(values)
     } catch (err) {
@@ -244,6 +237,7 @@ The submit button uses the `Button` component (not a plain `<button>`) so the `u
 | `{{FIELDS}}` | The rendered field elements — see Field Renderers below |
 | `{{IMPORT_SOURCE:Field,Input,Checkbox,Button}}` | Local import block resolved per `detect_target.py` output — see "Component-source imports" subsection below. Drop `Checkbox` from the placeholder list when no checkbox field is present. `Button` is always included (the submit button uses it). |
 | `{{CHECKBOX_COERCION}}` | One indented line per checkbox field: `        <name>: formData.get('<name>') === 'on',`. If the form has no checkbox fields, this expands to the empty string (the spread-only `values` object falls through to the `as unknown as {{NAME}}Values` cast unchanged). |
+| `{{RADIO_COERCION}}` | One indented line per radio field: `        <name>: String(formData.get('<name>') ?? ''),`. This keeps optional, unselected radio groups aligned with the declared `string` value type. If the form has no radio fields, this expands to the empty string. |
 
 ### Component-source imports
 
@@ -296,9 +290,9 @@ The `Input` component accepts `type="number"` and `type="date"` natively via its
   <textarea
     id="{{form_name_kebab}}-{{name}}"
     name="{{name}}"
-    rows={{rows ?? 4}}
+    {{ROWS_ATTR}}
     {{REQUIRED_ATTR}}
-    aria-required={{required}}
+    {{ARIA_REQUIRED_ATTR}}
   />
 </Field>
 ```
@@ -309,7 +303,12 @@ The `Input` component accepts `type="number"` and `type="date"` natively via its
 
 ```tsx
 <Field labelFor="{{form_name_kebab}}-{{name}}" label="{{label}}">
-  <select id="{{form_name_kebab}}-{{name}}" name="{{name}}" {{REQUIRED_ATTR}} aria-required={{required}}>
+  <select
+    id="{{form_name_kebab}}-{{name}}"
+    name="{{name}}"
+    {{REQUIRED_ATTR}}
+    {{ARIA_REQUIRED_ATTR}}
+  >
     <option value="">Select…</option>
     {{OPTIONS}}
   </select>
@@ -367,9 +366,12 @@ The `<fieldset>` + `<legend>` pairing is the WCAG-correct grouping pattern for r
 
 | Field property | Substitution |
 |----------------|--------------|
-| `required: true` | `required` (HTML attribute) and `required={true}` (Input prop) |
+| `required: true` | `{{REQUIRED_ATTR}}` -> `required`; `{{REQUIRED_PROP}}` -> `required={true}`; `{{ARIA_REQUIRED_ATTR}}` -> `aria-required={true}` |
+| `required: false` or omitted | Remove `{{REQUIRED_ATTR}}` / `{{REQUIRED_PROP}}`; `{{ARIA_REQUIRED_ATTR}}` -> `aria-required={false}` |
 | `autoComplete: "email"` | `autoComplete="email"` |
 | `minLength: 8` | `minLength={8}` |
+| `rows: 6` | `{{ROWS_ATTR}}` -> `rows={6}` for textarea; if omitted, use `rows={4}` |
+| `options` | Expand each option into the renderer-specific `<option>` or radio input block. Halt without writing if `select` or `radio` has no options. |
 
 ### Field-types map for `{{FIELD_TYPES}}`
 
@@ -405,7 +407,7 @@ The generated form is WCAG 2.2 AA compliant by construction. Don't strip these p
 - Per-field validation should populate the `errors` state and pass `validationState="invalid"` + `errorMessage={errors[name]}` to the matching Input. The skill's TSX Template does NOT include per-field validation logic — that's application-specific. Document this gap and let the user wire it up.
 
 **Atomic generation**
-- Build the entire form file in memory; write to disk only on success. If any field renderer fails (unsupported `type`, missing `options` for `select`), surface the error and write nothing. Partial files break TypeScript compilation in the user's project.
+- Build the entire form file in memory; write to disk only on success. If any field renderer fails (unsupported `type`, missing `options` for `select` or `radio`), surface the error and write nothing. Partial files break TypeScript compilation in the user's project.
 
 **WCAG 2.2 AA criteria addressed**
 - 1.3.1 Info and Relationships (label-control association via Field; aria-describedby for errors/hints)

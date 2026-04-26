@@ -21,11 +21,9 @@ The sibling layout is for **contributors** editing plugin skill docs: open the f
 ```
 acss-plugins/
 ├── .claude-plugin/
-│   └── marketplace.json    # catalog listing all plugins
+│   └── marketplace.json    # catalog listing acss-kit
 ├── plugins/
-│   ├── acss-app-builder/   # scaffolding plugin
-│   ├── acss-kit-builder/   # component generator plugin
-│   └── fpkit-developer/    # deprecated; kept for one release
+│   └── acss-kit/           # components, themes, and form pilot
 ├── README.md
 ├── CONTRIBUTING.md
 └── LICENSE
@@ -35,8 +33,8 @@ Each plugin directory follows the Claude Code plugin convention:
 - `.claude-plugin/plugin.json` — manifest (name, version, description)
 - `README.md` — user-facing docs
 - `commands/*.md` — slash command definitions
-- `skills/<plugin>/SKILL.md` — skill definition invoked by Claude
-- `skills/<plugin>/references/` — knowledge base documents
+- `skills/*/SKILL.md` — skill definitions invoked by Claude
+- `skills/*/references/` — knowledge base documents where applicable
 - `assets/` — templates and code snippets used by the plugin
 
 ## Version bumps
@@ -49,7 +47,7 @@ Bump the version in `plugin.json` when shipping changes — `/plugin update` use
 
 ## Testing locally
 
-Run `tests/setup.sh` from the repo root to scaffold a disposable Vite + React + TypeScript sandbox at `tests/sandbox/` (gitignored). The script prints a copy-pasteable Claude Code recipe that adds the local marketplace and installs all four plugins.
+Run `tests/setup.sh` from the repo root to scaffold a disposable Vite + React + TypeScript sandbox at `tests/sandbox/` (gitignored). The script prints a copy-pasteable Claude Code recipe that adds the local marketplace and installs `acss-kit`.
 
 ```sh
 tests/setup.sh
@@ -58,7 +56,7 @@ cd tests/sandbox && claude
 
 See [`tests/README.md`](./tests/README.md) for the full workflow:
 
-- Per-plugin smoke flows with what to verify after each command
+- `acss-kit` smoke flows with what to verify after each command
 - A verification checklist (including `npm run build` in the sandbox)
 - Reset and custom-recipe guidance
 - Troubleshooting

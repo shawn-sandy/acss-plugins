@@ -9,7 +9,7 @@ disable-model-invocation: false
 
 Usage: `/release-check <plugin-name>`
 
-Example: `/release-check acss-app-builder`
+Example: `/release-check acss-kit`
 
 This skill audits whether the release paperwork is complete on the current branch. It does **not** perform the version bump — use `/release-plugin <name> <version>` for that. Run this after `/release-plugin` and before opening a PR.
 
@@ -45,7 +45,7 @@ Collect the list of changed files scoped to `plugins/<plugin>/`.
 If any of these paths are in the diff:
 
 - `plugins/<plugin>/commands/*.md`
-- `plugins/<plugin>/skills/<plugin>/SKILL.md`
+- `plugins/<plugin>/skills/**/SKILL.md`
 
 Then `plugins/<plugin>/README.md` must also be in the diff.
 
@@ -67,7 +67,7 @@ If `.claude-plugin/marketplace.json` appears in this diff, note it as touched. I
 Print a checklist:
 
 ```
-Release checklist for acss-app-builder (main...HEAD)
+Release checklist for acss-kit (main...HEAD)
 
   [PASS] plugin.json version bumped (0.2.1 → 0.3.0)
   [FAIL] CHANGELOG.md not updated

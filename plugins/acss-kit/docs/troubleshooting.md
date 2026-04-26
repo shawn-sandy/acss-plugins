@@ -80,7 +80,7 @@ If you are surprised by which component depends on which, run `/kit-list <compon
 
 1. Did you delete and recreate the file before running `/kit-add`?
 2. Was the file in the correct `componentsDir` at the time of the second run? (Check `.acss-target.json`.)
-3. Did you run `/spec-promote` instead of `/kit-add`? The `spec-promote` command does overwrite — that is its documented behavior.
+3. Did another manual edit or script rewrite the file outside the `/kit-add` flow? The plugin itself skips existing generated files.
 
 ---
 

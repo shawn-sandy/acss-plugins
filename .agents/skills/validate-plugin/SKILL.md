@@ -8,27 +8,27 @@ disable-model-invocation: false
 
 Usage: `/validate-plugin <plugin-name>`
 
-Example: `/validate-plugin acss-kit-builder`
+Example: `/validate-plugin acss-kit`
 
 ## Checks
 
 Run each check in order. Report all failures at the end, not one at a time.
 
 ### 1. Manifest
-- `<plugin>/.Codex-plugin/plugin.json` exists and is valid JSON
+- `plugins/<plugin>/.claude-plugin/plugin.json` exists and is valid JSON
 - Required fields present: `name`, `description`, `version`, `author`, `license`
 - `version` is a valid semver string
 - `claudeCodeMinVersion` is present (warn if missing, don't fail)
 
 ### 2. Marketplace entry
-- `.Codex-plugin/marketplace.json` has an entry matching the plugin name
+- `.claude-plugin/marketplace.json` has an entry matching the plugin name
 - The entry does **not** have a `"version"` field (this causes silent conflicts)
 - `description` is non-empty
 
 ### 3. Required files
 - `README.md` exists
 - `commands/` directory exists and contains at least one `.md` file
-- `skills/<plugin>/SKILL.md` exists
+- `skills/` directory exists and contains at least one `SKILL.md`
 
 ### 4. Command files
 For each `commands/*.md`:
@@ -41,7 +41,7 @@ For each `commands/*.md`:
 - Each command mentioned in the SKILL.md has a corresponding `commands/*.md` file
 
 ### 6. Python scripts (if present)
-- Run `python3 -m py_compile <script>` on each `.py` file in `scripts/` or `<plugin>/scripts/`
+- Run `python3 -m py_compile <script>` on each `.py` file in `plugins/<plugin>/scripts/`
 - Report any syntax errors
 
 ### 7. Assets
