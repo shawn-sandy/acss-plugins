@@ -1,7 +1,7 @@
 
-# acss-plugins User Guide
+# agentic-acss-plugins User Guide
 
-`acss-plugins` is a Claude Code plugin marketplace for building accessible React components and CSS themes for fpkit/acss projects.
+`agentic-acss-plugins` is a Claude Code plugin marketplace for building accessible React components and CSS themes for fpkit/acss projects.
 
 As of `0.3.0`, the marketplace ships one plugin: `acss-kit`.
 
@@ -10,15 +10,15 @@ As of `0.3.0`, the marketplace ships one plugin: `acss-kit`.
 Run these commands inside a Claude Code session:
 
 ```text
-/plugin marketplace add shawn-sandy/acss-plugins
-/plugin install acss-kit@shawn-sandy-acss-plugins
+/plugin marketplace add shawn-sandy/agentic-acss-plugins
+/plugin install acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
 For local testing from this repo:
 
 ```text
-/plugin marketplace add /absolute/path/to/acss-plugins
-/plugin install acss-kit@acss-plugins
+/plugin marketplace add /absolute/path/to/agentic-acss-plugins
+/plugin install acss-kit@agentic-acss-plugins
 ```
 
 Use `/plugin list` to confirm the plugin is installed and to see available slash commands.
@@ -110,11 +110,11 @@ It vendors required form dependencies through `/kit-add` when needed, then write
 Uninstall old plugins if they are present:
 
 ```text
-/plugin uninstall acss-kit-builder@shawn-sandy-acss-plugins
-/plugin uninstall acss-theme-builder@shawn-sandy-acss-plugins
-/plugin uninstall acss-app-builder@shawn-sandy-acss-plugins
-/plugin uninstall acss-component-specs@shawn-sandy-acss-plugins
-/plugin install acss-kit@shawn-sandy-acss-plugins
+/plugin uninstall acss-kit-builder@shawn-sandy-agentic-acss-plugins
+/plugin uninstall acss-theme-builder@shawn-sandy-agentic-acss-plugins
+/plugin uninstall acss-app-builder@shawn-sandy-agentic-acss-plugins
+/plugin uninstall acss-component-specs@shawn-sandy-agentic-acss-plugins
+/plugin install acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
 Existing `.acss-target.json` files remain compatible.

@@ -1,4 +1,4 @@
-# Contributing to acss-plugins
+# Contributing to agentic-acss-plugins
 
 This repo hosts the Claude Code plugins for `@fpkit/acss`. The live fpkit source lives in a separate repo: [`shawn-sandy/acss`](https://github.com/shawn-sandy/acss).
 
@@ -9,7 +9,7 @@ Plugin work often needs to reference the fpkit source — either to check what's
 ```
 ~/work/
 ├── acss/               # shawn-sandy/acss — live fpkit library
-└── acss-plugins/       # this repo
+└── agentic-acss-plugins/       # this repo
 ```
 
 The plugins do not assume this layout at runtime. All references to fpkit source in `SKILL.md` files and generated-code comments use full GitHub URLs (e.g. `https://github.com/shawn-sandy/acss/blob/main/packages/fpkit/src/index.ts`) so plugin users need only this repo to be installed.
@@ -19,7 +19,7 @@ The sibling layout is for **contributors** editing plugin skill docs: open the f
 ## Repo structure
 
 ```
-acss-plugins/
+agentic-acss-plugins/
 ├── .claude/                # project-local maintainer tooling — see .claude/README.md
 ├── .claude-plugin/
 │   └── marketplace.json    # catalog listing acss-kit
@@ -74,7 +74,7 @@ See [`tests/README.md`](./tests/README.md) for the full workflow:
 - Reset and custom-recipe guidance
 - Troubleshooting
 
-Local-path marketplaces work the same as git-hosted ones. When satisfied, push to GitHub and let users install from `shawn-sandy/acss-plugins`.
+Local-path marketplaces work the same as git-hosted ones. When satisfied, push to GitHub and let users install from `shawn-sandy/agentic-acss-plugins`.
 
 ## Before submitting a change
 

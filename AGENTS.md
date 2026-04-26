@@ -16,8 +16,8 @@ Maintainer tooling for working on this repo lives at `.claude/` (review agents, 
 
 Install from a Claude Code session:
 ```
-/plugin marketplace add shawn-sandy/acss-plugins
-/plugin install acss-kit@shawn-sandy-acss-plugins
+/plugin marketplace add shawn-sandy/agentic-acss-plugins
+/plugin install acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
 ## Plugin structure
@@ -78,7 +78,7 @@ Feature branches + PR. Branch from `main`, open a PR, merge when ready. No direc
 
 ```bash
 # In a disposable project or Claude Code test session:
-/plugin marketplace add /absolute/path/to/acss-plugins
+/plugin marketplace add /absolute/path/to/agentic-acss-plugins
 /plugin install acss-kit@<local-marketplace-name>
 ```
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Scaffold a disposable Vite + React + TypeScript sandbox at tests/sandbox/
-# for end-to-end demo and smoke-testing of the acss-plugins marketplace.
+# for end-to-end demo and smoke-testing of the agentic-acss-plugins marketplace.
 #
 # This is the DEMO path. For automated test verification, run:
 #
@@ -62,7 +62,7 @@ fi
 
 if [[ ! -f "$REPO_ROOT/.claude-plugin/marketplace.json" ]]; then
   echo "Error: marketplace.json not found at $REPO_ROOT/.claude-plugin/" >&2
-  echo "Run this script from inside the acss-plugins repo." >&2
+  echo "Run this script from inside the agentic-acss-plugins repo." >&2
   exit 1
 fi
 
@@ -115,7 +115,7 @@ Inside the Claude Code session, paste these commands (the path is quoted so it w
 
 \`\`\`
 /plugin marketplace add "$REPO_ROOT"
-/plugin install acss-kit@acss-plugins
+/plugin install acss-kit@agentic-acss-plugins
 \`\`\`
 
 Then exercise the plugin. Suggested smoke flow:
@@ -154,8 +154,8 @@ git add -A
 # The .invalid TLD is reserved by RFC 2606 to signal a non-real address.
 # Subsequent commits the contributor makes inside tests/sandbox/ use their
 # normal git config — the overrides only affect this one invocation.
-git -c user.name="acss-plugins sandbox" \
-    -c user.email="sandbox@acss-plugins.invalid" \
+git -c user.name="agentic-acss-plugins sandbox" \
+    -c user.email="sandbox@agentic-acss-plugins.invalid" \
     -c commit.gpgsign=false \
     commit --no-verify -q -m "initial sandbox"
 

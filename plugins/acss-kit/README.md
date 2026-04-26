@@ -40,7 +40,7 @@ If you have any of the old plugins installed:
 /plugin uninstall acss-theme-builder
 /plugin uninstall acss-app-builder
 /plugin uninstall acss-component-specs
-/plugin install acss-kit@shawn-sandy-acss-plugins
+/plugin install acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
 Existing `.acss-target.json` files at project roots remain compatible — `/kit-add` reads the same shape.
@@ -57,8 +57,8 @@ npm install -D sass
 ## Installation
 
 ```shell
-/plugin marketplace add shawn-sandy/acss-plugins
-/plugin install acss-kit@shawn-sandy-acss-plugins
+/plugin marketplace add shawn-sandy/agentic-acss-plugins
+/plugin install acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
 ## Component commands

@@ -12,7 +12,7 @@ Prerequisites:
 
 - React + TypeScript project with a `package.json`
 - `sass` or `sass-embedded` in `devDependencies`
-- `acss-kit` installed via `/plugin install acss-kit@shawn-sandy-acss-plugins`
+- `acss-kit` installed via `/plugin install acss-kit@shawn-sandy-agentic-acss-plugins`
 
 If sass is not installed:
 

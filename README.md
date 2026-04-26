@@ -1,4 +1,4 @@
-# acss-plugins
+# agentic-acss-plugins
 
 A Claude Code plugin marketplace for building accessible React applications with the [fpkit/acss](https://github.com/shawn-sandy/acss) design system.
 
@@ -11,8 +11,8 @@ A Claude Code plugin marketplace for building accessible React applications with
 ## Install
 
 ```shell
-/plugin marketplace add shawn-sandy/acss-plugins
-/plugin install acss-kit@shawn-sandy-acss-plugins
+/plugin marketplace add shawn-sandy/agentic-acss-plugins
+/plugin install acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
 ## Migration

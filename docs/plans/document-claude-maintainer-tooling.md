@@ -2,7 +2,7 @@
 
 ## Context
 
-The `acss-plugins` repo ships one plugin (`acss-kit`) but holds substantial **maintainer-only tooling** at the repo-root `.claude/` directory: 4 review agents, 4 review commands, 10 authoring/release skills, 2 rules files, and a `settings.json` enforcing 6 hooks (4 PostToolUse + 2 PreToolUse). Only the agents are documented (`.claude/agents/README.md`). The rest is undocumented, so a contributor (or returning maintainer) browsing `.claude/skills/` cannot tell that `/release-plugin`, `/component-author`, `/plugin-health`, etc. exist or when to use them.
+The `agentic-acss-plugins` repo ships one plugin (`acss-kit`) but holds substantial **maintainer-only tooling** at the repo-root `.claude/` directory: 4 review agents, 4 review commands, 10 authoring/release skills, 2 rules files, and a `settings.json` enforcing 6 hooks (4 PostToolUse + 2 PreToolUse). Only the agents are documented (`.claude/agents/README.md`). The rest is undocumented, so a contributor (or returning maintainer) browsing `.claude/skills/` cannot tell that `/release-plugin`, `/component-author`, `/plugin-health`, etc. exist or when to use them.
 
 Goal: make the `.claude/` directory self-documenting so a developer landing in the repo can quickly run the right tool. Mirror the existing per-category README pattern (`agents/README.md`) rather than consolidating into a single file — depth-per-category × 16 items would produce a 500-line index, and contributors editing `.claude/skills/` look for a sibling README, not one a level up.
 
