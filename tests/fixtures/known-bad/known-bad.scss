@@ -1,0 +1,12 @@
+// Intentional contract violations. The harness must catch BOTH of these:
+//   1. var(--color-...) reference without a fallback.
+//   2. var(--font-...) reference without a fallback.
+//
+// If validate_components.py reports zero failures here, the var-fallback
+// regex has regressed. Add new known-bad cases when contract checks are
+// added or tightened.
+.known-bad {
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-family: var(--font-body);
+}

@@ -246,7 +246,15 @@ This table is the single source of truth for which components have been migrated
 
 ### 5. Verify locally
 
-Bootstrap a sandbox via `tests/setup.sh` from the repo root, then `cd tests/sandbox && claude` and run `/kit-add <component>`. Confirm the generated `.tsx` and `.scss` match what your reference doc declared.
+For automated structural validation (the default before opening a PR):
+
+```sh
+tests/run.sh
+```
+
+This extracts the new reference doc, syntax-checks the TSX, validates the SCSS contract (var fallbacks), and confirms the manifest is intact. See [`tests/README.md`](../../tests/README.md) for first-time setup.
+
+For end-to-end smoke testing — confirming `/kit-add <component>` actually writes a usable file — bootstrap the demo sandbox: `tests/setup.sh` from the repo root, then `cd tests/sandbox && claude` and run `/kit-add <component>`.
 
 ## Plugin Structure
 
