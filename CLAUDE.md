@@ -8,30 +8,36 @@ A Claude Code **plugin marketplace** — not a Node.js or Python package. There 
 
 **Stack:** Claude Code plugin format, Python 3 (scripts), SCSS/CSS custom properties (generated output).
 
-The repo contains three plugins:
+The repo contains a single plugin:
 
-- `plugins/acss-app-builder` — scaffolds Vite+React+TS apps with the fpkit design system
-- `plugins/acss-kit-builder` — generates fpkit-style components without an npm install
-- `plugins/acss-theme-builder` — generates and updates CSS themes for fpkit/acss projects
+- `plugins/acss-kit` — accessible React components and CSS themes for fpkit/acss projects. Two top-level skills (`components`, `styles`) plus the `component-form` pilot skill.
 
-Install plugins from a Claude Code session:
+Install from a Claude Code session:
 ```
 /plugin marketplace add shawn-sandy/acss-plugins
-/plugin install acss-app-builder@shawn-sandy-acss-plugins
+/plugin install acss-kit@shawn-sandy-acss-plugins
 ```
+
+History note: as of v0.3.0, `acss-kit` consolidated and replaced four predecessor plugins (`acss-kit-builder`, `acss-theme-builder`, `acss-app-builder`, `acss-component-specs`). See [`plugins/acss-kit/CHANGELOG.md`](./plugins/acss-kit/CHANGELOG.md) for the migration notes.
 
 ## Plugin structure
 
-Every plugin lives under `plugins/` and follows this layout:
+The plugin follows this layout:
 
 ```
-plugins/<plugin>/
-├── .claude-plugin/plugin.json   # manifest — authoritative version source
-├── README.md                    # user-facing docs
-├── commands/*.md                # slash command definitions (YAML front-matter)
-├── skills/<plugin>/SKILL.md     # master skill invoked by Claude
-├── skills/<plugin>/references/  # knowledge base documents
-└── assets/                      # templates and code snippets
+plugins/acss-kit/
+├── .claude-plugin/plugin.json     # manifest — authoritative version source
+├── README.md                      # user-facing docs
+├── CHANGELOG.md                   # version history
+├── commands/*.md                  # slash command definitions (YAML front-matter)
+├── skills/components/SKILL.md     # components skill (markdown-as-source TSX/SCSS)
+├── skills/components/references/  # component reference docs (18 components)
+├── skills/styles/SKILL.md         # styles skill (OKLCH theme generation)
+├── skills/styles/references/      # role catalogue, palette algorithm, theme schema
+├── skills/component-form/SKILL.md # form pilot — auto-triggers on natural language
+├── scripts/                       # Python 3 stdlib scripts (detect_target, palette, validate, etc.)
+├── assets/                        # foundation/ui.tsx, brand template, internal schema
+└── docs/                          # developer guides (architecture, recipes, troubleshooting, tutorial)
 ```
 
 ### Command file front-matter
@@ -59,10 +65,10 @@ Bump only `plugin.json`. Do not add a `version` key to `marketplace.json` entrie
 
 Before committing any plugin change:
 
-1. `plugin.json` version bumped (use `/release-plugin <plugin-name>`)
+1. `plugin.json` version bumped (use `/release-plugin acss-kit`)
 2. All SKILL.md references to fpkit source use full GitHub URLs, not repo-relative paths
 3. `marketplace.json` description updated if the change is user-facing
-4. Plugin-level `README.md` updated if commands or behavior changed
+4. Plugin-level `README.md` and `CHANGELOG.md` updated if commands or behavior changed
 
 ## Git workflow
 
@@ -80,14 +86,14 @@ Full validation: manual SKILL.md review → local install → smoke-test slash c
 
 ## Python scripts
 
-Scripts in `plugins/acss-app-builder/scripts/` follow this contract:
+Scripts in `plugins/acss-kit/scripts/` follow this contract:
 
 - Python 3 stdlib only, no external dependencies
 - Output JSON to stdout
 - Exit 0 on success, 1 on failure
 - Include a `"reasons"` array in JSON output for human-readable error messages
 
-See `plugins/acss-app-builder/scripts/` for the current script list and individual docstrings.
+Current scripts: `detect_target.py` (manages `.acss-target.json`), `generate_palette.py` (OKLCH palette math), `tokens_to_css.py` (palette → CSS), `css_to_tokens.py` (CSS → palette), `validate_theme.py` (WCAG 2.2 AA contrast).
 
 ## fpkit/acss cross-references
 
