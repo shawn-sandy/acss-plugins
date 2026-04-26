@@ -65,10 +65,11 @@ Bump only `plugin.json`. Do not add a `version` key to `marketplace.json` entrie
 
 Before committing any plugin change:
 
-1. `plugin.json` version bumped (use `/release-plugin acss-kit`)
-2. All SKILL.md references to fpkit source use full GitHub URLs, not repo-relative paths
-3. `marketplace.json` description updated if the change is user-facing
-4. Plugin-level `README.md` and `CHANGELOG.md` updated if commands or behavior changed
+1. `tests/run.sh` is green (one-time install: `npm --prefix tests ci && pip3 install --user tinycss2`)
+2. `plugin.json` version bumped (use `/release-plugin acss-kit`)
+3. All SKILL.md references to fpkit source use full GitHub URLs, not repo-relative paths
+4. `marketplace.json` description updated if the change is user-facing
+5. Plugin-level `README.md` and `CHANGELOG.md` updated if commands or behavior changed
 
 ## Git workflow
 
@@ -80,7 +81,9 @@ Feature branches + PR. Branch from `main`, open a PR, merge when ready. No direc
 
 ## Testing locally
 
-Run `tests/setup.sh` from the repo root to scaffold a disposable Vite+React+TS sandbox at `tests/sandbox/` (gitignored), then `cd tests/sandbox && claude` and paste the recipe the script printed. See [`tests/README.md`](./tests/README.md) for the full workflow, including the `--reset` flag.
+The default check is `tests/run.sh` from the repo root — automated structural validation in ~30 seconds. It extracts and syntax-checks every component reference, validates the SCSS contract, runs WCAG contrast on theme files, and replicates the manifest checks. One-time install: `npm --prefix tests ci` and `pip3 install --user tinycss2`.
+
+For end-to-end smoke testing of slash commands (rendering output, exercising `/kit-add` and `/theme-create`), `tests/setup.sh` scaffolds a disposable Vite+React+TS sandbox at `tests/sandbox/` (gitignored). For render-sensitive changes, `tests/storybook.sh` runs the optional Storybook + axe-playwright deep check (~3–4 min). See [`tests/README.md`](./tests/README.md) for the full workflow.
 
 Full validation: manual SKILL.md review → local install → smoke-test slash commands → run Python scripts against a sample project.
 

@@ -1,0 +1,12 @@
+{
+  "NAME": "Button",
+  "componentsDir": "src/components/fpkit",
+  "IMPORT_SOURCE": "../ui",
+  "IMPORT_SOURCE_MAP": {
+    "UI": "'../ui'",
+    "Field": "'../field/field'",
+    "Input": "'../input/input'",
+    "Checkbox": "'../checkbox/checkbox'",
+    "Button": "'../button/button'"
+  }
+}

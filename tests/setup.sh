@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 # Scaffold a disposable Vite + React + TypeScript sandbox at tests/sandbox/
-# for smoke-testing the acss-plugins marketplace locally.
+# for end-to-end demo and smoke-testing of the acss-plugins marketplace.
+#
+# This is the DEMO path. For automated test verification, run:
+#
+#     tests/run.sh
+#
+# The demo sandbox is appropriate when you are changing slash-command prose,
+# investigating a regression by running /kit-add or /theme-create by hand, or
+# verifying end-to-end output before a release. For everyday PR validation,
+# tests/run.sh is the documented entry point.
 #
 # Usage:
 #   tests/setup.sh           # first-time setup (errors if sandbox exists)
@@ -11,6 +20,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SANDBOX="$REPO_ROOT/tests/sandbox"
 RESET=0
+
+cat >&2 <<'BANNER'
+[tests/setup.sh] This scaffolds a demo sandbox for manual verification.
+                 For automated tests, run: tests/run.sh
+
+BANNER
 
 if [[ $# -gt 1 ]]; then
   echo "Too many arguments: $*" >&2

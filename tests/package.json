@@ -1,0 +1,14 @@
+{
+  "name": "acss-plugins-tests",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local test harness for the acss-plugins marketplace. Not published.",
+  "type": "module",
+  "scripts": {
+    "tsc": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/react": "^18.3.0"
+  }
+}
