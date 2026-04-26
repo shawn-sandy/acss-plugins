@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase 1 test harness for acss-plugins.
+# Phase 1 test harness for agentic-acss-plugins.
 #
 # Runs the full structural validation gate. SERIAL ONLY — concurrent
 # runs in the same checkout will collide on tests/.tmp/. If you need

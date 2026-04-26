@@ -15,8 +15,8 @@ The repo contains a single plugin:
 Install from a Claude Code session:
 
 ```text
-/plugin marketplace add shawn-sandy/acss-plugins
-/plugin install acss-kit@shawn-sandy-acss-plugins
+/plugin marketplace add shawn-sandy/agentic-acss-plugins
+/plugin install acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
 ## Plugin structure

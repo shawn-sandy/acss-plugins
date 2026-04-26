@@ -1,10 +1,10 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "acss-plugins",
+  "name": "agentic-acss-plugins",
   "description": "Claude Code plugin for building accessible React components and CSS themes for fpkit/acss projects",
   "owner": {
     "name": "Shawn Sandy",
-    "url": "https://github.com/shawn-sandy/acss-plugins"
+    "url": "https://github.com/shawn-sandy/agentic-acss-plugins"
   },
   "plugins": [
     {

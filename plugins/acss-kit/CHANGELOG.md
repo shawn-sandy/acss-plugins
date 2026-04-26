@@ -2,6 +2,12 @@
 
 All notable changes to the `acss-kit` plugin are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the plugin adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- **Marketplace repo renamed** from `shawn-sandy/acss-plugins` to `shawn-sandy/agentic-acss-plugins`. Install commands now use `@shawn-sandy-agentic-acss-plugins` (the marketplace alias is derived from `<owner>-<repo>`). The marketplace `name` field in `.claude-plugin/marketplace.json` also moved from `acss-plugins` to `agentic-acss-plugins` to match. No plugin behavior changed; this is metadata-only.
+
 ## [0.3.1] - 2026-04-26
 
 ### Fixed
@@ -54,7 +60,7 @@ Users on any of the predecessor plugins should:
 2. Install `acss-kit`:
 
    ```shell
-   /plugin install acss-kit@shawn-sandy-acss-plugins
+   /plugin install acss-kit@shawn-sandy-agentic-acss-plugins
    ```
 
 3. Existing `.acss-target.json` files at project roots remain compatible — the schema (`{ "componentsDir": "..." }`) is unchanged.

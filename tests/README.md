@@ -133,10 +133,10 @@ Inside the Claude Code session, paste the block from `RECIPE.md`:
 
 ```text
 /plugin marketplace add <absolute path printed by the script>
-/plugin install acss-kit@acss-plugins
+/plugin install acss-kit@agentic-acss-plugins
 ```
 
-The local marketplace suffix is `acss-plugins`, from the `name` field in `.claude-plugin/marketplace.json`.
+The local marketplace suffix is `agentic-acss-plugins`, from the `name` field in `.claude-plugin/marketplace.json`.
 
 ### Smoke flow
 
@@ -182,7 +182,7 @@ Run `npm --prefix tests ci` from the repo root.
 
 Run `pip3 install --user tinycss2`.
 
-**`Run this script from inside the acss-plugins repo` (setup.sh)**
+**`Run this script from inside the agentic-acss-plugins repo` (setup.sh)**
 
 The script cannot find `.claude-plugin/marketplace.json`. `cd` to the repo root and re-run.
 
@@ -190,7 +190,7 @@ The script cannot find `.claude-plugin/marketplace.json`. `cd` to the repo root 
 
 Expected on a second run. Pass `--reset` if you want a clean rebuild.
 
-**`/plugin install acss-kit@acss-plugins` says "not found"**
+**`/plugin install acss-kit@agentic-acss-plugins` says "not found"**
 
 Confirm the marketplace was added from the printed absolute repo path. Then run `/plugin marketplace list` and use the listed suffix if your Claude Code version normalizes it differently.
 
