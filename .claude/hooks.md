@@ -21,7 +21,7 @@ These run after Claude writes or edits a file. They warn or fail loudly so issue
 |---|---|
 | Matcher | `Write\|Edit` |
 | Status message | `Validating JSON...` |
-| Behaviour | If the touched file ends in `.json`, parses it with `python3 json.load`. Stderr surfaces the parse error, but does not exit non-zero. |
+| Behaviour | If the touched file ends in `.json`, parses it with `python3 json.load`. Parse errors print to stdout (the hook redirects stderr via `2>&1`) and the command exits non-zero, surfacing as a PostToolUse error. |
 | Why | Catches truncated edits in `plugin.json`, `marketplace.json`, `theme.tokens.json` before they propagate. |
 
 ### 2. plugin.json schema check

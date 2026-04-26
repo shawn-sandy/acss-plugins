@@ -2,7 +2,7 @@
 
 ## Context
 
-The `acss-plugins` repo ships one plugin (`acss-kit`) but holds substantial **maintainer-only tooling** at the repo-root `.claude/` directory: 4 review agents, 4 review commands, 10 authoring/release skills, 2 rules files, and a `settings.json` enforcing 5 hooks. Only the agents are documented (`.claude/agents/README.md`). The rest is undocumented, so a contributor (or returning maintainer) browsing `.claude/skills/` cannot tell that `/release-plugin`, `/component-author`, `/plugin-health`, etc. exist or when to use them.
+The `acss-plugins` repo ships one plugin (`acss-kit`) but holds substantial **maintainer-only tooling** at the repo-root `.claude/` directory: 4 review agents, 4 review commands, 10 authoring/release skills, 2 rules files, and a `settings.json` enforcing 6 hooks (4 PostToolUse + 2 PreToolUse). Only the agents are documented (`.claude/agents/README.md`). The rest is undocumented, so a contributor (or returning maintainer) browsing `.claude/skills/` cannot tell that `/release-plugin`, `/component-author`, `/plugin-health`, etc. exist or when to use them.
 
 Goal: make the `.claude/` directory self-documenting so a developer landing in the repo can quickly run the right tool. Mirror the existing per-category README pattern (`agents/README.md`) rather than consolidating into a single file — depth-per-category × 16 items would produce a 500-line index, and contributors editing `.claude/skills/` look for a sibling README, not one a level up.
 
@@ -15,7 +15,7 @@ Add a contributor-facing index plus per-category READMEs under `.claude/`, link 
 **To create (5):**
 - `.claude/README.md` — top-level index ("I want to..." task table, links to category READMEs and `hooks.md`)
 - `.claude/skills/README.md` — table of 10 skills (name, one-line description, trigger phrase / slash command if any)
-- `.claude/commands/README.md` — table of 4 review commands (command, description, agent dispatched)
+- `.claude/commands.md` — table of 4 review commands (command, description, agent dispatched). Lives one level above `commands/` because the slash-command loader treats every `.md` in `commands/` as a command (even without front-matter) — a `commands/README.md` would have registered as `/README`. Discovered during implementation.
 - `.claude/rules/README.md` — table of 2 rules (filename, what it governs, who reads it)
 - `.claude/hooks.md` — what `settings.json` enforces; `settings.json` vs `settings.local.json`; flag the dead `acss-component-specs` parity hook
 
@@ -38,11 +38,11 @@ Add a contributor-facing index plus per-category READMEs under `.claude/`, link 
 
 3. **Write `.claude/skills/README.md`.** Single table: skill name | description | how to invoke (slash command if one exists; otherwise "Claude auto-invokes when ..."). Group rows by purpose (Authoring / Updating / Validation / Release) for scannability. Why: 10 alphabetical rows are noise; 4 grouped clusters of 2-3 rows are scannable.
 
-4. **Write `.claude/commands/README.md`.** Single table: command | description | dispatches to (agent name from `.claude/agents/README.md`). Add a one-line note that all four commands wrap an agent and write nothing. Why: contributors should know these are review-only before running them.
+4. **Write `.claude/commands.md`.** Single table: command | description | dispatches to (agent name from `.claude/agents/README.md`). Add a one-line note that all four commands wrap an agent and write nothing. Why: contributors should know these are review-only before running them. Note: this file lives at `.claude/commands.md` (one level above `commands/`), not `.claude/commands/README.md` — the slash-command loader registers every `.md` inside `commands/` as a command, so the doc would have leaked through as `/README`.
 
 5. **Write `.claude/rules/README.md`.** Two-row table: rule file | scope | when Claude reads it. Add a note that rules are advisory text loaded into Claude's context for matching files, not enforced hooks. Why: the distinction between rules (advisory) and hooks (enforced) is non-obvious and easy to confuse.
 
-6. **Write `.claude/hooks.md`.** Document each of the 5 hooks: matcher, what it does, exit behaviour, statusMessage. Group as "PostToolUse" (4 advisory) and "PreToolUse" (2 blocking). Add a "Files" section explaining `settings.json` (committed, hooks live here) vs `settings.local.json` (machine-local, permissions allowlist). Add a "Known drift" callout: the spec/kit-builder parity hook references `plugins/acss-component-specs/` and `plugins/acss-kit-builder/`, neither of which exist post-v0.3.0 consolidation — the hook will never fire. Why: contributors deserve an honest map of what's enforced; pretending the dead hook works is misleading.
+6. **Write `.claude/hooks.md`.** Document each of the 6 hooks: matcher, what it does, exit behaviour, statusMessage. Group as "PostToolUse" (4 advisory) and "PreToolUse" (2 blocking). Add a "Files" section explaining `settings.json` (committed, hooks live here) vs `settings.local.json` (machine-local, permissions allowlist). Add a "Known drift" callout: the spec/kit-builder parity hook references `plugins/acss-component-specs/` and `plugins/acss-kit-builder/`, neither of which exist post-v0.3.0 consolidation — the hook will never fire. Why: contributors deserve an honest map of what's enforced; pretending the dead hook works is misleading.
 
 7. **Write `.claude/README.md`.** Sections: header ("Maintainer tooling for working on acss-kit"); "I want to..." task table (rows for: add a component, update a component, add a brand preset, update a theme, run pre-PR validation, bump a plugin version, audit a SKILL.md, audit a Python script, add a slash command); links to each category README; pointer to `.claude/agents/README.md` (already canonical); pointer to `.claude/hooks.md`. Keep under 80 lines. Why: the top-level index must stay scannable; deep info lives in category files.
 
@@ -55,8 +55,8 @@ Add a contributor-facing index plus per-category READMEs under `.claude/`, link 
 ## Verification
 
 - `cat .claude/README.md` renders as a scannable index, all internal links resolve to files in this commit
-- `ls .claude/*/README.md .claude/hooks.md` shows 4 new READMEs + the hooks file present
-- For each category README, the count matches `ls .claude/<category>/ | grep -v README` — i.e. skills README has 10 rows, commands README has 4 rows, rules README has 2 rows
+- `ls .claude/README.md .claude/skills/README.md .claude/rules/README.md .claude/commands.md .claude/hooks.md` shows all 5 new doc files present
+- For each catalog, the count matches what's on disk: `.claude/skills/README.md` has 10 rows, `.claude/commands.md` has 4 rows, `.claude/rules/README.md` has 2 rows
 - Open the 5 new files locally and confirm every cross-link path is repo-relative (no `file://`, no absolute paths)
 - `tests/run.sh` exits 0
 - `git diff --stat` shows exactly 5 new files + 2 edited files (`CONTRIBUTING.md`, `AGENTS.md`); no other changes
