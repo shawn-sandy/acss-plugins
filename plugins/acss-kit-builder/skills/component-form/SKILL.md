@@ -9,6 +9,15 @@ metadata:
 
 # SKILL: component-form
 
+> **⚠️ Known issues — tracked in [issue #15](https://github.com/shawn-sandy/acss-plugins/issues/15)**
+>
+> The v0.2.0 pilot ships with three outstanding bugs surfaced in Codex review round 3:
+> 1. **Step B1 hard-codes a path to `acss-app-builder/scripts/detect_component_source.py`** — fails when the skill is auto-triggered in a project that only has `acss-kit-builder` installed.
+> 2. **Non-required radio fields are not normalized in `handleSubmit`** — submitting a form without selecting an option produces `undefined` where the `{{NAME}}Values` type promises `string`.
+> 3. **Textarea/select renderers reference undefined placeholders (`{{rows ?? 4}}`, `{{required}}`)** — generators following the documented contract literally produce TSX with raw `{{...}}` tokens.
+>
+> Until these are fixed: prefer using `/app-form` (which always runs through `acss-app-builder`'s preflight, sidestepping P1) and avoid generating forms with non-required radio groups or textarea/select fields. See issue #15 for the full context including the iteration pattern across three Codex review rounds.
+
 Generate a self-contained, accessible React form component into the developer's project. The form is composed from the kit-builder's `Field`, `Input`, and `Checkbox` reference components; if any of those don't yet exist in the target directory, this skill walks the user through `/kit-add field input checkbox` first.
 
 > **Verified against fpkit source:** `@fpkit/acss@6.5.0` (closest tagged ref to npm `6.6.0`). The form composition pattern follows the upstream `components/form/form.tsx` structure (a top-level `<form>` with composed Fields), but the vendored version targets a single self-contained generated file rather than the multi-file upstream split (`form.tsx` + `fields.tsx` + `inputs.tsx` + `checkbox.tsx` + `form.types.ts`).
