@@ -6,6 +6,17 @@
         "hooks": [
           {
             "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; if [[ \"$f\" =~ plugins/acss-kit/assets/themes/.*\\.css$ ]]; then python3 plugins/acss-kit/scripts/validate_theme.py \"$f\" 2>&1; fi; }",
+            "timeout": 15,
+            "statusMessage": "Checking WCAG contrast..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
             "command": "jq -r '.tool_input.file_path // empty' | { read -r f; if [[ \"$f\" == *.json ]]; then python3 -c \"import json,sys; json.load(open(sys.argv[1]))\" \"$f\" 2>&1; fi; }",
             "timeout": 10,
             "statusMessage": "Validating JSON..."
