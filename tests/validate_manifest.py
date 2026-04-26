@@ -40,9 +40,22 @@ def ok(detail: dict) -> int:
     return 0
 
 
+def is_within_repo(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+        return True
+    except ValueError:
+        return False
+
+
 def check_plugin_dir(name: str, source: str) -> list[str]:
     failures: list[str] = []
     plugin_dir = (REPO_ROOT / source).resolve()
+    if not is_within_repo(plugin_dir, REPO_ROOT):
+        failures.append(
+            f"{name}: source path escapes repository root: {source!r}",
+        )
+        return failures
     if not plugin_dir.is_dir():
         failures.append(f"{name}: source path not found: {source}")
         return failures
@@ -111,7 +124,13 @@ def main() -> int:
         failures.append("marketplace.json plugins must be a non-empty array")
         return fail(failures)
 
-    for entry in plugins:
+    for idx, entry in enumerate(plugins):
+        if not isinstance(entry, dict):
+            failures.append(
+                "marketplace.json plugins entry at index "
+                f"{idx} must be an object, got {type(entry).__name__}",
+            )
+            continue
         name = entry.get("name", "<unnamed>")
         entry_missing = REQUIRED_PLUGIN_ENTRY_FIELDS - entry.keys()
         if entry_missing:

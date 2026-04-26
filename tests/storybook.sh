@@ -30,8 +30,11 @@ fi
 # Step 1
 section "1. install storybook deps (if needed)"
 if [ ! -d "$HARNESS/node_modules" ]; then
-  yellow "node_modules/ missing — running npm ci (one-time, ~2-3 min)"
-  npm --prefix "$HARNESS" ci
+  # `npm install` (not `ci`): the harness gitignores its package-lock.json
+  # because the deep-check is opt-in dev tooling, not a reproducible
+  # build artifact.
+  yellow "node_modules/ missing — running npm install (one-time, ~2-3 min)"
+  npm --prefix "$HARNESS" install
 else
   green "deps already installed"
 fi

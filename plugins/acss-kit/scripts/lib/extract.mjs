@@ -8,7 +8,8 @@
 // validation harness.
 //
 // Public API:
-//   extractFromMarkdown(content, vars?) -> { tsx, scss, name, foundation }
+//   extractFromMarkdown(content, vars?) -> { tsx, scss }
+//   extractFromFile(path, vars?)        -> { tsx, scss, name }
 //
 // Extraction rules:
 //   - TSX: only ```tsx blocks under `## Props Interface(s)` and

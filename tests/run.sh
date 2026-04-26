@@ -51,15 +51,27 @@ node "$REPO_ROOT/tests/validate_components.mjs"
 
 # Step 3
 section "3. SCSS contract"
-python3 "$REPO_ROOT/tests/validate_components.py" "$EXTRACTED" >/dev/null
-green "SCSS contract OK"
+SCSS_LOG="$TMP_ROOT/scss-contract.log"
+if python3 "$REPO_ROOT/tests/validate_components.py" "$EXTRACTED" >"$SCSS_LOG"; then
+  green "SCSS contract OK"
+else
+  red "SCSS contract failed:"
+  cat "$SCSS_LOG"
+  exit 1
+fi
 
 # Step 4
 section "4. WCAG theme contrast"
 THEME_DIR="$REPO_ROOT/plugins/acss-kit/assets"
+THEME_LOG="$TMP_ROOT/theme-contrast.log"
 if compgen -G "$THEME_DIR/themes/*.css" > /dev/null; then
-  python3 "$REPO_ROOT/plugins/acss-kit/scripts/validate_theme.py" "$THEME_DIR/themes/"*.css >/dev/null
-  green "theme contrast OK"
+  if python3 "$REPO_ROOT/plugins/acss-kit/scripts/validate_theme.py" "$THEME_DIR/themes/"*.css >"$THEME_LOG"; then
+    green "theme contrast OK"
+  else
+    red "theme contrast failed:"
+    cat "$THEME_LOG"
+    exit 1
+  fi
 elif [ -f "$THEME_DIR/brand-template.css" ]; then
   yellow "no themes/*.css yet; brand-template.css is the only theme on disk — skipping WCAG check"
 else
@@ -68,8 +80,14 @@ fi
 
 # Step 5
 section "5. manifest / structure"
-python3 "$REPO_ROOT/tests/validate_manifest.py" >/dev/null
-green "manifest OK"
+MANIFEST_LOG="$TMP_ROOT/manifest.log"
+if python3 "$REPO_ROOT/tests/validate_manifest.py" >"$MANIFEST_LOG"; then
+  green "manifest OK"
+else
+  red "manifest validation failed:"
+  cat "$MANIFEST_LOG"
+  exit 1
+fi
 
 # Step 6
 section "6. known-bad self-tests"
@@ -85,33 +103,44 @@ fi
 green "SCSS validator caught known-bad.scss"
 
 # (b) TSX validator must reject the banned import in known-bad.tsx.
-# Inject a synthetic reference that re-uses the known-bad.tsx as its TSX block,
-# then run the extractor — extraction must error on banned imports.
+# Build a synthetic reference doc using known-bad.tsx as its TSX Template,
+# then call the *exported* checkImports() from validate_components.mjs
+# directly. This exercises the real validator code path; a stub regex
+# here would let import-allowlist regressions slip through.
 KNOWN_BAD_REF="$KNOWN_BAD_TMP/known-bad.md"
 {
   printf '%s\n\n' '# Component: KnownBad'
-  printf '%s\n\n' '## TSX Template'
+  printf '%s\n\n' '## Props Interface'
+  printf '%s\n' '```tsx'
+  printf '%s\n' 'export type KnownBadProps = { children?: React.ReactNode }'
+  printf '%s\n' '```'
+  printf '\n%s\n\n' '## TSX Template'
   printf '%s\n' '```tsx'
   cat "$REPO_ROOT/tests/fixtures/known-bad/known-bad.tsx"
   printf '%s\n' '```'
-  printf '%s\n\n' '## SCSS Template'
+  printf '\n%s\n\n' '## SCSS Template'
   printf '%s\n' '```scss'
   printf '%s\n' '.known-bad { padding: 1rem; }'
   printf '%s\n' '```'
-  printf '%s\n' '## Accessibility'
+  printf '\n%s\n' '## Accessibility'
 } > "$KNOWN_BAD_REF"
 
-# Run a synthetic extraction over this single file. Easiest: spawn a one-shot
-# Node script that imports extract.mjs and asserts the import check would fail.
-node --input-type=module -e "
+KNOWN_BAD_REF_PATH="$KNOWN_BAD_REF" node --input-type=module -e "
 import { extractFromFile } from '$REPO_ROOT/plugins/acss-kit/scripts/lib/extract.mjs';
-const { tsx } = extractFromFile('$KNOWN_BAD_REF');
+import { checkImports } from '$REPO_ROOT/tests/validate_components.mjs';
+
+const { tsx } = extractFromFile(process.env.KNOWN_BAD_REF_PATH);
 if (!tsx) { console.error('known-bad: no tsx extracted'); process.exit(1); }
-if (!/@fpkit\/acss/.test(tsx)) { console.error('known-bad: banned import string not present in extracted TSX'); process.exit(1); }
-console.log('known-bad: TSX extraction surface intact');
+
+const failures = checkImports('known-bad', tsx);
+if (failures.length === 0) {
+  console.error('known-bad: validate_components.mjs accepted banned import in synthetic reference');
+  process.exit(1);
+}
+console.log('known-bad: TSX validator caught', failures.length, 'failure(s)');
 "
 
-green "TSX validator surface intact"
+green "TSX validator caught known-bad.tsx"
 
 section "ALL STEPS GREEN"
 green "Phase 1 harness passed."

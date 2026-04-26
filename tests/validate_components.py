@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Validate the SCSS contract for extracted acss-kit component styles.
 
-Walks the directory passed as argv[1] (default: tests/.tmp/extracted),
-reads every .scss file, strips SCSS-only single-line comments (`// ...`)
-that tinycss2 cannot parse, parses the remaining content with tinycss2,
-then asserts:
+Walks the directory passed as argv[1], reads every .scss file, strips
+SCSS-only single-line comments (`// ...`) that tinycss2 cannot parse,
+parses the remaining content with tinycss2, then asserts:
 
   - Every var(--color-*, ...), var(--font-*, ...), and var(--space-*, ...)
     reference includes a fallback. This is the load-bearing contract:

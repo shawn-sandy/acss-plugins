@@ -45,7 +45,7 @@ A full type-check would require either inlining helpers (fighting the markdown's
 
 ### `.mjs` extension
 
-The Node scripts under `tests/` and `plugins/acss-kit/scripts/lib/` use `.mjs` instead of `.js` so they parse as ES modules without requiring a `"type": "module"` field on `tests/package.json`.
+The Node scripts under `tests/` and `plugins/acss-kit/scripts/lib/` use `.mjs` to make their ES module format explicit at the file level. `tests/package.json` also sets `"type": "module"`; the explicit `.mjs` extension keeps the scripts unambiguous when read or executed in isolation, independent of which `package.json` is in scope.
 
 ### Escape hatch when the harness itself blocks unrelated work
 

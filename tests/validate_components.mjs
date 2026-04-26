@@ -25,8 +25,8 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { basename, dirname, join, resolve } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
 
 import { extractFromFile } from '../plugins/acss-kit/scripts/lib/extract.mjs'
@@ -61,7 +61,7 @@ function listReferences() {
     .map((f) => join(REFS_DIR, f))
 }
 
-function findImports(tsx) {
+export function findImports(tsx) {
   const re = /^\s*import\s+[^'"]+from\s+['"]([^'"]+)['"]/gm
   const sources = []
   let m
@@ -69,7 +69,7 @@ function findImports(tsx) {
   return sources
 }
 
-function checkImports(name, tsx) {
+export function checkImports(name, tsx) {
   const failures = []
   for (const src of findImports(tsx)) {
     for (const banned of BANNED_IMPORTS) {
@@ -123,7 +123,9 @@ function main() {
 
     if (!tsx) {
       failures.push(
-        `${name}: reference doc has no \`\`\`tsx fenced block before Accessibility/Usage Examples`,
+        `${name}: reference doc must include \`## Props Interface(s)\` and ` +
+          `\`## TSX Template\` sections, with at least one \`\`\`tsx fenced block ` +
+          `under one of those headings`,
       )
       continue
     }
@@ -168,7 +170,7 @@ function main() {
   const tsxFiles = []
   if (foundationWritten) tsxFiles.push(['foundation', join(TMP_DIR, 'ui.tsx')])
   for (const refPath of refs) {
-    const name = refPath.split('/').pop().replace(/\.md$/, '')
+    const name = basename(refPath, '.md')
     if (name === 'foundation') continue
     const candidate = join(TMP_DIR, name, `${name}.tsx`)
     if (existsSync(candidate)) tsxFiles.push([name, candidate])
@@ -190,4 +192,11 @@ function report(failures) {
   process.exit(1)
 }
 
-main()
+// Run main() only when invoked as a script, not when imported (e.g. by
+// the known-bad self-test in tests/run.sh which imports `checkImports`).
+if (
+  process.argv[1] &&
+  pathToFileURL(process.argv[1]).href === import.meta.url
+) {
+  main()
+}
