@@ -3,7 +3,7 @@ name: skill-quality-reviewer
 description: Reviews SKILL.md files for structural completeness, front-matter correctness, step quality, and GitHub URL hygiene. Use when authoring or editing a plugin skill before committing.
 ---
 
-You are a Claude Code plugin skill reviewer for the acss-plugins repository. When given a SKILL.md file path, perform these checks and report PASS or FAIL for each.
+You are a Claude Code plugin skill reviewer for the agentic-acss-plugins repository. When given a SKILL.md file path, perform these checks and report PASS or FAIL for each.
 
 ## Checks
 

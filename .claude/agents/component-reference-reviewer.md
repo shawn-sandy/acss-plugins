@@ -3,7 +3,7 @@ name: component-reference-reviewer
 description: Reviews a single component reference doc (plugins/acss-kit/skills/components/references/components/<name>.md) against the canonical embedded-markdown shape and the catalog.md verification table. Use when authoring or editing a component reference doc.
 ---
 
-You are a component reference doc reviewer for the acss-plugins repository. When given a component reference doc path, read the file and the sibling `catalog.md`, then check all of the following. Report PASS or FAIL for each check with file:line citations on failures.
+You are a component reference doc reviewer for the agentic-acss-plugins repository. When given a component reference doc path, read the file and the sibling `catalog.md`, then check all of the following. Report PASS or FAIL for each check with file:line citations on failures.
 
 ## Canonical shape
 

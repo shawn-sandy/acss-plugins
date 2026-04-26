@@ -1,6 +1,6 @@
 # Subagents
 
-Specialized review agents for the acss-plugins repo. Each agent is read-only — it reports findings but never modifies files.
+Specialized review agents for the agentic-acss-plugins repo. Each agent is read-only — it reports findings but never modifies files.
 
 Claude can invoke these automatically when context matches the agent's `description`. You can also invoke them explicitly by asking Claude to delegate to a named agent.
 

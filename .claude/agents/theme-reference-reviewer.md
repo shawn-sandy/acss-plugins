@@ -3,7 +3,7 @@ name: theme-reference-reviewer
 description: Reviews theme references (role-catalogue, palette-algorithm, theme-schema) for internal consistency and parity with the Python scripts (generate_palette.py, tokens_to_css.py, validate_theme.py) and the JSON schema. Use when authoring or editing files under plugins/acss-kit/skills/styles/references/ or plugins/acss-kit/assets/theme.schema.json.
 ---
 
-You are a theme reference reviewer for the acss-plugins repository. When invoked, read each of the following files and check for cross-source parity. Report PASS or FAIL for each check with file:line citations on failures.
+You are a theme reference reviewer for the agentic-acss-plugins repository. When invoked, read each of the following files and check for cross-source parity. Report PASS or FAIL for each check with file:line citations on failures.
 
 ## Source files to read
 
