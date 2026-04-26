@@ -42,19 +42,26 @@ A new role or modified description in the role catalogue should propagate to the
 
 ## Step 3 — palette-algorithm change
 
-A change to the OKLCH lightness anchors or hue offsets should be reflected in `generate_palette.py` and re-validated against the bundled brand template + presets.
+A change to the OKLCH lightness anchors or hue offsets should be reflected in `generate_palette.py` and re-validated against any bundled brand presets that were derived algorithmically.
 
 1. Read `plugins/acss-kit/skills/styles/references/palette-algorithm.md` and extract the documented constants (lightness anchors per role group, hue offsets for state colors).
 2. Read `plugins/acss-kit/scripts/generate_palette.py` and extract the corresponding constants.
 3. Diff and surface any drift. If drift is detected, surface the exact line and suggested edit; do not modify the Python automatically.
-4. After confirming parity (or on the maintainer's confirmation that they will reconcile), regenerate the bundled `assets/brand-template.css` if it has a derivable seed (look for a `/* seed: #... */` header comment). Run:
+4. After confirming parity (or on the maintainer's confirmation that they will reconcile), regenerate every algorithmically-derived brand preset. `assets/brand-template.css` is the user-facing starter template — hand-authored and explicitly NOT a regeneration target.
 
-   ```
-   python3 plugins/acss-kit/scripts/generate_palette.py <seed> --mode=brand | python3 plugins/acss-kit/scripts/tokens_to_css.py --stdin --out-dir=plugins/acss-kit/assets/
-   ```
+   For each `brand-<name>.css` under `assets/brand-presets/`:
+   - Parse the `/* seed: #rrggbb */` header comment to recover the seed. If no seed is recorded, skip the file and note it (hand-authored preset).
+   - Run the same reshape pipeline used by `style-author` sub-flow A:
 
-   If no seed is recorded, skip the regeneration and note it.
-5. Run `python3 plugins/acss-kit/scripts/validate_theme.py` against `assets/brand-template.css` and every file under `assets/brand-presets/`.
+     ```
+     python3 plugins/acss-kit/scripts/generate_palette.py "<seed>" --mode=brand \
+       | python3 -c "import json,sys; d=json.load(sys.stdin); print(json.dumps({'brands': {'<name>': d['brand_overrides']}}))" \
+       | python3 plugins/acss-kit/scripts/tokens_to_css.py --stdin --out-dir=plugins/acss-kit/assets/brand-presets/
+     ```
+
+   If `assets/brand-presets/` does not exist or is empty, note "no bundled presets to regenerate" and continue.
+
+5. Re-validate every regenerated preset by running `python3 plugins/acss-kit/scripts/validate_theme.py <file>` per `brand-*.css` file under `assets/brand-presets/`. Skip `assets/brand-template.css` (hand-authored, not part of the algorithmic regeneration target).
 6. Run the `theme-reference-reviewer` agent.
 
 ---

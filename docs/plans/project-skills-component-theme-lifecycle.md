@@ -83,7 +83,7 @@ Implementer should skim these to keep new content consistent:
 3. **Create `.claude/skills/style-author/SKILL.md`.**
    - Front-matter: `name: style-author`, description matching "add a brand preset", "add a new theme role", "scaffold a bundled brand template", "extend the role catalogue".
    - Three sub-flows (the user picks one via AskUserQuestion at the start):
-     - **Brand preset** — generate `plugins/acss-kit/assets/brand-presets/<name>.css` from a seed hex by running `generate_palette.py <hex> --mode=brand` and writing the CSS, then re-validating with `validate_theme.py`. Updates the `styles` SKILL.md "Bundled brand presets" list (creating that section on first run).
+     - **Brand preset** — generate `plugins/acss-kit/assets/brand-presets/brand-<name>.css` (the `brand-` prefix is required so the file matches `validate_theme.py`'s `^(light|dark|brand-[\w-]+)\.css$` regex) by piping `generate_palette.py <hex> --mode=brand` through a JSON reshape stage (`{brand_overrides}` → `{brands: {<name>: ...}}`) into `tokens_to_css.py --stdin`, then re-validating with `validate_theme.py`. Updates the `styles` SKILL.md "Bundled brand presets" list (creating that section on first run).
      - **New role** — guided edit of `references/role-catalogue.md`, `references/theme-schema.md`, and `assets/theme.schema.json` to add a new optional role. Reminds the user to update `tokens_to_css.py:ROLE_GROUPS` and to flag whether the new role should be required (default: optional).
      - **Palette algorithm tweak** — guided edit of `references/palette-algorithm.md` followed by regeneration of the bundled brand template via `generate_palette.py` and re-validation.
    - All flows finish with a contrast-pair re-validation summary.
@@ -122,7 +122,7 @@ After implementation, exercise each new skill end-to-end:
 
 1. **`component-author` smoke test.** Run on a fictional component (e.g., `tabs-test`). Confirm the file is created with all 9 sections and that `catalog.md` gets a new row. Delete the test file and revert the catalog edit.
 2. **`component-update` smoke test.** Run against `references/components/button.md` (which is already canonical-shape ✓). The skill should report "no drift detected" and re-run the reviewer agent cleanly.
-3. **`style-author` brand preset smoke test.** Run with a seed hex (e.g., `#0f766e`). Confirm a new file lands under `assets/brand-presets/`, palette JSON is valid, and `validate_theme.py` reports passing pairs.
+3. **`style-author` brand preset smoke test.** Run with a seed hex (e.g., `#0f766e`). Confirm a new file lands at `assets/brand-presets/brand-<name>.css` (with the `brand-` prefix added by `tokens_to_css.py`), palette JSON is valid, and `validate_theme.py` reports `validate_theme: OK` (not `no palette files found` — that would mean the filename did not match the regex and the validation was silently skipped).
 4. **`style-update` smoke test.** Edit a comment-only line in `role-catalogue.md`, run the skill, confirm it re-validates without spurious failures.
 5. **`plugin-health` smoke test.** Run on the current branch. Output should be a clean dashboard with mostly OK status (the catalog has known legacy `nav.md` and `form.md` entries — these should appear as "FIX" with a pointer to `/component-update`).
 6. **`component-reference-reviewer` direct invocation.** `/review-component plugins/acss-kit/skills/components/references/components/button.md` — should report all PASS.

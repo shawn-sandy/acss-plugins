@@ -25,87 +25,87 @@ Scaffolds `plugins/acss-kit/skills/components/references/components/<component-n
 3. **Capture intentional divergences via AskUserQuestion.**
    Ask whether this component will diverge from upstream in any documented way (inlined hooks, simplified compound API, dropped subcomponents, etc.). Default: "none". Capture as `<divergences>`. The verification banner is load-bearing for future maintainers — if there are no divergences, write "none" rather than leaving the field empty.
 
-4. **Write the reference doc skeleton** to `plugins/acss-kit/skills/components/references/components/<component-name>.md`:
+4. **Write the reference doc skeleton** to `plugins/acss-kit/skills/components/references/components/<component-name>.md`. Outer fence uses 4 backticks so the inner triple-backtick blocks render correctly:
 
-   ```markdown
-   # Component: <PascalCaseName>
+    ````markdown
+    # Component: <PascalCaseName>
 
-   > **Verified against fpkit source:** `<ref>`. Intentional divergences from upstream: <divergences>.
+    > **Verified against fpkit source:** `<ref>`. Intentional divergences from upstream: <divergences>.
 
-   ## Overview
+    ## Overview
 
-   <One-paragraph summary of the component's purpose. Note key WCAG patterns it addresses.>
+    <One-paragraph summary of the component's purpose. Note key WCAG patterns it addresses.>
 
-   ## Generation Contract
+    ## Generation Contract
 
-   ```
-   export_name: <PascalCaseName>
-   file: <component-name>.tsx
-   scss: <component-name>.scss
-   imports: UI from '../ui'
-   dependencies: []
-   ```
+    ```
+    export_name: <PascalCaseName>
+    file: <component-name>.tsx
+    scss: <component-name>.scss
+    imports: UI from '../ui'
+    dependencies: []
+    ```
 
-   ## Props Interface
+    ## Props Interface
 
-   ```tsx
-   export type <PascalCaseName>Props = {
-     children?: React.ReactNode
-     // TODO: copy props from fpkit source at <ref>
-   } & React.ComponentPropsWithoutRef<'div'>
-   ```
+    ```tsx
+    export type <PascalCaseName>Props = {
+      children?: React.ReactNode
+      // TODO: copy props from fpkit source at <ref>
+    } & React.ComponentPropsWithoutRef<'div'>
+    ```
 
-   ## TSX Template
+    ## TSX Template
 
-   ```tsx
-   // TODO: copy from https://github.com/shawn-sandy/acss/blob/<tag-or-sha>/packages/fpkit/src/components/<component-name>/<component-name>.tsx
-   import React from 'react'
-   import UI from '../ui'
+    ```tsx
+    // TODO: copy from https://github.com/shawn-sandy/acss/blob/<tag-or-sha>/packages/fpkit/src/components/<component-name>/<component-name>.tsx
+    import React from 'react'
+    import UI from '../ui'
 
-   export default function <PascalCaseName>({ children, ...rest }: <PascalCaseName>Props) {
-     return <UI as="div" {...rest}>{children}</UI>
-   }
-   ```
+    export default function <PascalCaseName>({ children, ...rest }: <PascalCaseName>Props) {
+      return <UI as="div" {...rest}>{children}</UI>
+    }
+    ```
 
-   ## CSS Variables
+    ## CSS Variables
 
-   ```scss
-   // CSS custom properties this component reads
-   // --<component-name>-bg
-   // --<component-name>-color
-   // (extend with the full variable list)
-   ```
+    ```scss
+    // CSS custom properties this component reads
+    // --<component-name>-bg
+    // --<component-name>-color
+    // (extend with the full variable list)
+    ```
 
-   ## SCSS Template
+    ## SCSS Template
 
-   ```scss
-   // TODO: copy from https://github.com/shawn-sandy/acss/blob/<tag-or-sha>/packages/fpkit/src/components/<component-name>/<component-name>.scss
-   .<component-name> {
-     background: var(--<component-name>-bg, transparent);
-     color: var(--<component-name>-color, currentColor);
-   }
-   ```
+    ```scss
+    // TODO: copy from https://github.com/shawn-sandy/acss/blob/<tag-or-sha>/packages/fpkit/src/components/<component-name>/<component-name>.scss
+    .<component-name> {
+      background: var(--<component-name>-bg, transparent);
+      color: var(--<component-name>-color, currentColor);
+    }
+    ```
 
-   ## Accessibility
+    ## Accessibility
 
-   - Keyboard interaction: <TODO>
-   - ARIA: <TODO>
-   - Focus management: <TODO>
-   - Target size: <TODO>
-   - Color contrast: <TODO>
-   - WCAG 2.2 AA criteria addressed: <TODO>
+    - Keyboard interaction: <TODO>
+    - ARIA: <TODO>
+    - Focus management: <TODO>
+    - Target size: <TODO>
+    - Color contrast: <TODO>
+    - WCAG 2.2 AA criteria addressed: <TODO>
 
-   ## Usage Examples
+    ## Usage Examples
 
-   ```tsx
-   import <PascalCaseName> from './components/fpkit/<component-name>/<component-name>'
-   import './components/fpkit/<component-name>/<component-name>.scss'
+    ```tsx
+    import <PascalCaseName> from './<component-name>/<component-name>'
+    import './<component-name>/<component-name>.scss'
 
-   <<PascalCaseName>>Hello</<PascalCaseName>>
-   ```
-   ```
+    <<PascalCaseName>>Hello</<PascalCaseName>>
+    ```
+    ````
 
-   Substitute `<component-name>`, `<PascalCaseName>`, `<ref>`, `<tag-or-sha>`, and `<divergences>` at write time. Leave every `TODO:` marker for the maintainer to fill in.
+   Substitute `<component-name>`, `<PascalCaseName>`, `<ref>`, `<tag-or-sha>`, and `<divergences>` at write time. Leave every `TODO:` marker for the maintainer to fill in. The Usage Examples import path uses `./<component-name>/<component-name>` to match the convention in existing reference docs (e.g. `button.md`, `alert.md`) — the `src/components/fpkit/` portion is the project-level path the developer chose during `/kit-add` initialization, not part of the relative import.
 
 5. **Add a row to `catalog.md` Verification Status.**
    Read `plugins/acss-kit/skills/components/references/components/catalog.md`. Find the "Verification Status" table and append a row before the next section header:

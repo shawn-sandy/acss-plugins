@@ -43,13 +43,20 @@ Invoke the `theme-reference-reviewer` agent. Capture its check verdicts. Each FA
 
 ## Step 6 — Bundled theme validation
 
-For each `.css` file under `plugins/<plugin-name>/assets/` and `plugins/<plugin-name>/assets/brand-presets/` (if it exists):
+`validate_theme.py` only validates files whose name matches `^(light|dark|brand-[\w-]+)\.css$`. Anything else (including `<preset>.css` without the `brand-` prefix) is silently skipped with `validate_theme: skipped (no palette files found)` and exit 0 — that path must NOT be treated as a passing validation.
 
-1. Run `python3 plugins/<plugin-name>/scripts/validate_theme.py <file>` with timeout 30s.
-2. Capture exit code (0 = pass, 1 = WCAG failures).
-3. List failures with the failing pair names.
-
-Mark `OK` if all bundled themes pass, `FIX` otherwise.
+1. Build the candidate file list:
+   - Top-level `assets/`: include any `.css` file matching the regex above.
+   - `assets/brand-presets/` (if it exists): include any `.css` file matching the regex.
+2. For each candidate file, run `python3 plugins/<plugin-name>/scripts/validate_theme.py <file>` with timeout 30s. Capture exit code and stdout.
+3. Classify each result:
+   - exit 0 + `validate_theme: OK ...` → PASS
+   - exit 1 → FAIL with the listed failing pair names
+   - stdout contains `no palette files found` → INFO ("filename did not match the validator regex"), do NOT count as PASS
+4. Mark the section overall:
+   - `OK` if every candidate file is PASS.
+   - `FIX` if any candidate is FAIL.
+   - `SKIP` if no candidate files were found at all (no bundled themes to validate).
 
 ## Step 7 — Render the dashboard
 

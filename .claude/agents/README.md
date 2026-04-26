@@ -116,9 +116,13 @@ Reviews a single component reference doc under `plugins/acss-kit/skills/componen
 | Catalog entry | Component appears in `catalog.md` "Verification Status" table |
 | TSX Template imports | Only `react`, `'../ui'`, and relative paths to vendored components — never `@fpkit/acss` |
 
-### When Claude invokes it automatically
+### How it gets invoked
 
-When you write or significantly edit a `references/components/<name>.md` file, or via the `/component-update` skill.
+Three triggers, none of them via a `settings.json` hook (no PostToolUse hook for component reference docs is currently wired):
+
+- **Model-invocation** — Claude routes to the agent when the request matches its `description` (e.g. authoring or editing a `references/components/<name>.md` file in a maintenance conversation).
+- **From the `/component-update` skill** — that skill explicitly delegates to this agent on every run.
+- **Manually via slash command** — `/review-component <path>` (see below).
 
 ### Manual invocation
 
@@ -159,9 +163,13 @@ Reviews the acss-kit theme references and bundled brand presets for cross-source
 | OKLCH algorithm parity | Lightness anchors and hue offsets in `palette-algorithm.md` match constants in `generate_palette.py` |
 | Bundled brand preset validation | Every `assets/brand-presets/*.css` passes `validate_theme.py` (SKIP if directory absent) |
 
-### When Claude invokes it automatically
+### How it gets invoked
 
-When you write or significantly edit `references/role-catalogue.md`, `references/palette-algorithm.md`, `references/theme-schema.md`, or `assets/theme.schema.json`.
+Three triggers, none of them via a `settings.json` hook (no PostToolUse hook for theme references is currently wired):
+
+- **Model-invocation** — Claude routes to the agent when the request matches its `description` (e.g. authoring or editing a file under `skills/styles/references/` or `assets/theme.schema.json` in a maintenance conversation).
+- **From the `/style-author`, `/style-update`, and `/plugin-health` skills** — each of those calls this agent during their own workflow.
+- **Manually via slash command** — `/review-themes` (no arguments).
 
 ### Manual invocation
 

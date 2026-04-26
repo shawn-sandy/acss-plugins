@@ -32,13 +32,14 @@ Build three sets of role names:
 
 ### 2. Required vs optional consistency
 
-Cross-check the required/optional annotation for each role:
+Derive the required/optional classification from the documents themselves rather than embedding a fixed list — the optional set may grow whenever `style-author` adds a new role:
 
-- Required roles: must be in `theme.schema.json` `$defs.palette.required` array.
-- Optional roles (`--color-surface-subtle`, `--color-text-subtle`, `--color-brand-accent`): must NOT be in the `required` array.
+- Parse `plugins/acss-kit/skills/styles/SKILL.md` (and the same annotations in `role-catalogue.md` if present) and build two sets: roles annotated `*(required)*` and roles annotated `*(optional)*`.
+- Read `theme.schema.json` `$defs.palette.required` as the schema-required set.
+- For each role: every role marked `*(required)*` in `styles/SKILL.md` must appear in the schema's `required` array; every role marked `*(optional)*` must NOT appear there. Roles in the schema's `required` array but missing or marked optional in `styles/SKILL.md` are also a mismatch.
 
-- PASS if `styles/SKILL.md` markings match `theme.schema.json`.
-- FAIL listing any role whose required/optional annotation disagrees between the two sources.
+- PASS if the derived classifications match for every role.
+- FAIL listing each role whose required/optional annotation disagrees, with file:line citations on both sides.
 
 ### 3. WCAG contrast pair parity
 
@@ -56,10 +57,14 @@ Compare the lightness anchors and state-color hue offsets documented in `palette
 
 ### 5. Bundled brand preset validation
 
-For each `.css` file under `plugins/acss-kit/assets/brand-presets/`, run `python3 plugins/acss-kit/scripts/validate_theme.py <file>` and capture exit code + output.
+For each `.css` file under `plugins/acss-kit/assets/brand-presets/`, run `python3 plugins/acss-kit/scripts/validate_theme.py <file>` and capture exit code + stdout.
 
-- PASS if every preset exits 0 (all WCAG pairs satisfied).
-- FAIL listing each preset that fails, with the failing pair names.
+`validate_theme.py` requires filenames matching `^(light|dark|brand-[\w-]+)\.css$`. Any other filename is silently skipped with `validate_theme: skipped (no palette files found)` and exit 0 — that path must be treated as a FAIL here, not a PASS, because a misnamed preset would never be validated in production.
+
+- PASS if every preset exits 0 AND its stdout contains `validate_theme: OK ...` (i.e., the file matched the regex and passed every WCAG pair).
+- FAIL listing:
+  - Each preset that exits 1, with the failing pair names.
+  - Each preset whose stdout contains `no palette files found` — annotate with: `<file>: filename does not match the brand-<slug>.css convention; rename to be validated`.
 - SKIP if the `brand-presets/` directory does not exist yet (the bundled-presets feature may not be active).
 
 ## Output format

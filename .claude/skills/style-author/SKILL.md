@@ -26,59 +26,60 @@ Branch to the matching step set below.
 
 Usage: `/style-author <preset-name> --from=<hex>` (e.g. `/style-author sunset --from=#f97316`)
 
+The output filename is always `brand-<preset-name>.css` (with the `brand-` prefix). Two scripts are involved:
+- `generate_palette.py --mode=brand` outputs `{seed, reasons, brand_overrides: {light, dark}}` — note the singular `brand_overrides` shape, distinct from the `modes` shape `--mode=both` produces.
+- `tokens_to_css.py` consumes a tokens document with `{brands: {<name>: {light, dark}}}` and writes one CSS file per brand named `brand-<name>.css`.
+- Because the two shapes differ, sub-flow A inserts a JSON reshape step between them.
+
 ### A1. Validate inputs
 
-- `<preset-name>` is lowercase kebab-case (alphanumeric + hyphens).
+- `<preset-name>` is lowercase kebab-case (alphanumeric + hyphens). The `brand-` prefix is added automatically — do not include it in `<preset-name>`.
 - `<hex>` is a 3- or 6-digit hex color.
-- Refuse if `plugins/acss-kit/assets/brand-presets/<preset-name>.css` already exists.
+- Refuse if `plugins/acss-kit/assets/brand-presets/brand-<preset-name>.css` already exists.
 
 ### A2. Create the brand-presets directory if missing
 
 If `plugins/acss-kit/assets/brand-presets/` does not exist, create it. This directory is a new convention for bundled brand presets — distinct from the existing `assets/brand-template.css` user-facing template.
 
-### A3. Generate the palette
+### A3. Generate, reshape, and write CSS
 
-Run from the worktree root:
-
-```
-python3 plugins/acss-kit/scripts/generate_palette.py <hex> --mode=brand
-```
-
-Capture the JSON stdout. If exit code is 1, print the `reasons` array and halt.
-
-### A4. Convert palette to CSS
-
-Pipe the palette JSON into:
+Run from the worktree root as a single pipeline:
 
 ```
-python3 plugins/acss-kit/scripts/tokens_to_css.py --stdin --out-dir=plugins/acss-kit/assets/brand-presets/
+python3 plugins/acss-kit/scripts/generate_palette.py "<hex>" --mode=brand \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); print(json.dumps({'brands': {'<preset-name>': d['brand_overrides']}}))" \
+  | python3 plugins/acss-kit/scripts/tokens_to_css.py --stdin --out-dir=plugins/acss-kit/assets/brand-presets/
 ```
 
-Rename the output file to `<preset-name>.css` if `tokens_to_css.py` writes a generic name. Confirm the file was written.
+The middle stage transforms `{brand_overrides: {...}}` into `{brands: {'<preset-name>': {...}}}`, which is what `tokens_to_css.py` consumes. It also short-circuits on `reasons` from `generate_palette.py` (non-empty `reasons` ⇒ exit 1, JSON to stderr).
 
-### A5. Validate WCAG contrast
+If any stage of the pipeline returns non-zero, print the captured stderr and halt. Confirm the output file `plugins/acss-kit/assets/brand-presets/brand-<preset-name>.css` was written (`tokens_to_css.py` prints `wrote: <path>` on success).
+
+### A4. Validate WCAG contrast
 
 Run:
 
 ```
-python3 plugins/acss-kit/scripts/validate_theme.py plugins/acss-kit/assets/brand-presets/<preset-name>.css
+python3 plugins/acss-kit/scripts/validate_theme.py plugins/acss-kit/assets/brand-presets/brand-<preset-name>.css
 ```
 
-If any contrast pair fails, surface the failures. Ask the maintainer whether to (a) keep the preset as-is with documented divergences, (b) tune the seed hex and regenerate, or (c) discard. Only proceed if the maintainer accepts the result.
+The filename `brand-<preset-name>.css` matches the `^(light|dark|brand-[\w-]+)\.css$` regex in `validate_theme.py`. If validation prints `validate_theme: skipped (no palette files found)`, the filename is wrong — verify the brand- prefix was added by `tokens_to_css.py` and re-run.
 
-### A6. Update styles SKILL.md
+If any contrast pair fails (exit code 1), surface the failures. Ask the maintainer whether to (a) keep the preset as-is with documented divergences (add a `/* divergences: ... */` comment header to the file), (b) tune the seed hex and regenerate, or (c) discard. Only proceed if the maintainer accepts the result.
+
+### A5. Update styles SKILL.md
 
 Read `plugins/acss-kit/skills/styles/SKILL.md`. Find or create a "Bundled brand presets" section (place it just before the "Error handling" section near the bottom). Append:
 
 ```markdown
-- **<preset-name>** (`assets/brand-presets/<preset-name>.css`) — derived from `<hex>` via `generate_palette.py --mode=brand`. <one-line description>
+- **<preset-name>** (`assets/brand-presets/brand-<preset-name>.css`) — derived from `<hex>` via `generate_palette.py --mode=brand`. <one-line description>
 ```
 
 If the section did not exist, create it with a short intro line.
 
-### A7. Print summary
+### A6. Print summary
 
-- Files created: `assets/brand-presets/<preset-name>.css`
+- Files created: `assets/brand-presets/brand-<preset-name>.css`
 - Files modified: `skills/styles/SKILL.md`
 - WCAG validation: PASS / N pairs failed (with names)
 - Reminder: bump `acss-kit` plugin version via `/release-plugin acss-kit <new-version>` if this preset should ship.
@@ -162,19 +163,28 @@ The OKLCH constants live in both `references/palette-algorithm.md` (documentatio
 
 > Update the matching constant in `plugins/acss-kit/scripts/generate_palette.py` to keep the doc and implementation in sync. The `theme-reference-reviewer` agent will flag drift between them.
 
-### C4. Regenerate the bundled brand template
+### C4. Regenerate every bundled brand preset (not the user-facing template)
 
-If `plugins/acss-kit/assets/brand-template.css` is derived from a known seed (check the file header for a comment), regenerate it after the maintainer updates `generate_palette.py`:
+`assets/brand-template.css` is the user-facing starter template the consumer copies into their project — it is hand-authored and not a candidate for regeneration. The targets here are the bundled `assets/brand-presets/brand-*.css` files (if any exist), each of which records a seed hex in a header comment of the form `/* seed: #rrggbb */`.
 
-```
-python3 plugins/acss-kit/scripts/generate_palette.py <seed> --mode=brand | python3 plugins/acss-kit/scripts/tokens_to_css.py --stdin --out-dir=plugins/acss-kit/assets/
-```
+For each `brand-<name>.css` under `assets/brand-presets/`:
 
-(Adjust paths to overwrite `brand-template.css`.) If the brand-template was hand-authored, skip this step and note it in the summary.
+1. Parse the `/* seed: #rrggbb */` header to recover `<seed>`. If no seed is recorded, skip the file and note it in the summary (hand-authored preset).
+2. Re-run the same reshape pipeline used by sub-flow A:
+
+   ```
+   python3 plugins/acss-kit/scripts/generate_palette.py "<seed>" --mode=brand \
+     | python3 -c "import json,sys; d=json.load(sys.stdin); print(json.dumps({'brands': {'<name>': d['brand_overrides']}}))" \
+     | python3 plugins/acss-kit/scripts/tokens_to_css.py --stdin --out-dir=plugins/acss-kit/assets/brand-presets/
+   ```
+
+   This rewrites `brand-<name>.css` in place using the updated algorithm constants.
+
+If `assets/brand-presets/` does not exist or is empty, note "no bundled presets to regenerate" and continue.
 
 ### C5. Re-validate every bundled preset
 
-Run `validate_theme.py` against `assets/brand-template.css` and every file under `assets/brand-presets/` (if any). Surface any failures.
+Run `python3 plugins/acss-kit/scripts/validate_theme.py <file>` against each `brand-*.css` under `assets/brand-presets/`. Skip `assets/brand-template.css` (it is hand-authored and not part of the algorithmic regeneration target). Surface any contrast failures with the failing pair names.
 
 ### C6. Run the reviewer agent
 

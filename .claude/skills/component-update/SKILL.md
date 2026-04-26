@@ -24,9 +24,10 @@ Re-verifies an existing component reference doc against its captured fpkit ref, 
    - Capture the existing `<divergences>` from the verification banner (everything after "Intentional divergences from upstream:").
 
 3. **Fetch the upstream fpkit source at `<ref>`.**
-   - Build the GitHub URL: `https://github.com/shawn-sandy/acss/blob/<ref-as-tag-or-sha>/packages/fpkit/src/components/<component-name>/<component-name>.tsx`. Use WebFetch to retrieve the raw source. If the captured `<ref>` is `@fpkit/acss@<version>`, translate to the matching git tag (typically `v<version>` or `<version>`).
-   - Repeat for the `.scss` companion if `<scss>` is not `(none)`.
-   - If WebFetch returns 404, fall back to `https://raw.githubusercontent.com/shawn-sandy/acss/<ref>/packages/fpkit/src/components/<component-name>/<component-name>.tsx`. If still 404, surface the error and ask the maintainer for a corrected ref or path.
+   - Build the raw URL first: `https://raw.githubusercontent.com/shawn-sandy/acss/<ref-as-tag-or-sha>/packages/fpkit/src/components/<component-name>/<component-name>.tsx`. The raw form returns the actual file contents; the `github.com/.../blob/...` form returns rendered HTML, which would corrupt the diff in step 4.
+   - Use WebFetch on the raw URL. If the captured `<ref>` is `@fpkit/acss@<version>`, translate to the matching git tag (typically `v<version>` or `<version>`).
+   - Repeat for the `.scss` companion if `<scss>` is not `(none)`, using the same raw URL form.
+   - If WebFetch returns 404, try the alternate translated ref (e.g. `<version>` if `v<version>` failed) or verify the component path. Only as a last resort fall back to the rendered `https://github.com/shawn-sandy/acss/blob/<ref>/...` URL and warn the maintainer that the diff may include HTML noise. If still 404, surface the error and ask the maintainer for a corrected ref or path.
 
 4. **Diff upstream vs local templates.**
    - Read the `## TSX Template` fenced block from the local reference doc.
