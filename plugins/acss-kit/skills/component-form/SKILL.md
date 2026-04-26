@@ -116,9 +116,9 @@ Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <project_root>`. Par
 
 **`source: "generated"`** — proceed to B3 to probe `<componentsDir>` for the required local files.
 
-**`source: "none"`** — error before generation: print the install hint suggesting `/kit-add field input button` (and `checkbox` if the form uses one). Halt.
+**`source: "none"`** — clean project, no `ui.tsx` foundation yet. Skip B3 (nothing to probe) and jump to B4 to bootstrap. Do **not** halt — the `/kit-add` flow handles first-run setup, including prompting for `componentsDir` and writing `.acss-target.json`.
 
-### B3. Probe required components
+### B3. Probe required components *(only when source is `generated`)*
 
 Read `componentsDir` from the script output (default: `src/components/fpkit`). Check for:
 
@@ -128,9 +128,16 @@ Read `componentsDir` from the script output (default: `src/components/fpkit`). C
 - `<componentsDir>/checkbox/checkbox.tsx` *(only if any field has `type: 'checkbox'`)*
 - `<componentsDir>/ui.tsx` *(foundation)*
 
-### B4. Generate missing components
+### B4. Bootstrap or vendor missing components
 
-If any of the probed files are missing, run `/kit-add field input button` (and `checkbox` if needed) before generating the form. The kit-add flow walks the dependency tree and previews before writing.
+Run `/kit-add field input button` (and `checkbox` if any field has `type: 'checkbox'`) when **either**:
+
+- `source: "none"` from B1 (clean project — first-run bootstrap), or
+- B3 found any missing files in an existing project.
+
+The `/kit-add` flow walks the dependency tree, previews before writing, and on first run prompts for the components directory and writes `.acss-target.json`. After it completes, re-run `detect_target.py` to confirm `source` is now `"generated"` and `componentsDir` is set, then continue to Step C.
+
+If `/kit-add` itself fails (e.g. `sass` missing from `devDependencies`), surface its error and halt — the form cannot be generated without its component dependencies.
 
 ---
 
@@ -255,7 +262,7 @@ Step B already determined the components are vendored locally and located them v
    import '<relative>/checkbox/checkbox.scss'            // omit if no checkbox field
    import '<relative>/button/button.scss'
    ```
-3. **For `source=none`**: error — Step B should have already halted with an install hint before generation reaches this point.
+3. **`source: "none"` should not reach this step.** Step B4 either successfully bootstraps the project via `/kit-add` (after which `source` becomes `"generated"`) or surfaces a `/kit-add` error and halts. If you somehow reach Step C with `source: "none"`, treat it as a bug and halt before writing.
 
 ---
 
