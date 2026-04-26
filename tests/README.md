@@ -72,6 +72,29 @@ What it adds beyond `tests/run.sh`:
 
 What it does NOT add: theme contrast (no Storybook story for CSS-only files), SCSS contract violations that render but break the rules, manifest checks. Run `tests/run.sh` *first* — `tests/storybook.sh` is supplementary, not a replacement.
 
+## Quick local test: `--plugin-dir`
+
+The fastest way to test a plugin without the marketplace install flow is the `--plugin-dir` flag. Claude Code loads the plugin directly from the local path, so changes to SKILL.md and command files are picked up on the next `claude` invocation without re-running the install.
+
+```sh
+# Run tests/setup.sh first if the sandbox doesn't exist yet
+tests/setup.sh
+
+# cd into the sandbox, then launch Claude with the plugin loaded directly
+cd tests/sandbox
+claude --plugin-dir ../../plugins/acss-kit
+```
+
+Once Claude starts, verify the plugin loaded:
+
+```text
+/plugin list
+```
+
+Then run smoke commands as normal (`/kit-list`, `/kit-add button`, etc.). No `/plugin marketplace add` or `/plugin install` step needed.
+
+Use this path for rapid iteration on SKILL.md prose or command front-matter. Switch to the full marketplace flow (below) when you want to validate the install path itself.
+
 ## Demo sandbox: `tests/setup.sh`
 
 Recreates the original Vite + React + TypeScript sandbox flow for end-to-end slash-command verification.
