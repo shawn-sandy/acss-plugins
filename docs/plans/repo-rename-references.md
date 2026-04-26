@@ -55,6 +55,10 @@ Refresh every in-repo reference to the marketplace path so the README/install sn
     - Update current-state prose that names the repo (the file describes ongoing tooling, not a frozen snapshot)
     - In `docs/plans/test-docs-harness-alignment.md`, **leave the commit URL** at line 5 unchanged — the commit SHA is immutable and GitHub redirects renamed-repo commit URLs reliably.
 
+12. **Maintainer review agents** — `.claude/agents/README.md` and `.claude/agents/{component-reference,python-script,skill-quality,theme-reference}-reviewer.md`
+    - Each agent system prompt opens with "You are a {role} for the acss-plugins repo[sitory]" — update the repo name. Five files, one occurrence each.
+    - **Found late** because this worktree lives at `.claude/worktrees/<name>/` inside the parent checkout, and the parent repo's `.gitignore` has `.claude/worktrees/`. Default ripgrep walks up to the parent gitignore and applies its rules — so it skipped these tracked-but-superficially-ignored files. Run verification grep with `--no-ignore` (or scope to the worktree's `.claude/`) to avoid the trap.
+
 ## Critical files
 
 - `.claude-plugin/marketplace.json` — marketplace identifier, user-visible
@@ -79,10 +83,12 @@ Bump `plugins/acss-kit/.claude-plugin/plugin.json` (e.g. patch bump for the rena
 After edits, run from the repo root:
 
 ```sh
-# 1. No remaining references to the old slug or old install suffix
-rg 'shawn-sandy/acss-plugins' -g '!.git' -g '!node_modules' -g '!.claude/worktrees'
-rg '@shawn-sandy-acss-plugins' -g '!.git' -g '!node_modules' -g '!.claude/worktrees'
-# Expected: only the preserved commit URL in docs/plans/test-docs-harness-alignment.md
+# 1. No remaining references to the old slug or old install suffix.
+#    Use --no-ignore because this worktree lives under the parent's
+#    ignored .claude/worktrees/ path and ripgrep would otherwise skip it.
+rg --pcre2 --no-ignore '(?<!agentic-)acss-plugins' -g '!.git' -g '!node_modules' -g '!tests/node_modules'
+# Expected: only the preserved commit URL in docs/plans/test-docs-harness-alignment.md,
+# the [Unreleased] CHANGELOG entry that documents the rename, and this plan file itself.
 
 # 2. marketplace.json is still valid JSON
 python3 -m json.tool .claude-plugin/marketplace.json > /dev/null

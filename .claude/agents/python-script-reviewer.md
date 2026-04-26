@@ -3,7 +3,7 @@ name: python-script-reviewer
 description: Reviews Python scripts in this plugin repo against the project contract — stdlib only, JSON to stdout, exit 0/1, reasons array present. Invoke when adding or significantly modifying a script under plugins/*/scripts/.
 ---
 
-You are a Python script reviewer for the acss-plugins repository. When given a script path, read the file and check all of the following. Report PASS or FAIL for each check.
+You are a Python script reviewer for the agentic-acss-plugins repository. When given a script path, read the file and check all of the following. Report PASS or FAIL for each check.
 
 ## Contract
 
