@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 280" role="img" aria-labelledby="overview-title overview-desc">
+  <title id="overview-title">acss-kit system overview</title>
+  <desc id="overview-desc">Three boxes left to right. Claude Code on the left invokes the acss-kit plugin in the middle, which writes generated component files into the user's project on the right. The plugin contains slash commands, the components and styles skills, reference documentation, and the ui.tsx polymorphic foundation. The user's project receives src/components/fpkit/ui.tsx and per-component subdirectories.</desc>
+  <style>
+    .box { fill: #f6f8fa; stroke: #57606a; stroke-width: 1.5; }
+    .header { fill: #ddf4ff; stroke: #57606a; stroke-width: 1.5; }
+    .text { font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1f2328; }
+    .header-text { font: bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1f2328; }
+    .small { font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #57606a; }
+    .arrow { stroke: #57606a; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#57606a"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="20" y="40" width="200" height="200" rx="6"/>
+  <rect class="header" x="20" y="40" width="200" height="36" rx="6"/>
+  <rect class="header" x="20" y="64" width="200" height="12"/>
+  <text class="header-text" x="120" y="63" text-anchor="middle">Claude Code</text>
+  <text class="small" x="120" y="100" text-anchor="middle">CLI · IDE · web</text>
+  <text class="text" x="120" y="135" text-anchor="middle">/kit-add button</text>
+  <text class="text" x="120" y="160" text-anchor="middle">/kit-list</text>
+  <text class="text" x="120" y="185" text-anchor="middle">/theme-create</text>
+  <text class="small" x="120" y="225" text-anchor="middle">user invokes</text>
+
+  <line class="arrow" x1="225" y1="140" x2="275" y2="140" marker-end="url(#arrowhead)"/>
+
+  <rect class="box" x="280" y="40" width="240" height="200" rx="6"/>
+  <rect class="header" x="280" y="40" width="240" height="36" rx="6"/>
+  <rect class="header" x="280" y="64" width="240" height="12"/>
+  <text class="header-text" x="400" y="63" text-anchor="middle">acss-kit plugin</text>
+  <text class="small" x="400" y="100" text-anchor="middle">commands · skills</text>
+  <text class="text" x="400" y="130" text-anchor="middle">reference docs</text>
+  <text class="small" x="400" y="148" text-anchor="middle">(button.md, form.md, …)</text>
+  <text class="text" x="400" y="180" text-anchor="middle">ui.tsx foundation</text>
+  <text class="small" x="400" y="198" text-anchor="middle">(polymorphic base)</text>
+  <text class="small" x="400" y="225" text-anchor="middle">reads &amp; writes</text>
+
+  <line class="arrow" x1="525" y1="140" x2="575" y2="140" marker-end="url(#arrowhead)"/>
+
+  <rect class="box" x="580" y="40" width="200" height="200" rx="6"/>
+  <rect class="header" x="580" y="40" width="200" height="36" rx="6"/>
+  <rect class="header" x="580" y="64" width="200" height="12"/>
+  <text class="header-text" x="680" y="63" text-anchor="middle">Your project</text>
+  <text class="small" x="680" y="100" text-anchor="middle">src/components/fpkit/</text>
+  <text class="text" x="680" y="130" text-anchor="middle">ui.tsx</text>
+  <text class="small" x="680" y="148" text-anchor="middle">(once per project)</text>
+  <text class="text" x="680" y="178" text-anchor="middle">button/</text>
+  <text class="text" x="680" y="198" text-anchor="middle">form/ · card/ · …</text>
+  <text class="small" x="680" y="225" text-anchor="middle">you own these</text>
+</svg>

@@ -2,6 +2,8 @@
 
 This page is for maintainers editing the plugin: adding component references, updating a SKILL workflow, or extending the slash commands.
 
+> Prefer diagrams? See [visual-guide.md §7](visual-guide.md#7-authoring-a-new-component-reference) for the maintainer authoring loop as a flowchart.
+
 ## Plugin layout
 
 ```
@@ -12,24 +14,34 @@ plugins/acss-kit/
     foundation/
       ui.tsx                   # Polymorphic UI base — copied verbatim into user projects
   commands/
-    kit-add.md                 # /kit-add definition; delegates to SKILL.md
-    kit-list.md                # /kit-list definition; delegates to SKILL.md
+    kit-add.md                 # /kit-add; delegates to skills/components/SKILL.md
+    kit-list.md                # /kit-list; delegates to skills/components/SKILL.md
+    theme-create.md            # /theme-create; delegates to skills/styles/SKILL.md
+    theme-brand.md             # /theme-brand; delegates to skills/styles/SKILL.md
+    theme-update.md            # /theme-update; delegates to skills/styles/SKILL.md
+    theme-extract.md           # /theme-extract; delegates to skills/styles/SKILL.md
   skills/
-    acss-kit/
-      SKILL.md                 # The full generation workflow (Steps A–F)
+    components/
+      SKILL.md                 # Component generation workflow (Steps A–F)
       references/
         architecture.md        # UI polymorphic chain, compound pattern, data-attr selectors
         accessibility.md       # WCAG rationale, useDisabledState source, WCAG checklist
         composition.md         # Component categories, decision tree, inline-types pattern
         css-variables.md       # Naming convention, fallbacks, rem conversion
         components/
-          alert.md             # Generation Contract + full reference
-          button.md
-          card.md
-          catalog.md           # Badge, Tag, Heading, Text, Link, List, Details, Progress, Icon
-          dialog.md
-          form.md
-          nav.md
+          catalog.md           # Verification status table + leaf components (Badge, Tag, Heading, Text, Details, Progress)
+          button.md            # Canonical 9-section example
+          alert.md, card.md, dialog.md, popover.md, table.md, img.md, icon.md
+          link.md, list.md, field.md, input.md, checkbox.md, icon-button.md
+          form.md, nav.md      # nav.md retains the legacy shape
+    styles/
+      SKILL.md                 # Theme generation workflow (4 flows)
+      references/
+        role-catalogue.md      # 15 required + 3 optional --color-* roles, contrast pairings
+        palette-algorithm.md   # OKLCH lightness targets, state hue offsets
+        theme-schema.md        # Internal JSON schema for the round-trip scripts
+    component-form/
+      SKILL.md                 # Pilot per-component skill (auto-triggers on "create a form")
 ```
 
 ## Command → SKILL delegation
