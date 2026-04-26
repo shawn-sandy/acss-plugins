@@ -13,18 +13,17 @@ The repo contains a single plugin:
 - `plugins/acss-kit` — accessible React components and CSS themes for fpkit/acss projects. Two top-level skills (`components`, `styles`) plus the `component-form` pilot skill.
 
 Install from a Claude Code session:
-```
+
+```text
 /plugin marketplace add shawn-sandy/acss-plugins
 /plugin install acss-kit@shawn-sandy-acss-plugins
 ```
-
-History note: as of v0.3.0, `acss-kit` consolidated and replaced four predecessor plugins (`acss-kit-builder`, `acss-theme-builder`, `acss-app-builder`, `acss-component-specs`). See [`plugins/acss-kit/CHANGELOG.md`](./plugins/acss-kit/CHANGELOG.md) for the migration notes.
 
 ## Plugin structure
 
 The plugin follows this layout:
 
-```
+```text
 plugins/acss-kit/
 ├── .claude-plugin/plugin.json     # manifest — authoritative version source
 ├── README.md                      # user-facing docs
@@ -70,6 +69,15 @@ Before committing any plugin change:
 3. All SKILL.md references to fpkit source use full GitHub URLs, not repo-relative paths
 4. `marketplace.json` description updated if the change is user-facing
 5. Plugin-level `README.md` and `CHANGELOG.md` updated if commands or behavior changed
+6. If renaming or removing scripts/plugins, update `.claude/rules/python-scripts.md` glob+inventory and the Bash hooks in `.claude/settings.json`
+
+## Maintainer tooling
+
+**Project-level skills** (`.claude/skills/`): `add-command`, `component-author`, `component-update`, `plugin-health`, `release-check`, `release-plugin`, `style-author`, `style-update`, `validate-plugin`, `verify-plugins`. Use these for plugin maintenance tasks instead of manual steps.
+
+**Rules** (`.claude/rules/`): `scss-conventions.md` (active, fires on SCSS/CSS edits), `python-scripts.md` (active, fires on `plugins/acss-kit/scripts/**`). See `.claude/rules/README.md` for the full status table.
+
+**Hooks** (`.claude/settings.json`): PostToolUse validates JSON syntax, `plugin.json` required fields, command front-matter, and SKILL.md front-matter on every Write/Edit. PreToolUse blocks commits/pushes to `main`.
 
 ## Git workflow
 
@@ -89,29 +97,9 @@ Full validation: manual SKILL.md review → local install → smoke-test slash c
 
 ## Python scripts
 
-All scripts in `plugins/acss-kit/scripts/` use **Python 3 stdlib only** with no external dependencies. Two contract families coexist:
+All scripts in `plugins/acss-kit/scripts/` use **Python 3 stdlib only** with no external dependencies. Two contract families coexist — detector (JSON to stdout, `reasons` array, exit 0/1) and generator/validator (data to stdout, errors to stderr, exit 0/1/2). See `.claude/rules/python-scripts.md` for the full contract and current script inventory.
 
-### Detector contract (machine-callable, structured)
-
-For scripts whose output is parsed by slash commands or skills.
-
-- Output JSON to stdout
-- Exit 0 on success, 1 on logical failure (e.g. nothing detected)
-- Always include a `"reasons"` array in the JSON — empty `[]` on success, populated on failure
-
-Detectors: `detect_target.py`.
-
-### Generator / validator contract (pipeline-friendly, human-readable)
-
-For scripts that emit data (CSS, JSON files, palette JSON) or report human-readable validation results. These compose into shell pipelines and follow the conventional CLI contract.
-
-- Data on stdout (JSON for `generate_palette.py` / `css_to_tokens.py`; written CSS files for `tokens_to_css.py`; text report for `validate_theme.py`)
-- Errors on stderr
-- Exit 0 on success, 1 on logical failure (e.g. contrast pair fails), 2 on usage / IO errors
-
-Generators / validators: `generate_palette.py` (OKLCH palette math), `tokens_to_css.py` (palette JSON → CSS), `css_to_tokens.py` (CSS → palette JSON), `validate_theme.py` (WCAG 2.2 AA contrast pairs).
-
-When adding a new script, pick the contract that matches the caller. If a slash command parses the output, use the detector contract. If the script is a pipeline transformer or human-readable validator, use the generator/validator contract.
+When adding a new script: use the detector contract if a slash command parses the output; use the generator/validator contract if it is a pipeline transformer or human-readable validator.
 
 ## fpkit/acss cross-references
 

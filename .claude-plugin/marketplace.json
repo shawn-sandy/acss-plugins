@@ -1,7 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "acss-plugins",
-  "version": "0.3.0",
   "description": "Claude Code plugin for building accessible React components and CSS themes for fpkit/acss projects",
   "owner": {
     "name": "Shawn Sandy",
