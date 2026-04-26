@@ -8,13 +8,13 @@
 
 Every section pairs a diagram (or two) with a short caption and a "Read the prose" link out to the canonical doc. Five visual formats appear below:
 
-| Marker | Format | What it shows |
-|---|---|---|
-| ` ```mermaid` `flowchart` ` | Mermaid flowchart | A command's lifecycle — boxes are steps, arrows are transitions |
-| ` ```mermaid` `sequenceDiagram` ` | Mermaid sequence | An interaction over time — actors on top, time flowing down |
-| ` ```mermaid` `classDiagram` ` | Mermaid class | The shape of a data structure — boxes are types, lines are relationships |
-| ` ```text` ` ASCII tree | Plain monospace | A directory layout — usually before / after a command |
-| `![alt](… .svg)` / `.png` | Image | Hand-authored architecture figures and terminal/browser screenshots |
+| Format | What it shows |
+|---|---|
+| Mermaid flowchart | A command's lifecycle — boxes are steps, arrows are transitions |
+| Mermaid sequence diagram | An interaction over time — actors on top, time flowing down |
+| Mermaid class diagram | The shape of a data structure — boxes are types, lines are relationships |
+| ASCII tree | A directory layout — usually before / after a command |
+| Hand-authored SVG or PNG | Architecture figures and terminal / browser screenshots |
 
 Audience badges:
 
