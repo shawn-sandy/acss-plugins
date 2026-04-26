@@ -86,14 +86,29 @@ Full validation: manual SKILL.md review → local install → smoke-test slash c
 
 ## Python scripts
 
-Scripts in `plugins/acss-kit/scripts/` follow this contract:
+All scripts in `plugins/acss-kit/scripts/` use **Python 3 stdlib only** with no external dependencies. Two contract families coexist:
 
-- Python 3 stdlib only, no external dependencies
+### Detector contract (machine-callable, structured)
+
+For scripts whose output is parsed by slash commands or skills.
+
 - Output JSON to stdout
-- Exit 0 on success, 1 on failure
-- Include a `"reasons"` array in JSON output for human-readable error messages
+- Exit 0 on success, 1 on logical failure (e.g. nothing detected)
+- Always include a `"reasons"` array in the JSON — empty `[]` on success, populated on failure
 
-Current scripts: `detect_target.py` (manages `.acss-target.json`), `generate_palette.py` (OKLCH palette math), `tokens_to_css.py` (palette → CSS), `css_to_tokens.py` (CSS → palette), `validate_theme.py` (WCAG 2.2 AA contrast).
+Detectors: `detect_target.py`.
+
+### Generator / validator contract (pipeline-friendly, human-readable)
+
+For scripts that emit data (CSS, JSON files, palette JSON) or report human-readable validation results. These compose into shell pipelines and follow the conventional CLI contract.
+
+- Data on stdout (JSON for `generate_palette.py` / `css_to_tokens.py`; written CSS files for `tokens_to_css.py`; text report for `validate_theme.py`)
+- Errors on stderr
+- Exit 0 on success, 1 on logical failure (e.g. contrast pair fails), 2 on usage / IO errors
+
+Generators / validators: `generate_palette.py` (OKLCH palette math), `tokens_to_css.py` (palette JSON → CSS), `css_to_tokens.py` (CSS → palette JSON), `validate_theme.py` (WCAG 2.2 AA contrast pairs).
+
+When adding a new script, pick the contract that matches the caller. If a slash command parses the output, use the detector contract. If the script is a pipeline transformer or human-readable validator, use the generator/validator contract.
 
 ## fpkit/acss cross-references
 

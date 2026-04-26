@@ -19,7 +19,8 @@ Output (JSON to stdout):
       "source": "generated",
       "projectRoot": "/abs/path",
       "componentsDir": "src/components/fpkit",
-      "importMapHint": "import Button from '../src/components/fpkit/button/button'"
+      "importMapHint": "import Button from '../src/components/fpkit/button/button'",
+      "reasons": []
     }
 
     No source found:
@@ -96,6 +97,7 @@ def main() -> int:
             "projectRoot": str(root),
             "componentsDir": components_dir,
             "importMapHint": f"import Button from '../{components_dir}/button/button'",
+            "reasons": [],
         }
         print(json.dumps(result, indent=2))
         return 0
