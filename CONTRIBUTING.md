@@ -47,7 +47,15 @@ Bump the version in `plugin.json` when shipping changes — `/plugin update` use
 
 ## Testing locally
 
-Run `tests/setup.sh` from the repo root to scaffold a disposable Vite + React + TypeScript sandbox at `tests/sandbox/` (gitignored). The script prints a copy-pasteable Claude Code recipe that adds the local marketplace and installs `acss-kit`.
+`tests/run.sh` from the repo root is the default structural-validation gate — ~30 seconds, no browser. It extracts each component reference, syntax-checks the TSX, validates the SCSS contract, runs WCAG contrast on themes, and replicates manifest checks. One-time setup: `npm --prefix tests ci && pip3 install --user tinycss2`.
+
+```sh
+tests/run.sh
+```
+
+For render-sensitive changes, `tests/storybook.sh` is an optional Storybook + axe-playwright deep check (~3–4 min, requires `npx playwright install` on first run).
+
+For end-to-end slash-command verification — when changing slash-command prose or exercising `/kit-add` and `/theme-create` interactively — `tests/setup.sh` scaffolds a disposable Vite + React + TypeScript sandbox at `tests/sandbox/` (gitignored). The script prints a copy-pasteable Claude Code recipe that adds the local marketplace and installs `acss-kit`.
 
 ```sh
 tests/setup.sh
@@ -65,7 +73,8 @@ Local-path marketplaces work the same as git-hosted ones. When satisfied, push t
 
 ## Before submitting a change
 
-1. `plugin.json` version bumped
-2. SKILL.md references to fpkit source are full GitHub URLs, not repo-relative paths
-3. `marketplace.json` description reflects any user-facing change
-4. Relevant `README.md` (plugin-level or repo-level) updated
+1. `tests/run.sh` passes from the repo root
+2. `plugin.json` version bumped
+3. SKILL.md references to fpkit source are full GitHub URLs, not repo-relative paths
+4. `marketplace.json` description reflects any user-facing change
+5. Relevant `README.md` (plugin-level or repo-level) updated

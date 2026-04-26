@@ -23,14 +23,22 @@ Existing `.acss-target.json` files at project roots remain compatible — the sc
 
 ## Testing locally
 
-Contributors can smoke-test plugin changes against a disposable sandbox without leaking artifacts into the repo:
+`tests/run.sh` from the repo root is the default automated check — structural validation in ~30 seconds, no browser. One-time setup: `npm --prefix tests ci && pip3 install --user tinycss2`.
+
+```sh
+tests/run.sh
+```
+
+For render-sensitive changes, `tests/storybook.sh` is an optional Storybook + axe-playwright deep check (~3–4 min, downloads Playwright browsers on first run).
+
+For end-to-end slash-command verification, `tests/setup.sh` scaffolds a disposable Vite + React + TypeScript sandbox at `tests/sandbox/` (gitignored):
 
 ```sh
 tests/setup.sh
 cd tests/sandbox && claude
 ```
 
-The sandbox is gitignored. See [`tests/README.md`](./tests/README.md) for the full workflow, the `--reset` flag, and troubleshooting.
+See [`tests/README.md`](./tests/README.md) for the full workflow, the `--reset` flag, escape hatches, and troubleshooting.
 
 ## Relationship to the main fpkit repo
 
