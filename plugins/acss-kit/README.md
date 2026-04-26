@@ -63,6 +63,15 @@ npm install -D sass
 
 ## Component commands
 
+### `/kit-list [component]`
+
+List available components or inspect one without writing any files. Read-only — useful for discovering names, props, CSS variables, and dependencies before running `/kit-add`. The full reference (signature, examples, output shape) is in [`docs/commands.md`](docs/commands.md).
+
+```
+/kit-list
+/kit-list dialog
+```
+
 ### `/kit-add <component> [component2 ...]`
 
 Generate one or more components into your project.
@@ -259,6 +268,7 @@ Bootstrap a sandbox via `tests/setup.sh` from the repo root, then `cd tests/sand
     brand-template.css                     # Brand preset placeholder (theme-brand)
     theme.schema.json                      # Internal contract for round-trip scripts
   commands/
+    kit-list.md                            # /kit-list
     kit-add.md                             # /kit-add
     theme-create.md                        # /theme-create
     theme-brand.md                         # /theme-brand

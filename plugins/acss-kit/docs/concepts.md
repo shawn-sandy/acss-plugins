@@ -53,7 +53,7 @@ See [`references/css-variables.md`](../skills/components/references/css-variable
 
 ## aria-disabled and useDisabledState
 
-Interactive components (Button, any component with a clickable surface) use `aria-disabled="true"` instead of the native `disabled` attribute. The reason: native `disabled` removes an element from the keyboard tab order, which fails WCAG 2.1.1 (Non-text Contrast) and breaks the expected experience for keyboard and screen-reader users.
+Interactive components (Button, any component with a clickable surface) use `aria-disabled="true"` instead of the native `disabled` attribute. The reason: native `disabled` removes an element from the keyboard tab order, making it unfocusable and harder for keyboard and screen-reader users to reach the control, discover that it is unavailable, or access any explanation for the disabled state.
 
 The plugin inlines a condensed `useDisabledState<T>` hook (~50 lines) directly into each interactive component file. It is never a shared import — each component that needs it carries its own copy. This keeps generated files self-contained.
 

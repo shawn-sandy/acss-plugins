@@ -219,7 +219,7 @@ export type ButtonProps = {
 
 **Always use `aria-disabled` instead of the native `disabled` attribute for buttons and interactive elements.**
 
-Why: Native `disabled` removes the element from keyboard tab order (violates WCAG 2.1.1). `aria-disabled` keeps it focusable so screen readers can discover and announce the disabled state.
+Why: Native `disabled` removes the element from keyboard tab order — keyboard and screen-reader users can't reach the control to discover it's disabled or access any explanation. `aria-disabled` keeps it focusable so screen readers can announce the disabled state.
 
 **Condensed useDisabledState** (inline in button.tsx and any interactive component):
 
