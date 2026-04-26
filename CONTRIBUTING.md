@@ -20,6 +20,7 @@ The sibling layout is for **contributors** editing plugin skill docs: open the f
 
 ```
 acss-plugins/
+├── .claude/                # project-local maintainer tooling — see .claude/README.md
 ├── .claude-plugin/
 │   └── marketplace.json    # catalog listing acss-kit
 ├── plugins/
@@ -36,6 +37,10 @@ Each plugin directory follows the Claude Code plugin convention:
 - `skills/*/SKILL.md` — skill definitions invoked by Claude
 - `skills/*/references/` — knowledge base documents where applicable
 - `assets/` — templates and code snippets used by the plugin
+
+## Maintainer tooling
+
+The `.claude/` directory at the repo root holds project-local Claude Code definitions used while developing the plugin: review agents, authoring/release skills, validation slash commands, advisory rules, and `settings.json` hooks. See [`.claude/README.md`](./.claude/README.md) for the index — it includes an "I want to..." quick-reference table mapping common maintainer tasks to the right tool.
 
 ## Version bumps
 

@@ -12,6 +12,8 @@ The repo contains one plugin:
 
 - `plugins/acss-kit` - accessible React components and CSS themes for fpkit/acss projects.
 
+Maintainer tooling for working on this repo lives at `.claude/` (review agents, authoring/release skills, validation commands, advisory rules, hooks) — see [`.claude/README.md`](./.claude/README.md) for the index.
+
 Install from a Claude Code session:
 ```
 /plugin marketplace add shawn-sandy/acss-plugins
