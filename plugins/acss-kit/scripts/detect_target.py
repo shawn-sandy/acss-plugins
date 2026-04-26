@@ -23,7 +23,9 @@ Output (JSON to stdout):
       "reasons": []
     }
 
-    No source found:
+    No source found — two distinct failure modes (both return source=none, exit 1):
+
+    A. No React project root was found anywhere in the path's ancestors:
     {
       "source": "none",
       "projectRoot": null,
@@ -32,7 +34,21 @@ Output (JSON to stdout):
       "reasons": ["No project root containing react was found."]
     }
 
-Exit code 0 = source detected (generated), 1 = none.
+    B. React project root found, but no generated <componentsDir>/ui.tsx
+       (a clean project that hasn't run /kit-add yet — projectRoot is the
+       resolved string path, not null):
+    {
+      "source": "none",
+      "projectRoot": "/abs/path/to/project",
+      "componentsDir": "src/components/fpkit",
+      "importMapHint": "",
+      "reasons": [
+        "No fpkit component source found.",
+        "Vendor components via /kit-add to bootstrap <componentsDir>/ui.tsx."
+      ]
+    }
+
+Exit code 0 = source detected (generated), 1 = none (either failure mode).
 """
 from __future__ import annotations
 

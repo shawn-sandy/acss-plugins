@@ -9,7 +9,7 @@ Developers using the plugin to generate fpkit-style components into their own pr
 | Guide | What it covers |
 |-------|---------------|
 | [tutorial.md](tutorial.md) | A guided walkthrough: generate, import, and customize your first component |
-| [concepts.md](concepts.md) | The mental model: UI base component, data-\* variants, CSS-var fallbacks, aria-disabled, generation flow, and cross-plugin coordination |
+| [concepts.md](concepts.md) | The mental model: UI base component, data-\* variants, CSS-var fallbacks, aria-disabled, generation flow, and the `.acss-target.json` config |
 | [commands.md](commands.md) | Full reference for `/kit-add` and `/kit-list` |
 | [recipes.md](recipes.md) | Step-by-step walkthroughs for the most common tasks |
 | [troubleshooting.md](troubleshooting.md) | Concrete failure modes and how to resolve them |
@@ -20,7 +20,7 @@ Developers maintaining or extending the plugin itself (SKILL.md, reference docs,
 
 | Guide | What it covers |
 |-------|---------------|
-| [architecture.md](architecture.md) | Plugin internals: SKILL.md structure, how to add a component reference, cross-plugin wiring, version-bump checklist |
+| [architecture.md](architecture.md) | Plugin internals: SKILL.md structure, how to add a component reference, the `.acss-target.json` contract, version-bump checklist |
 
 ## Reference material (canonical sources)
 

@@ -1,6 +1,6 @@
 # acss-kit — Architecture (Contributor Guide)
 
-This page is for maintainers editing the plugin: adding component references, updating the SKILL workflow, or extending cross-plugin coordination.
+This page is for maintainers editing the plugin: adding component references, updating a SKILL workflow, or extending the slash commands.
 
 ## Plugin layout
 
