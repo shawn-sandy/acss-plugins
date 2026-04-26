@@ -54,7 +54,7 @@ Canonical set of CSS custom properties used by the `styles` skill. All generated
 
 ## WCAG AA contrast targets
 
-These pairs are validated by `scripts/validate_theme.py`. Minimum ratios follow WCAG 2.1 AA for normal text (4.5:1) and UI components / large text (3.0:1).
+These pairs are validated by `scripts/validate_theme.py`. Minimum ratios follow WCAG 2.2 AA for normal text (4.5:1) and UI components / large text (3.0:1).
 
 | Foreground | Background | Min ratio | Reason |
 |---|---|---|---|

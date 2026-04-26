@@ -2,6 +2,16 @@
 
 All notable changes to the `acss-kit` plugin are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the plugin adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.1] - 2026-04-26
+
+### Fixed
+
+- **Plugin README** — documented `/kit-list` command. The command file (`commands/kit-list.md`) and full reference (`docs/commands.md`) already shipped in 0.3.0, but the plugin-level README omitted it from both the Component commands section and the Plugin Structure file-tree diagram.
+- **WCAG success-criterion citations** — corrected three SC name/number mismatches in reference docs and developer guides:
+  - `docs/concepts.md` — `WCAG 2.1.1 (Non-text Contrast)` → `WCAG 2.1.1 (Keyboard)`. Non-text Contrast is SC 1.4.11; the surrounding text was about keyboard tab order.
+  - `skills/components/references/components/icon-button.md` (×2) — `WCAG 2.1.1` references for the accessible-name XOR constraint → `WCAG 1.1.1 (Non-text Content)`, the SC the type-level constraint actually addresses.
+  - `skills/styles/references/role-catalogue.md` — `WCAG 2.1 AA` → `WCAG 2.2 AA` for plugin-wide consistency. Contrast ratio targets (4.5:1 normal, 3.0:1 large/UI) are identical across both spec versions; this is a wording fix only.
+
 ## [0.3.0] - 2026-04-26
 
 ### Added

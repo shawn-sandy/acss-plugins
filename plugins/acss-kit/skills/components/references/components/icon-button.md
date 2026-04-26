@@ -4,7 +4,7 @@
 
 ## Overview
 
-An accessible icon-only (or icon + label) button. Built on top of `Button` from the same generated component set. Enforces the WCAG 2.1.1 accessible-name requirement at compile time via a TypeScript XOR type that requires exactly one of `aria-label` or `aria-labelledby`.
+An accessible icon-only (or icon + label) button. Built on top of `Button` from the same generated component set. Enforces the WCAG 1.1.1 (Non-text Content) accessible-name requirement at compile time via a TypeScript XOR type that requires exactly one of `aria-label` or `aria-labelledby`.
 
 ## Generation Contract
 
@@ -38,7 +38,7 @@ export type IconButtonProps = Omit<ButtonProps, 'children'> &
   }
 ```
 
-The XOR constraint means passing both `aria-label` AND `aria-labelledby` (or neither) is a TypeScript compile-time error. This satisfies WCAG 2.1.1 Non-text Content at the type level — the icon glyph alone is never a sufficient accessible name.
+The XOR constraint means passing both `aria-label` AND `aria-labelledby` (or neither) is a TypeScript compile-time error. This satisfies WCAG 1.1.1 Non-text Content at the type level — the icon glyph alone is never a sufficient accessible name.
 
 ## TSX Template
 
