@@ -48,11 +48,7 @@ Existing `.acss-target.json` files at project roots remain compatible — `/kit-
 ## Prerequisites
 
 - React + TypeScript project
-- `sass` or `sass-embedded` in devDependencies
-
-```bash
-npm install -D sass
-```
+- `sass` or `sass-embedded` in devDependencies (acss-kit will tell you the exact command if missing)
 
 ## Installation
 
@@ -60,6 +56,28 @@ npm install -D sass
 /plugin marketplace add shawn-sandy/agentic-acss-plugins
 /plugin install acss-kit@shawn-sandy-agentic-acss-plugins
 ```
+
+## First-run setup
+
+**Run `/setup` once after installing the plugin.** It front-loads the one-time configuration so subsequent `/kit-add` and `/theme-create` calls are pure generation.
+
+```
+/setup
+```
+
+What it does:
+
+1. Detects your package manager from the lockfile (`pnpm-lock.yaml`, `yarn.lock`, `bun.lock`, `package-lock.json`).
+2. Checks for `sass`/`sass-embedded` in `devDependencies`. If missing, prints the exact install command and stops — no side effects.
+3. Writes `.acss-target.json` at your project root (or reuses existing).
+4. Copies `ui.tsx` (the polymorphic foundation component) verbatim to your target directory.
+5. Seeds `src/styles/theme/light.css` and `dark.css` from a prompt for a seed hex color.
+
+Pass `--no-theme` to skip theme generation, or `--target=<dir>` to override the component output directory.
+
+**Generated artifacts are committed — developer owns the code.** `.acss-target.json`, `src/components/fpkit/`, and `src/styles/theme/` should be in version control, not `.gitignore`.
+
+`/setup` is idempotent: re-running it checks each artifact and skips anything already present.
 
 ## Component commands
 
@@ -276,6 +294,7 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
     brand-template.css                     # Brand preset placeholder (theme-brand)
     theme.schema.json                      # Internal contract for round-trip scripts
   commands/
+    setup.md                               # /setup  ← start here after install
     kit-list.md                            # /kit-list
     kit-add.md                             # /kit-add
     theme-create.md                        # /theme-create
@@ -284,6 +303,7 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
     theme-extract.md                       # /theme-extract
   scripts/
     detect_target.py                       # Manages .acss-target.json
+    detect_package_manager.py             # Detects pnpm/yarn/bun/npm from lockfile
     generate_palette.py                    # OKLCH palette math
     tokens_to_css.py                       # Palette JSON → CSS theme
     css_to_tokens.py                       # CSS theme → palette JSON (round-trip)
@@ -305,6 +325,8 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
         theme-schema.md                    # Internal JSON schema reference
     component-form/
       SKILL.md                             # Form pilot — auto-triggers on natural language
+    setup/
+      SKILL.md                             # Cross-domain setup skill (/setup command)
   docs/                                    # Developer guides (architecture, recipes, troubleshooting)
 ```
 

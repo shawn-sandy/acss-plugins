@@ -8,6 +8,14 @@ All notable changes to the `acss-kit` plugin are documented here. Format follows
 
 - **Marketplace repo renamed** from `shawn-sandy/acss-plugins` to `shawn-sandy/agentic-acss-plugins`. Install commands now use `@shawn-sandy-agentic-acss-plugins` (the marketplace alias is derived from `<owner>-<repo>`). The marketplace `name` field in `.claude-plugin/marketplace.json` also moved from `acss-plugins` to `agentic-acss-plugins` to match. No plugin behavior changed; this is metadata-only.
 
+## [0.4.0] - 2026-04-26
+
+### Added
+
+- **`/setup` command** — first-run project bootstrap for acss-kit. Detects package manager via lockfile inspection, prints the exact `<pm> add -D sass` command (does not execute), writes `.acss-target.json`, copies `ui.tsx` verbatim, and optionally seeds `src/styles/theme/light.css` + `dark.css` via the OKLCH pipeline. Per-step idempotency: re-running `/setup` skips artifacts that already exist and tabulates `created` vs `kept` in the final summary.
+- **`detect_package_manager.py`** — new detector script. Inspects lockfiles in priority order (`pnpm-lock.yaml` → `yarn.lock` → `bun.lock` → `bun.lockb` → `package-lock.json`) then falls back to `package.json#packageManager` field. Outputs `{ manager, lockfile, installCommand, projectRoot, reasons }`. Includes `--self-test` mode for `tests/run.sh` smoke check.
+- **`skills/setup/SKILL.md`** — cross-domain setup skill. Deliberately not nested under `components` or `styles`; documents the placement rationale inline for future maintainers.
+
 ## [0.3.1] - 2026-04-26
 
 ### Fixed

@@ -142,5 +142,16 @@ console.log('known-bad: TSX validator caught', failures.length, 'failure(s)');
 
 green "TSX validator caught known-bad.tsx"
 
+# Step 7
+section "7. detect_package_manager.py --self-test"
+DPM_LOG="$TMP_ROOT/detect-pm.log"
+if python3 "$REPO_ROOT/plugins/acss-kit/scripts/detect_package_manager.py" --self-test >"$DPM_LOG"; then
+  green "detect_package_manager self-test OK"
+else
+  red "detect_package_manager self-test FAILED:"
+  cat "$DPM_LOG"
+  exit 1
+fi
+
 section "ALL STEPS GREEN"
 green "Phase 1 harness passed."
