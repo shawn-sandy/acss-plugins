@@ -17,6 +17,7 @@ CLAUDE.local.md
 tests/sandbox/
 tests/.tmp/
 tests/node_modules/
+tests/lib/.tmp-bundle.mjs
 
 # Python bytecode
 __pycache__/

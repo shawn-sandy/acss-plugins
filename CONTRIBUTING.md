@@ -58,9 +58,9 @@ Bump the version in `plugin.json` when shipping changes — `/plugin update` use
 tests/run.sh
 ```
 
-For render-sensitive changes, `tests/storybook.sh` is an optional Storybook + axe-playwright deep check (~3–4 min, requires `npx playwright install` on first run).
+For render-sensitive changes, `tests/e2e.sh` runs the deeper opt-in check — extracts components from reference docs into a temp fixture, runs `tsc --noEmit`, compiles every generated SCSS, and runs jsdom + axe-core a11y on rendered HTML. ~30s after `npm --prefix tests ci` is in place. Replaces the previous Storybook + Playwright path; the trade-off is documented in `tests/README.md` (jsdom can't measure real contrast or focus indicators — those rely on author review and `validate_theme.py`).
 
-For end-to-end slash-command verification — when changing slash-command prose or exercising `/kit-add` and `/theme-create` interactively — `tests/setup.sh` scaffolds a disposable Vite + React + TypeScript sandbox at `tests/sandbox/` (gitignored). The script prints a copy-pasteable Claude Code recipe that adds the local marketplace and installs `acss-kit`.
+For end-to-end slash-command verification — when changing slash-command prose or exercising `/kit-add` and `/theme-create` interactively — `tests/setup.sh` writes a minimal verification fixture at `tests/sandbox/` (gitignored). No Vite, no app shell — just a `package.json`, a `tsconfig.json`, and an ambient SCSS module declaration. The script prints a copy-pasteable Claude Code recipe that adds the local marketplace and installs `acss-kit`.
 
 ```sh
 tests/setup.sh

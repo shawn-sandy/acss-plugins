@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>known-bad-a11y fixture</title>
+  </head>
+  <body>
+    <main>
+      <!--
+        Deliberate violations for the run_axe.mjs --self-test to find:
+          - <button> with no accessible name (axe rule: button-name)
+          - <input type="text"> with no associated label (axe rule: label)
+          - <img> without alt attribute (axe rule: image-alt)
+        If axe-core ever stops flagging these the harness regressed; the
+        self-test will fail loudly so a real run never silently passes.
+      -->
+      <button></button>
+      <input type="text" name="q">
+      <img src="logo.png">
+    </main>
+  </body>
+</html>

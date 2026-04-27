@@ -1,5 +1,11 @@
 # Rewrite test structure: replace Vite sandbox with automated validation
 
+> **Superseded** by the 2026-04 test-harness simplification: the Vite sandbox
+> in `tests/setup.sh` was replaced with a minimal `package.json` + `tsconfig.json`
+> fixture, and the Storybook + Playwright deep check (`tests/storybook.sh`,
+> `plugins/acss-kit/.harness/`) was removed in favour of `tests/e2e.sh`'s
+> jsdom + axe-core path. Kept here for historical context only.
+
 ## Context
 
 Today there is no automated test suite. `tests/setup.sh` scaffolds a Vite+React+TS sandbox at `tests/sandbox/`; the developer then opens a `claude` session inside it, runs `/kit-add` and `/theme-create` by hand, and visually verifies that files land on disk and `npm run build` succeeds. Vite is not running tests — it is the host project the plugin's output gets imported into.
