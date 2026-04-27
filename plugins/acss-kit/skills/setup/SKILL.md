@@ -42,7 +42,14 @@ Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`.
 
 Parse the JSON output. If `projectRoot` is `null`, halt with the script's `reasons[0]` message. Do not proceed.
 
-Checkpoint: `Detected React project at <projectRoot>`.
+Then confirm TypeScript is configured: check that `<projectRoot>/tsconfig.json` exists. If not, halt with:
+
+```
+TypeScript not configured. /setup requires a React + TypeScript project.
+Add tsconfig.json and re-run /setup.
+```
+
+Checkpoint: `Detected React + TypeScript project at <projectRoot>`.
 
 ---
 
@@ -100,9 +107,15 @@ Halt. Record `paused=true` for the Step 8 summary. Do not proceed to Step 5.
 
 ## Step 5 — Determine target directory
 
-Honor the `--target=<dir>` flag if provided; use that value as `componentsDir`.
+**If `--target=<dir>` was passed:**
+Set `componentsDir` to the specified value. Always write `.acss-target.json` at `projectRoot` so subsequent `/kit-add` calls use the same directory:
+```json
+{ "componentsDir": "<dir>" }
+```
+Add `.acss-target.json` to `created[]`.
 
-Otherwise, read `.acss-target.json` at `projectRoot`:
+**Otherwise:**
+Read `.acss-target.json` at `projectRoot`:
 
 - **If it exists:** Use the `componentsDir` value. Add `.acss-target.json` to `kept[]`. Skip the prompt.
 - **If it does not exist:** Ask:
@@ -138,11 +151,21 @@ Checkpoint: `Copied ui.tsx to <componentsDir>/` or `ui.tsx already present, skip
 
 If `--no-theme` was passed, skip this step entirely.
 
-Check if `<projectRoot>/src/styles/theme/light.css` exists.
+Let `themeDir = <projectRoot>/src/styles/theme/`. Check `light.css` and `dark.css` in `themeDir` independently:
 
-**If it exists:** Add `src/styles/theme/light.css` and `src/styles/theme/dark.css` to `kept[]`. Skip.
+- If `<themeDir>/light.css` exists, add it to `kept[]`.
+- If `<themeDir>/dark.css` exists, add it to `kept[]`.
 
-**If it does not exist:**
+Determine generation mode from what is missing:
+
+| light.css | dark.css | Action |
+|-----------|----------|--------|
+| present   | present  | skip — both already kept |
+| present   | missing  | `--mode=dark` |
+| missing   | present  | `--mode=light` |
+| missing   | missing  | `--mode=both` |
+
+**If generation is needed:**
 1. Ask the developer for a seed hex color:
    ```
    Enter a seed hex color for your theme (default: #4f46e5):
@@ -150,27 +173,27 @@ Check if `<projectRoot>/src/styles/theme/light.css` exists.
 2. Validate the input is a 3- or 6-digit hex color (e.g. `#4f46e5` or `#fff`). If invalid, use `#4f46e5` and note the substitution.
 3. Run:
    ```
-   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/generate_palette.py <hex> --mode=both
+   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/generate_palette.py <hex> --mode=<mode>
    ```
    Capture JSON stdout. If exit code is non-zero, print the error output, skip to Step 8 (keep component init intact; record theme as not generated).
 4. Run:
    ```
-   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/tokens_to_css.py --stdin --out-dir=src/styles/theme/
+   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/tokens_to_css.py --stdin --out-dir=<projectRoot>/src/styles/theme/
    ```
-   piping the palette JSON to stdin. This writes `src/styles/theme/light.css` and `dark.css`.
+   piping the palette JSON to stdin.
 5. Run:
    ```
-   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/validate_theme.py src/styles/theme/
+   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/validate_theme.py <projectRoot>/src/styles/theme/
    ```
-   **On validation failure:** Print the contrast errors. Add `light.css` and `dark.css` to `created[]` with a `(contrast warning)` flag. Print:
+   **On validation failure:** Print the contrast errors. Add the generated files to `created[]` with a `(contrast warning)` flag. Print:
    ```
    Theme validation failed — fix the seed color and re-run /theme-create.
    ```
    Do not roll back `ui.tsx` or `.acss-target.json`. Continue to Step 8.
 
-   **On validation success:** Add `src/styles/theme/light.css` and `src/styles/theme/dark.css` to `created[]`.
+   **On validation success:** Add the generated files to `created[]`.
 
-Checkpoint: `Wrote light.css and dark.css` or `Theme files already present, skipped`.
+Checkpoint: `Wrote <generated files>` or `Theme files already present, skipped`.
 
 ---
 
