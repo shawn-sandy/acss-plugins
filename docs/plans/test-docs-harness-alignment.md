@@ -1,5 +1,10 @@
 # Test documentation review — align orientation-layer docs with the Phase 1 harness
 
+> **Superseded** by the 2026-04 test-harness simplification. The Phase 2
+> Storybook deep-check (`tests/storybook.sh`, `plugins/acss-kit/.harness/`)
+> referenced below has been removed; `tests/e2e.sh` (jsdom + axe-core) is the
+> new opt-in deeper check. Kept here for historical context only.
+
 ## Context
 
 The Phase 1 structural validation harness landed in commit [`71ffe6c`](https://github.com/shawn-sandy/acss-plugins/commit/71ffe6c) — `tests/run.sh` is now the default pre-PR check (extract+TSC, SCSS contract, WCAG contrast, manifest replication, known-bad self-tests; ~30s, no browser). A Phase 2 Storybook deep-check (`tests/storybook.sh`) is also in place. Most documentation was updated when the harness landed.

@@ -29,9 +29,9 @@ Existing `.acss-target.json` files at project roots remain compatible — the sc
 tests/run.sh
 ```
 
-For render-sensitive changes, `tests/storybook.sh` is an optional Storybook + axe-playwright deep check (~3–4 min, requires `npx playwright install` on first run).
+For render-sensitive changes, `tests/e2e.sh` runs the deeper opt-in check (~30s after first install) — extracts components from reference docs, type-checks them with `tsc --noEmit`, compiles SCSS, validates theme contrast, and runs jsdom + axe-core a11y on rendered output.
 
-For end-to-end slash-command verification, `tests/setup.sh` scaffolds a disposable Vite + React + TypeScript sandbox at `tests/sandbox/` (gitignored):
+For end-to-end slash-command verification, `tests/setup.sh` writes a minimal verification fixture at `tests/sandbox/` (gitignored) — `package.json` + `tsconfig.json`, no Vite, no app shell:
 
 ```sh
 tests/setup.sh
