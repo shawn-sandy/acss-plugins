@@ -8,6 +8,7 @@ Developers using the plugin to generate fpkit-style components into their own pr
 
 | Guide | What it covers |
 |-------|---------------|
+| [visual-guide.md](visual-guide.md) | A diagrams-first portal: system overview, `/kit-add` lifecycle, component anatomy, composition, theming flow, and a gated maintainer track |
 | [tutorial.md](tutorial.md) | A guided walkthrough: generate, import, and customize your first component |
 | [concepts.md](concepts.md) | The mental model: UI base component, data-\* variants, CSS-var fallbacks, aria-disabled, generation flow, and the `.acss-target.json` config |
 | [commands.md](commands.md) | Full reference for `/kit-add` and `/kit-list` |

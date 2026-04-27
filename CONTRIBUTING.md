@@ -83,3 +83,4 @@ Local-path marketplaces work the same as git-hosted ones. When satisfied, push t
 3. SKILL.md references to fpkit source are full GitHub URLs, not repo-relative paths
 4. `marketplace.json` description reflects any user-facing change
 5. Relevant `README.md` (plugin-level or repo-level) updated
+6. If a slash command's interactive flow changed, update the matching diagram in [`plugins/acss-kit/docs/visual-guide.md`](./plugins/acss-kit/docs/visual-guide.md)
