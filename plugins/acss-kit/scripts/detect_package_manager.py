@@ -2,14 +2,18 @@
 """
 Detect the package manager for a JavaScript project.
 
-Inspection priority (first match wins):
+Inspection priority (first match wins, walking from package root upward):
   1. pnpm-lock.yaml          → pnpm
   2. yarn.lock               → yarn
   3. bun.lock (text, 1.2+)   → bun
   4. bun.lockb (binary)      → bun
   5. package-lock.json       → npm
-  6. package.json#packageManager field (name@version spec)
+  6. package.json#packageManager field (name@version spec, walks ancestors)
   7. npm (final fallback)
+
+Lockfile search walks ancestor directories so monorepo/workspace setups
+are handled correctly — workspace lockfiles live at the workspace root,
+not inside each package.
 
 Usage:
     python detect_package_manager.py [project_root]
@@ -62,6 +66,7 @@ INSTALL_COMMANDS = {
 
 
 def find_project_root(start: Path) -> Optional[Path]:
+    """Walk from start upward; return first directory containing package.json."""
     cur = start.resolve()
     while True:
         if (cur / "package.json").is_file():
@@ -71,26 +76,51 @@ def find_project_root(start: Path) -> Optional[Path]:
         cur = cur.parent
 
 
-def detect_manager(root: Path) -> dict:
-    lockfile_name: Optional[str] = None
-    manager = "npm"
+def find_lockfile(start: Path) -> tuple[Optional[str], Optional[str]]:
+    """Walk from start upward; return (filename, manager) for first lockfile found.
 
-    for filename, pm in LOCKFILE_PRIORITY:
-        if (root / filename).is_file():
-            lockfile_name = filename
-            manager = pm
-            break
+    Walks ancestors so monorepo workspace lockfiles (at the workspace root)
+    are found even when start is a nested package directory.
+    """
+    cur = start.resolve()
+    while True:
+        for filename, pm in LOCKFILE_PRIORITY:
+            if (cur / filename).is_file():
+                return filename, pm
+        if cur.parent == cur:
+            return None, None
+        cur = cur.parent
+
+
+def find_packagemanager_field(start: Path) -> Optional[str]:
+    """Walk from start upward; return manager from first packageManager field found.
+
+    Handles workspace roots that carry the packageManager field on the root
+    package.json rather than on nested package package.json files.
+    """
+    cur = start.resolve()
+    while True:
+        pkg_path = cur / "package.json"
+        if pkg_path.is_file():
+            try:
+                pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+                pm_field = pkg.get("packageManager", "")
+                if pm_field:
+                    m = re.match(r"^([a-z]+)@", pm_field)
+                    if m and m.group(1) in INSTALL_COMMANDS:
+                        return m.group(1)
+            except Exception:
+                pass
+        if cur.parent == cur:
+            return None
+        cur = cur.parent
+
+
+def detect_manager(root: Path) -> dict:
+    lockfile_name, manager = find_lockfile(root)
 
     if lockfile_name is None:
-        try:
-            pkg = json.loads((root / "package.json").read_text(encoding="utf-8"))
-            pm_field = pkg.get("packageManager", "")
-            if pm_field:
-                m = re.match(r"^([a-z]+)@", pm_field)
-                if m and m.group(1) in INSTALL_COMMANDS:
-                    manager = m.group(1)
-        except Exception:
-            pass
+        manager = find_packagemanager_field(root) or "npm"
 
     return {
         "manager": manager,
