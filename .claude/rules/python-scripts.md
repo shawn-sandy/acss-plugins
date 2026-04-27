@@ -8,6 +8,7 @@ paths:
 Current scripts in `plugins/acss-kit/scripts/`:
 
 - `detect_target.py` — detects the target project type (Vite, etc.) for skill routing
+- `detect_package_manager.py` — detects the active package manager (pnpm/yarn/bun/npm) via lockfile inspection; outputs install command
 - `generate_palette.py` — OKLCH palette math; outputs palette JSON
 - `css_to_tokens.py` — converts CSS custom properties to palette JSON
 - `tokens_to_css.py` — converts palette JSON to CSS custom property files
@@ -21,7 +22,7 @@ For scripts whose output is parsed by slash commands or skills.
 - Exit 0 on success, 1 on logical failure (e.g. nothing detected)
 - Always include a `"reasons"` array in the JSON — empty `[]` on success, populated on failure
 
-Detectors: `detect_target.py`.
+Detectors: `detect_target.py`, `detect_package_manager.py`.
 
 ## Generator / validator contract (pipeline-friendly, human-readable)
 

@@ -10,7 +10,7 @@
     {
       "name": "acss-kit",
       "source": "./plugins/acss-kit",
-      "description": "Generate accessible React components and CSS themes for fpkit/acss projects. Markdown-as-source component templates plus OKLCH theme generation with WCAG 2.2 AA validation. No @fpkit/acss npm package required.",
+      "description": "Generate accessible React components and CSS themes for fpkit/acss projects. Run /setup to bootstrap a new project (sass check, ui.tsx copy, starter theme). Then use /kit-add for components and /theme-create for themes. No @fpkit/acss npm package required.",
       "category": "development",
       "tags": [
         "fpkit",
