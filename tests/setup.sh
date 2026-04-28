@@ -15,14 +15,17 @@
 # render a React app.
 #
 # Usage:
-#   tests/setup.sh           # first-time setup (errors if sandbox exists)
-#   tests/setup.sh --reset   # wipe and recreate the sandbox
+#   tests/setup.sh                       # first-time setup (errors if sandbox exists)
+#   tests/setup.sh --reset               # wipe and recreate the sandbox
+#   tests/setup.sh --with-style-tune     # also seed light.css + dark.css for style-tune verification
+#   tests/setup.sh --reset --with-style-tune
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SANDBOX="$REPO_ROOT/tests/sandbox"
 RESET=0
+WITH_STYLE_TUNE=0
 
 cat >&2 <<'BANNER'
 [tests/setup.sh] This scaffolds the manual demo fixture.
@@ -30,19 +33,16 @@ cat >&2 <<'BANNER'
 
 BANNER
 
-if [[ $# -gt 1 ]]; then
-  echo "Too many arguments: $*" >&2
-  echo "Usage: tests/setup.sh [--reset]" >&2
-  exit 1
-fi
-
-case "${1:-}" in
-  --reset) RESET=1 ;;
-  "")      ;;
-  *)       echo "Unknown argument: $1" >&2
-           echo "Usage: tests/setup.sh [--reset]" >&2
-           exit 1 ;;
-esac
+for arg in "$@"; do
+  case "$arg" in
+    --reset)            RESET=1 ;;
+    --with-style-tune)  WITH_STYLE_TUNE=1 ;;
+    "")                 ;;
+    *)                  echo "Unknown argument: $arg" >&2
+                        echo "Usage: tests/setup.sh [--reset] [--with-style-tune]" >&2
+                        exit 1 ;;
+  esac
+done
 
 # --- Preflight -----------------------------------------------------------
 
@@ -137,6 +137,24 @@ SCSS_DTS
 # Placeholder so /kit-add has a stable directory tree to write into.
 touch "$SANDBOX/src/.gitkeep"
 
+# --- Optional style-tune theme baseline ---------------------------------
+# When --with-style-tune is passed, seed light.css + dark.css so the user
+# can immediately try /style-tune prompts against a populated theme. The
+# skill needs an existing theme to edit; without this baseline its first
+# instruction is "run /theme-create #seedhex first".
+#
+# Component vendoring (/kit-add) still requires an interactive Claude
+# session — those slash commands aren't reachable from a shell script.
+# RECIPE.md (below) walks the user through the component step.
+
+if [[ "$WITH_STYLE_TUNE" -eq 1 ]]; then
+  echo "Seeding theme baseline for style-tune verification..."
+  THEME_DIR="$SANDBOX/src/styles/theme"
+  mkdir -p "$THEME_DIR"
+  python3 "$REPO_ROOT/plugins/acss-kit/scripts/generate_palette.py" "#2563eb" --mode=both \
+    | python3 "$REPO_ROOT/plugins/acss-kit/scripts/tokens_to_css.py" --stdin --out-dir="$THEME_DIR"
+fi
+
 cd "$SANDBOX"
 
 echo "Installing fixture devDependencies (typescript, sass, react)..."
@@ -147,6 +165,46 @@ npm install --silent
 # the initial commit. If we wrote it after, the sandbox would have an
 # untracked file from the start — defeating the "clean anchor" the bootstrap
 # commit provides for plugin dirty-tree guards.
+
+STYLE_TUNE_NOTE=""
+if [[ "$WITH_STYLE_TUNE" -eq 1 ]]; then
+  STYLE_TUNE_NOTE="
+## Style-tune verification
+
+This sandbox was built with \`--with-style-tune\`, so \`light.css\` and
+\`dark.css\` are pre-seeded from \`#2563eb\`. To exercise the
+\`style-tune\` skill end to end:
+
+1. Vendor the v1-supported components inside Claude Code:
+
+   \`\`\`
+   /kit-add button card alert dialog input nav
+   \`\`\`
+
+2. Try natural-language prompts (no slash command needed — these
+   auto-trigger):
+
+   - \"Make the button feel softer and warmer\"
+   - \"Tone down the primary color a touch\"
+   - \"More spacious cards\"
+   - \"Style the dialog to feel more elevated\"
+   - \"Narrower dialog\"
+   - \"Smaller buttons\"
+
+3. After each prompt, inspect \`git diff\` to confirm the targeted
+   tokens moved (and only those tokens). \`var(\` count in each
+   component SCSS file should be unchanged before/after.
+
+4. For atomicity, try a deliberately failing prompt — e.g. set the
+   primary too close to the background:
+
+   \`\`\`
+   /style-tune make the primary nearly the same color as the background
+   \`\`\`
+
+   Expect: pre-validation halts the entire batch; nothing is written.
+"
+fi
 
 cat > "$SANDBOX/RECIPE.md" <<EOF
 # Local plugin testing recipe
@@ -193,7 +251,7 @@ Compile a generated SCSS file to confirm it parses:
 \`\`\`
 npx sass --no-source-map src/components/fpkit/button/button.scss
 \`\`\`
-
+$STYLE_TUNE_NOTE
 Reset this sandbox with:
 \`\`\`
 "$REPO_ROOT/tests/setup.sh" --reset
