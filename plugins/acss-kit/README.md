@@ -4,11 +4,12 @@ A Claude Code plugin for building accessible React applications with the [fpkit/
 
 ## What you get
 
-Two top-level skills (plus one pilot per-component skill):
+Two top-level skills (plus two pilot skills):
 
 - **`components`** — accessible React components from markdown specs. `/kit-add <component>` walks the dependency tree and writes self-contained TSX + SCSS into your project.
 - **`styles`** — CSS theme generation. `/theme-create`, `/theme-brand`, `/theme-update`, `/theme-extract` for OKLCH palettes with WCAG 2.2 AA validation.
 - **`component-form`** — pilot per-component skill that auto-triggers on phrases like "create a signup form", "add a contact form".
+- **`style-tune`** — pilot per-feel skill that auto-triggers on phrases like "warmer button", "softer card", "tone down the primary", "more spacious cards", "more elevated dialog". `/style-tune` is the explicit fallback. Routes between theme-role and component-SCSS edits with atomic WCAG pre-validation.
 
 ## Why
 
@@ -156,6 +157,18 @@ Extract brand colors from an image or Figma design and generate full theme CSS.
 /theme-extract ~/Downloads/brand-moodboard.png
 /theme-extract https://figma.com/design/abc123/Brand-Guide
 ```
+
+### `/style-tune <natural-language description>`
+
+Adjust visual feel using natural language. Auto-triggers on phrases like "warmer button" / "softer card" / "more elevated dialog" — the slash form is the explicit fallback. Six v1 token families: color, radius, spacing, elevation, size, height.
+
+```shell
+/style-tune make the button feel softer and warmer
+/style-tune tone down the primary color a touch
+/style-tune more spacious cards
+```
+
+Theme-layer edits delegate to `/theme-update` after a pre-validation pass; component-layer edits write the targeted `--{component}-*` tokens in place. Paired roles and light/dark mirrors are atomic — either every role applies or none do.
 
 ## Available components
 
@@ -305,6 +318,8 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
     detect_target.py                       # Manages .acss-target.json
     detect_package_manager.py             # Detects pnpm/yarn/bun/npm from lockfile
     generate_palette.py                    # OKLCH palette math
+    oklch_shift.py                         # Hex + per-channel OKLCH offsets → hex
+    _oklch.py                              # Internal hex↔OKLCH helpers (shared by generate_palette + oklch_shift)
     tokens_to_css.py                       # Palette JSON → CSS theme
     css_to_tokens.py                       # CSS theme → palette JSON (round-trip)
     validate_theme.py                      # WCAG 2.2 AA contrast pair validator
@@ -325,6 +340,10 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
         theme-schema.md                    # Internal JSON schema reference
     component-form/
       SKILL.md                             # Form pilot — auto-triggers on natural language
+    style-tune/
+      SKILL.md                             # Style-feel pilot — auto-triggers on adjective + component
+      references/
+        intent-vocabulary.md               # Modifier → token-family table
     setup/
       SKILL.md                             # Cross-domain setup skill (/setup command)
   docs/                                    # Developer guides (architecture, recipes, troubleshooting)

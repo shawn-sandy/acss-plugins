@@ -4,8 +4,16 @@ All notable changes to the `acss-kit` plugin are documented here. Format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Pilot `style-tune` skill and `/style-tune` command** — natural-language adjustment of acss-kit components and theme roles. Routes "warmer button", "softer card", "tone down the primary", "more spacious cards", "more elevated dialog", "smaller buttons", "narrower dialog", "taller dialog" between theme-role edits (delegated to `/theme-update` with WCAG pre-validation) and component SCSS token edits. Six v1 token families (color, radius, spacing, elevation, size, height) across six components (button, card, alert, dialog, input, nav). Atomic batch pre-validation guarantees paired roles and light/dark mirrors never desync. `references/intent-vocabulary.md` documents the full modifier → token-family table.
+- **`scripts/oklch_shift.py`** — new CLI helper that takes a hex color plus per-channel OKLCH offsets (`--hue`, `--chroma`, `--lightness`) and emits the shifted hex. Detector contract; stdlib only. Powers `style-tune`'s color deltas.
+- **`scripts/_oklch.py`** — internal shared module exposing `hex_to_oklch`, `oklch_to_hex`, `in_gamut`. Extracted from `generate_palette.py` so both palette generation and `oklch_shift.py` use the same conversion math.
+- **`tests/setup.sh --with-style-tune`** — opt-in fixture build that vendors the six v1 components and seeds a `light.css` / `dark.css` baseline so end-to-end style-tune prompts have a populated project to edit.
+
 ### Changed
 
+- **`scripts/generate_palette.py` refactored** — its inline OKLCH conversion helpers moved into the new shared `scripts/_oklch.py` module. Public CLI behavior is byte-identical against five canonical seeds (`#2563eb`, `#7c3aed`, `#16a34a`, `#dc2626`, `#0f766e`).
 - **Test harness simplified** — replaced the Vite + React + TypeScript demo sandbox (`tests/setup.sh`) with a minimal `package.json` + `tsconfig.json` fixture. No app framework, no `npm create`, no `npm run dev`. Replaced the Storybook + Playwright + axe-playwright deep check (`tests/storybook.sh`, `plugins/acss-kit/.harness/`, `scripts/generate_stories.mjs`) with a browserless `tests/e2e.sh` that runs `tsc --noEmit`, compiles SCSS, validates theme contrast, and runs jsdom + axe-core on rendered components. Faster install footprint, narrower a11y coverage (no real-pixel contrast or focus-indicator detection — see `tests/README.md` for the trade-off table). Plugin runtime behavior unchanged.
 - **Marketplace repo renamed** from `shawn-sandy/acss-plugins` to `shawn-sandy/agentic-acss-plugins`. Install commands now use `@shawn-sandy-agentic-acss-plugins` (the marketplace alias is derived from `<owner>-<repo>`). The marketplace `name` field in `.claude-plugin/marketplace.json` also moved from `acss-plugins` to `agentic-acss-plugins` to match. No plugin behavior changed; this is metadata-only.
 

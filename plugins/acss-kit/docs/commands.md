@@ -115,3 +115,73 @@ Nothing is written to disk.
 /kit-list dialog               # Show Dialog's full dependency tree (button)
 /kit-list form                 # Show which sub-controls form.tsx contains
 ```
+
+---
+
+## /style-tune
+
+Adjust the visual feel of acss-kit components or theme roles using natural language. Routes between theme-role edits (delegated to `/theme-update` with WCAG pre-validation) and component SCSS token edits.
+
+**Signature**
+
+```
+/style-tune <natural-language description>
+```
+
+**Tools used:** `Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion`
+
+**Arguments**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<natural-language description>` | Yes | One or more sentences naming a component (button, card, alert, dialog, input, nav) or theme role (primary, accent, danger, warning, info, success, brand) plus a modifier from the intent vocabulary (softer, warmer, calmer, spacious, elevated, smaller, narrower, etc.). |
+
+The skill also auto-triggers on the same phrases without the slash command — see the SKILL.md front-matter for the full trigger surface.
+
+### What happens step by step
+
+These steps correspond to Steps A–F in [`SKILL.md`](../skills/style-tune/SKILL.md).
+
+**Step A — Resolve intent**
+
+1. Read `references/intent-vocabulary.md` to load the modifier table.
+2. Tokenize the prompt; match modifiers to token families.
+3. Map subject nouns to a layer: theme-role names route to the theme layer, component names route to the component layer.
+4. AskUserQuestion when the prompt is ambiguous, contradictory, or missing a subject.
+
+**Step B — Locate files**
+
+1. Run `scripts/detect_target.py` to capture `componentsDir`.
+2. Theme layer: locate `light.css` + `dark.css`; auto-mirror when both exist.
+3. Component layer: probe `<componentsDir>/<component>/<component>.scss`; halt with a `/kit-add` hint if missing.
+
+**Step C — Compute deltas**
+
+1. Theme layer: read current hex via `scripts/css_to_tokens.py`; compute new hex via `scripts/oklch_shift.py`. Apply paired-role and dark-mirror rules.
+2. Component layer: apply scalar deltas (radius × 1.5, padding × 0.66, etc.). Var-only references auto-route to the underlying theme role.
+
+**Step D — Apply edits**
+
+1. Theme batch: stage proposed values into a tmp directory and run `scripts/validate_theme.py` against each staged file. Halt the entire batch on any contrast failure (atomic — paired roles never desync).
+2. Component batch: build the updated SCSS in memory; Edit atomically. Preserve all `var()` wrappers.
+
+**Step E — Validate**
+
+1. Theme: D's pre-validation guarantees no in-flight reverts.
+2. Component: structural integrity check (`var(` count unchanged; each token still appears exactly once on a declaration LHS).
+3. Drift hint when a tuned color's chroma drops below 0.05 or its hue diverges >30° from its palette-derived reference.
+
+**Step F — Summary**
+
+Print a `Modifier / Token / Old / New / Status` table plus next-step hints.
+
+### Examples
+
+```
+/style-tune make the button feel softer and warmer
+/style-tune tone down the primary color a touch
+/style-tune more spacious cards
+/style-tune style the dialog to feel more elevated
+/style-tune narrower dialog
+/style-tune smaller buttons
+```
