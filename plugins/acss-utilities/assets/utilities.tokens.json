@@ -1,0 +1,91 @@
+{
+  "$schema": "./utilities.tokens.schema.json",
+  "version": "0.1.0",
+  "fpkitUpstream": "@fpkit/acss@6.5.0",
+  "bundleSizeBudgetKb": 80,
+  "breakpoints": {
+    "sm": "30rem",
+    "md": "48rem",
+    "lg": "62rem",
+    "xl": "80rem"
+  },
+  "colorRoles": {
+    "primary": "--color-primary",
+    "primary-light": "--color-primary-light",
+    "secondary": "--color-secondary",
+    "success": "--color-success",
+    "error": "--color-error",
+    "warning": "--color-warning",
+    "info": "--color-info",
+    "text": "--color-text",
+    "muted": "--color-text-muted",
+    "surface": "--color-surface",
+    "surface-secondary": "--color-surface-secondary"
+  },
+  "stateBg": {
+    "success": "--color-success-bg",
+    "error": "--color-error-bg",
+    "warning": "--color-warning-bg",
+    "info": "--color-info-bg"
+  },
+  "spacing": {
+    "baseline": "0.25rem",
+    "scale": [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32],
+    "properties": ["m", "mt", "mb", "ml", "mr", "mx", "my", "p", "pt", "pb", "pl", "pr", "px", "py", "gap"]
+  },
+  "type": {
+    "fontSize": {
+      "xs": "0.75rem",
+      "sm": "0.875rem",
+      "base": "1rem",
+      "lg": "1.125rem",
+      "xl": "1.25rem",
+      "2xl": "1.5rem",
+      "3xl": "1.875rem",
+      "4xl": "2.25rem"
+    },
+    "fontWeight": {
+      "normal": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700"
+    },
+    "leading": {
+      "tight": "1.25",
+      "normal": "1.5",
+      "loose": "1.75"
+    },
+    "align": ["left", "center", "right", "justify"]
+  },
+  "radius": {
+    "none": "0",
+    "sm": "0.125rem",
+    "md": "0.375rem",
+    "lg": "0.5rem",
+    "xl": "0.75rem",
+    "full": "9999px"
+  },
+  "shadow": {
+    "none": "none",
+    "sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    "md": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+    "lg": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+    "xl": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+  },
+  "zIndex": ["0", "10", "20", "30", "40", "50", "auto"],
+  "positions": ["static", "relative", "absolute", "fixed", "sticky"],
+  "families": {
+    "color-bg":     { "enabled": true, "responsive": false },
+    "color-text":   { "enabled": true, "responsive": false },
+    "color-border": { "enabled": true, "responsive": false },
+    "spacing":      { "enabled": true, "responsive": true },
+    "display":      { "enabled": true, "responsive": true },
+    "flex":         { "enabled": true, "responsive": true },
+    "grid":         { "enabled": true, "responsive": true },
+    "type":         { "enabled": true, "responsive": false },
+    "radius":       { "enabled": true, "responsive": false },
+    "shadow":       { "enabled": true, "responsive": false },
+    "position":     { "enabled": true, "responsive": false },
+    "z-index":      { "enabled": true, "responsive": false }
+  }
+}

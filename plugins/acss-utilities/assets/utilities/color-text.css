@@ -1,0 +1,12 @@
+/* color-text utilities */
+.text-primary { color: var(--color-primary, currentColor); }
+.text-primary-light { color: var(--color-primary-light, currentColor); }
+.text-secondary { color: var(--color-secondary, currentColor); }
+.text-success { color: var(--color-success, currentColor); }
+.text-error { color: var(--color-error, currentColor); }
+.text-warning { color: var(--color-warning, currentColor); }
+.text-info { color: var(--color-info, currentColor); }
+.text-text { color: var(--color-text, currentColor); }
+.text-muted { color: var(--color-text-muted, currentColor); }
+.text-surface { color: var(--color-surface, currentColor); }
+.text-surface-secondary { color: var(--color-surface-secondary, currentColor); }
