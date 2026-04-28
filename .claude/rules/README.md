@@ -5,7 +5,7 @@ Advisory text auto-loaded into Claude's context whenever it touches a file match
 | Rule | Triggers on | Status |
 |---|---|---|
 | [`scss-conventions.md`](scss-conventions.md) | `**/*.scss`, `**/*.css` | Active — variable naming pattern, `var()` fallbacks, `[aria-disabled="true"]` for disabled state. |
-| [`python-scripts.md`](python-scripts.md) | `plugins/acss-app-builder/scripts/**` | **Drift** — references `acss-app-builder`, a predecessor plugin consolidated into `acss-kit` at v0.3.0. The path glob never matches a real file, so this rule never loads. Fix: rewrite the inventory for `plugins/acss-kit/scripts/**`, or delete the file. |
+| [`python-scripts.md`](python-scripts.md) | `plugins/acss-kit/scripts/**` | Active — stdlib-only Python 3 contract (detector vs. generator/validator), current 6-script inventory. |
 
 ## Rules vs. hooks vs. skills
 
