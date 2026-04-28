@@ -47,7 +47,19 @@ def hex_to_oklch(hex_str: str) -> tuple[float, float, float]:
 
 
 def oklch_to_hex(L: float, C: float, H: float) -> str:
-    """Convert OKLCH to hex, clamping chroma to stay in sRGB gamut."""
+    """Convert OKLCH to hex, clamping chroma to stay in sRGB gamut.
+
+    Defensive clamps:
+    - ``L`` is clamped to ``[0.0, 1.0]`` up front, so the iterative
+      chroma-reduction loop always operates on a valid lightness.
+    - ``C`` is clamped to ``>= 0``.
+    - When all 100 reduction steps fail to find an in-gamut color, we
+      return an achromatic hex at the requested lightness directly
+      instead of recursing — preventing infinite recursion if numeric
+      issues somehow leave even ``C=0`` out of gamut.
+    """
+    L = max(0.0, min(1.0, L))
+    C = max(0.0, C)
     for _ in range(100):
         a = C * math.cos(math.radians(H))
         b = C * math.sin(math.radians(H))
@@ -70,9 +82,18 @@ def oklch_to_hex(L: float, C: float, H: float) -> str:
             gi = round(_gamma(g) * 255)
             bi = round(_gamma(b_) * 255)
             return f"#{ri:02x}{gi:02x}{bi:02x}"
+        if C == 0.0:
+            # Already achromatic and still failing the gamut check —
+            # synthesize a neutral gray at the requested lightness
+            # directly so we never recurse into the same code path.
+            v = max(0.0, min(1.0, L))
+            gv = round(_gamma(v) * 255)
+            return f"#{gv:02x}{gv:02x}{gv:02x}"
         C = max(0.0, C - 0.01)
-    # Fallback: achromatic at target lightness
-    return oklch_to_hex(L, 0.0, H)
+    # Final fallback: achromatic at the (clamped) target lightness.
+    v = max(0.0, min(1.0, L))
+    gv = round(_gamma(v) * 255)
+    return f"#{gv:02x}{gv:02x}{gv:02x}"
 
 
 def in_gamut(L: float, C: float, H: float) -> bool:

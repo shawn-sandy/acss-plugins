@@ -144,10 +144,18 @@ For each `(role, delta)` from Step A:
    `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/css_to_tokens.py <theme-file>`.
 2. Compute the new hex via
    `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/oklch_shift.py <currentHex>
-   --hue=±deg --chroma=×float --lightness=±float`. Capture `hex` from
-   the JSON output. If `oklch_shift.py` exits 1 (out-of-gamut),
-   surface its `reasons` in Step F's summary and skip that role for
-   that file.
+   --hue=±deg --chroma=×float --lightness=±float`. The script always
+   produces a usable hex when the input is valid:
+   - **Exit 0** (always when a hex is produced): use the returned `hex`
+     value. Inspect `clamped` — if `true`, the OKLCH math hit a gamut
+     boundary; surface the entries from `reasons` in Step F as
+     informational warnings but still apply the edit (the clamped hex
+     is what the user asked for, expressed in valid sRGB).
+   - **Exit 2**: usage / IO error (e.g. invalid hex argument). Surface
+     the stderr message and skip that role.
+   The skill does not currently see exit 1 from this script;
+   `oklch_shift.py` reserves it for future hard failures where no
+   usable hex can be produced.
 3. **Paired-role rule:** when shifting `--color-primary`, always shift
    `--color-primary-hover` by the same OKLCH delta. Treat the pair as
    a single batch entry — both values must apply, or both must revert.
