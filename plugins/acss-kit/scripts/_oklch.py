@@ -60,6 +60,15 @@ def oklch_to_hex(L: float, C: float, H: float) -> str:
     """
     L = max(0.0, min(1.0, L))
     C = max(0.0, C)
+
+    def _achromatic_hex(L_clamped: float) -> str:
+        # OKLab → linear sRGB on the neutral axis (a = b = 0): the M2
+        # inverse gives l_ = m_ = s_ = L, then cubing yields linear-light
+        # r = g = b = L ** 3. Apply gamma encoding to get the sRGB byte.
+        lv = max(0.0, min(1.0, L_clamped ** 3))
+        gv = round(_gamma(lv) * 255)
+        return f"#{gv:02x}{gv:02x}{gv:02x}"
+
     for _ in range(100):
         a = C * math.cos(math.radians(H))
         b = C * math.sin(math.radians(H))
@@ -86,14 +95,10 @@ def oklch_to_hex(L: float, C: float, H: float) -> str:
             # Already achromatic and still failing the gamut check —
             # synthesize a neutral gray at the requested lightness
             # directly so we never recurse into the same code path.
-            v = max(0.0, min(1.0, L))
-            gv = round(_gamma(v) * 255)
-            return f"#{gv:02x}{gv:02x}{gv:02x}"
+            return _achromatic_hex(L)
         C = max(0.0, C - 0.01)
     # Final fallback: achromatic at the (clamped) target lightness.
-    v = max(0.0, min(1.0, L))
-    gv = round(_gamma(v) * 255)
-    return f"#{gv:02x}{gv:02x}{gv:02x}"
+    return _achromatic_hex(L)
 
 
 def in_gamut(L: float, C: float, H: float) -> bool:
