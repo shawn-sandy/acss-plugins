@@ -10,8 +10,10 @@ Examples:
     oklch_shift.py "#2563eb" --chroma=0.75     # multiply chroma by 0.75
     oklch_shift.py "#2563eb" --lightness=-0.06 # subtract 0.06 from L
 
-Output: JSON to stdout — { "hex", "oklch": [L, C, H], "shifted": [L, C, H], "reasons": [] }
-Exit codes: 0 = success, 1 = logical failure (post-shift out of gamut, etc.), 2 = usage / IO error.
+Output: JSON to stdout — { "hex", "oklch": [L, C, H], "shifted": [L, C, H], "clamped": bool, "reasons": [] }
+Exit codes: 0 = success (a usable hex was produced — `reasons` may still be populated as warnings;
+            check `clamped` to detect gamut clamping), 1 = no usable hex (reserved for future hard
+            failures — currently unreachable), 2 = usage / IO error.
 
 Stdlib only — no external dependencies.
 """
@@ -76,6 +78,7 @@ def main() -> int:
         return 2
 
     reasons: list[str] = []
+    clamped = False
 
     L0, C0, H0 = hex_to_oklch(seed)
 
@@ -83,23 +86,27 @@ def main() -> int:
     C1 = C0 * chroma_factor
     H1 = (H0 + hue_delta) % 360
 
-    # Lightness clamp [0.0, 1.0] is a hard gamut floor/ceiling; surface it.
+    # Lightness clamp [0.0, 1.0] — note as a warning, not a hard failure.
     if L1 < 0.0:
-        reasons.append(f"lightness out of gamut: {L1:.4f} < 0.0 (clamped to 0.0)")
+        reasons.append(f"lightness clamped: {L1:.4f} < 0.0 (using 0.0)")
         L1 = 0.0
+        clamped = True
     if L1 > 1.0:
-        reasons.append(f"lightness out of gamut: {L1:.4f} > 1.0 (clamped to 1.0)")
+        reasons.append(f"lightness clamped: {L1:.4f} > 1.0 (using 1.0)")
         L1 = 1.0
+        clamped = True
     # Chroma must stay non-negative.
     if C1 < 0.0:
-        reasons.append(f"chroma negative after shift: {C1:.4f} (clamped to 0.0)")
+        reasons.append(f"chroma clamped: {C1:.4f} < 0.0 (using 0.0)")
         C1 = 0.0
+        clamped = True
 
     if not in_gamut(L1, C1, H1):
         reasons.append(
-            f"shifted color out of sRGB gamut at (L={L1:.4f}, C={C1:.4f}, H={H1:.2f}); "
-            f"oklch_to_hex will reduce chroma to fit"
+            f"requested OKLCH (L={L1:.4f}, C={C1:.4f}, H={H1:.2f}) is out of sRGB gamut; "
+            f"oklch_to_hex reduced chroma to fit"
         )
+        clamped = True
 
     new_hex = oklch_to_hex(L1, C1, H1)
     Lp, Cp, Hp = hex_to_oklch(new_hex)
@@ -114,10 +121,14 @@ def main() -> int:
             "chroma": chroma_factor,
             "lightness": lightness_delta,
         },
+        "clamped": clamped,
         "reasons": reasons,
     }
     print(json.dumps(result, indent=2))
-    return 1 if reasons else 0
+    # A usable hex was always produced — `reasons` is informational
+    # (clamping warnings). Reserve exit 1 for future hard failures
+    # (currently no path reaches it from valid input).
+    return 0
 
 
 if __name__ == "__main__":

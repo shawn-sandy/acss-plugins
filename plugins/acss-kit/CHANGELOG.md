@@ -7,9 +7,9 @@ All notable changes to the `acss-kit` plugin are documented here. Format follows
 ### Added
 
 - **Pilot `style-tune` skill and `/style-tune` command** — natural-language adjustment of acss-kit components and theme roles. Routes "warmer button", "softer card", "tone down the primary", "more spacious cards", "more elevated dialog", "smaller buttons", "narrower dialog", "taller dialog" between theme-role edits (delegated to `/theme-update` with WCAG pre-validation) and component SCSS token edits. Six v1 token families (color, radius, spacing, elevation, size, height) across six components (button, card, alert, dialog, input, nav). Atomic batch pre-validation guarantees paired roles and light/dark mirrors never desync. `references/intent-vocabulary.md` documents the full modifier → token-family table.
-- **`scripts/oklch_shift.py`** — new CLI helper that takes a hex color plus per-channel OKLCH offsets (`--hue`, `--chroma`, `--lightness`) and emits the shifted hex. Detector contract; stdlib only. Powers `style-tune`'s color deltas.
-- **`scripts/_oklch.py`** — internal shared module exposing `hex_to_oklch`, `oklch_to_hex`, `in_gamut`. Extracted from `generate_palette.py` so both palette generation and `oklch_shift.py` use the same conversion math.
-- **`tests/setup.sh --with-style-tune`** — opt-in fixture build that vendors the six v1 components and seeds a `light.css` / `dark.css` baseline so end-to-end style-tune prompts have a populated project to edit.
+- **`scripts/oklch_shift.py`** — new CLI helper that takes a hex color plus per-channel OKLCH offsets (`--hue`, `--chroma`, `--lightness`) and emits the shifted hex. Generator/validator contract; stdlib only. Exits 0 whenever a usable hex was produced (with `clamped: true` and a populated `reasons` array when the math hit a gamut boundary). Powers `style-tune`'s color deltas.
+- **`scripts/_oklch.py`** — internal shared module exposing `hex_to_oklch`, `oklch_to_hex`, `in_gamut`. Extracted from `generate_palette.py` so both palette generation and `oklch_shift.py` use the same conversion math. `oklch_to_hex` defensively clamps `L` to `[0, 1]` upfront and falls back to a directly-synthesized achromatic hex on gamut failure (no recursion).
+- **`tests/setup.sh --with-style-tune`** — opt-in fixture flag that seeds `light.css` and `dark.css` from a baseline palette so end-to-end style-tune prompts have a populated theme to edit. Component vendoring (`/kit-add`) still requires an interactive Claude session — `RECIPE.md` walks through that step.
 
 ### Changed
 
