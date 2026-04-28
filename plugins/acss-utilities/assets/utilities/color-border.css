@@ -1,0 +1,12 @@
+/* color-border utilities */
+.border-primary { border-color: var(--color-primary, currentColor); }
+.border-primary-light { border-color: var(--color-primary-light, currentColor); }
+.border-secondary { border-color: var(--color-secondary, currentColor); }
+.border-success { border-color: var(--color-success, currentColor); }
+.border-error { border-color: var(--color-error, currentColor); }
+.border-warning { border-color: var(--color-warning, currentColor); }
+.border-info { border-color: var(--color-info, currentColor); }
+.border-text { border-color: var(--color-text, currentColor); }
+.border-muted { border-color: var(--color-text-muted, currentColor); }
+.border-surface { border-color: var(--color-surface, currentColor); }
+.border-surface-secondary { border-color: var(--color-surface-secondary, currentColor); }

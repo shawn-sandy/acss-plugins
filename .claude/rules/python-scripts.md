@@ -1,6 +1,6 @@
 ---
 paths:
-  - "plugins/acss-kit/scripts/**"
+  - "plugins/*/scripts/**"
 ---
 
 # Python Script Contracts
@@ -16,6 +16,12 @@ Current scripts in `plugins/acss-kit/scripts/`:
 - `tokens_to_css.py` — converts palette JSON to CSS custom property files
 - `validate_theme.py` — checks theme CSS files for WCAG 2.2 AA contrast on semantic role pairs
 
+Current scripts in `plugins/acss-utilities/scripts/`:
+
+- `detect_utility_target.py` — detects the target React project + drop directory for `utilities.css`. Mirrors `acss-kit/scripts/detect_target.py`'s ancestor-walk and reads the same `.acss-target.json` (with an added `utilitiesDir` field)
+- `generate_utilities.py` — reads `utilities.tokens.json` and emits per-family CSS partials + a concatenated `utilities.css`. Generator/validator contract; either streams the bundle to stdout or writes to a directory via `--out-dir`
+- `validate_utilities.py` — validates utility CSS files: kebab-case selectors, `var()` fallbacks, no duplicate selectors, responsive parity across breakpoints, bundle-size budget, and `token-bridge.css` `:root` ↔ `[data-theme="dark"]` parity. Generator/validator contract (data + reasons array on stdout, exit 0/1/2)
+
 ## Detector contract (machine-callable, structured)
 
 For scripts whose output is parsed by slash commands or skills.
@@ -24,7 +30,7 @@ For scripts whose output is parsed by slash commands or skills.
 - Exit 0 on success, 1 on logical failure (e.g. nothing detected)
 - Always include a `"reasons"` array in the JSON — empty `[]` on success, populated on failure
 
-Detectors: `detect_target.py`, `detect_package_manager.py`.
+Detectors: `detect_target.py`, `detect_package_manager.py`, `detect_utility_target.py`.
 
 ## Generator / validator contract (pipeline-friendly, human-readable)
 

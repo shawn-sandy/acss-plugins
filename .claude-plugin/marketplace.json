@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "agentic-acss-plugins",
-  "description": "Claude Code plugin for building accessible React components and CSS themes for fpkit/acss projects",
+  "description": "Claude Code plugins for building accessible React components, CSS themes, and utility classes for fpkit/acss projects",
   "owner": {
     "name": "Shawn Sandy",
     "url": "https://github.com/shawn-sandy/agentic-acss-plugins"
@@ -24,6 +24,22 @@
         "oklch",
         "sass",
         "typescript"
+      ]
+    },
+    {
+      "name": "acss-utilities",
+      "source": "./plugins/acss-utilities",
+      "description": "Tailwind-style atomic CSS utility classes for fpkit/acss projects, mirroring @fpkit/acss@6.5.0 conventions (.bg-primary, .mt-4, .sm:hide, etc.). Pairs with acss-kit via a token-bridge that aliases acss-kit's OKLCH roles to fpkit-style names in both light and dark modes. Run /utility-add to drop the bundle into your project.",
+      "category": "development",
+      "tags": [
+        "utility-classes",
+        "atomic-css",
+        "tailwind-style",
+        "fpkit",
+        "acss",
+        "css",
+        "responsive",
+        "css-variables"
       ]
     }
   ]

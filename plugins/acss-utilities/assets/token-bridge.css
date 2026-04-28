@@ -1,0 +1,52 @@
+/*
+ * acss-utilities — token bridge
+ *
+ * Aliases acss-kit's role names (`--color-danger`, `--color-primary`, …) to
+ * the fpkit-style token names that the utility classes reference
+ * (`--color-error`, `--color-error-bg`, `--color-primary-light`, …).
+ *
+ * Both `:root` and `[data-theme="dark"]` blocks are mandatory — utility
+ * classes that consume these aliases would otherwise fall back to light
+ * values when the page is in dark mode. The validator enforces parity.
+ *
+ * If acss-kit is not installed, every fallback hex is the resolved value
+ * — so this file works standalone too.
+ */
+
+:root {
+  /* Brand */
+  --color-primary-light: color-mix(in oklch, var(--color-primary, #2563eb) 80%, white);
+
+  /* Semantic state — fpkit-style aliases. */
+  --color-error:         var(--color-danger, #dc2626);
+  --color-error-bg:      color-mix(in oklch, var(--color-danger, #dc2626) 12%, var(--color-background, #ffffff));
+  --color-success-bg:    color-mix(in oklch, var(--color-success, #16a34a) 12%, var(--color-background, #ffffff));
+  --color-warning-bg:    color-mix(in oklch, var(--color-warning, #ca8a04) 12%, var(--color-background, #ffffff));
+  --color-info-bg:       color-mix(in oklch, var(--color-info, #0284c7) 12%, var(--color-background, #ffffff));
+
+  /* Surface family — fpkit uses `--color-surface-secondary`; acss-kit
+     uses `--color-surface-raised`. Alias either name to the other for
+     mutual compatibility. */
+  --color-surface-secondary: var(--color-surface-raised, var(--color-surface, #f5f5f5));
+
+  /* Secondary brand — acss-kit doesn't define one; fall back to primary. */
+  --color-secondary: var(--color-primary, #2563eb);
+}
+
+[data-theme="dark"] {
+  /* Brand */
+  --color-primary-light: color-mix(in oklch, var(--color-primary, #7dd3fc) 70%, black);
+
+  /* Semantic state — adjusted mix ratios for dark mode. */
+  --color-error:         var(--color-danger, #f87171);
+  --color-error-bg:      color-mix(in oklch, var(--color-danger, #f87171) 18%, var(--color-background, #0f172a));
+  --color-success-bg:    color-mix(in oklch, var(--color-success, #4ade80) 18%, var(--color-background, #0f172a));
+  --color-warning-bg:    color-mix(in oklch, var(--color-warning, #fbbf24) 18%, var(--color-background, #0f172a));
+  --color-info-bg:       color-mix(in oklch, var(--color-info, #38bdf8) 18%, var(--color-background, #0f172a));
+
+  /* Surface family */
+  --color-surface-secondary: var(--color-surface-raised, var(--color-surface, #1e293b));
+
+  /* Secondary brand */
+  --color-secondary: var(--color-primary, #7dd3fc);
+}
