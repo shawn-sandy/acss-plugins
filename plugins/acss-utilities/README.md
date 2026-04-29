@@ -171,7 +171,7 @@ plugins/acss-utilities/
 tests/run.sh
 ```
 
-Runs the structural validation, CSS contract check, idempotency check (regenerate `utilities.css` and diff against the committed bundle), and four bad-fixture self-tests.
+Runs the shared structural-validation gate plus two `acss-utilities`-specific steps: the validator over `plugins/acss-utilities/assets/` (selector grammar, `var()` fallbacks, bridge dark-mode parity, bundle-size budget) and an idempotency check that regenerates the bundle from `utilities.tokens.json` and diffs against the committed copy. Bad-fixture self-tests are not yet wired in.
 
 ## License
 

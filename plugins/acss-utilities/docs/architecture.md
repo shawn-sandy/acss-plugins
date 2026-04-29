@@ -134,12 +134,13 @@ When releasing a new `acss-utilities` version:
 
 `tests/run.sh` covers (post-`acss-utilities`):
 
-- Manifest validation (every `plugins/<name>/.claude-plugin/plugin.json` has required fields)
-- SCSS/CSS contract (every utility CSS file's selectors and `var()` fallbacks)
-- Idempotency: regenerate `utilities.css` from tokens and diff against the committed file
-- Bridge parity: every alias in `:root` is also in `[data-theme="dark"]`
-- Bundle-size budget: bundle ≤ `bundleSizeBudgetKb` (or `--max-kb` override)
-- Bad-fixture self-tests: PascalCase selector, missing `var()` fallback, missing dark bridge entry, oversize bundle — each must exit 1
+- Manifest validation (every `plugins/<name>/.claude-plugin/plugin.json` has required fields) — Step 5
+- **Step 8: utility validator** — runs `validate_utilities.py` over `plugins/acss-utilities/assets/`. Enforces selector grammar, `var()` fallbacks, no duplicate selectors per context, responsive parity, bridge dark-mode parity, and bundle-size budget (against `bundleSizeBudgetKb` from the tokens file).
+- **Step 9: idempotency** — regenerates the bundle and per-family partials from `utilities.tokens.json` into a tmp dir and diffs against the committed copy. Any divergence fails the harness with the regenerate-and-commit instruction inline.
+
+What is **not** in the harness yet:
+
+- Bad-fixture self-tests (PascalCase selector, missing `var()` fallback, missing `[data-theme="dark"]` alias, oversize bundle). Each fixture would assert that the validator exits non-zero. Wiring is deferred — the `[Unreleased]` CHANGELOG entry tracks this.
 
 One-time install for the test runner: `npm --prefix tests ci && pip3 install --user tinycss2`.
 
