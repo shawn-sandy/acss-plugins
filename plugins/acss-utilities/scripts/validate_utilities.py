@@ -11,7 +11,10 @@ Two modes (auto-detected by filename):
     - No duplicate selectors at the same nesting level.
     - Every responsive variant present at one breakpoint must be present
       at every other breakpoint declared in the file.
-    - Bundle file (`utilities.css`) must not exceed `--max-kb` (default 80).
+    - Bundle file (`utilities.css`) must not exceed the size budget.
+      Resolution order: `--max-kb` flag (explicit) → `bundleSizeBudgetKb`
+      from a `utilities.tokens.json` co-located with the bundle or under
+      the validation target → fallback 80.
 
   Mode B — `token-bridge.css`
     - Every `--alias-name: …;` declaration in `:root` must also appear in
@@ -217,11 +220,34 @@ def collect_files(target: Path) -> List[Path]:
     return files
 
 
+def find_budget_kb(target: Path, bundle: Path | None) -> int | None:
+    """Locate `utilities.tokens.json#bundleSizeBudgetKb` near the bundle or
+    target. Returns the integer budget if found, else None."""
+    candidates: List[Path] = []
+    if bundle is not None:
+        candidates.append(bundle.parent / "utilities.tokens.json")
+        candidates.append(bundle.parent.parent / "utilities.tokens.json")
+    if target.is_dir():
+        candidates.append(target / "utilities.tokens.json")
+    for tokens_path in candidates:
+        if tokens_path.is_file():
+            try:
+                data = json.loads(tokens_path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                continue
+            kb = data.get("bundleSizeBudgetKb")
+            if isinstance(kb, int) and kb > 0:
+                return kb
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, add_help=True)
     parser.add_argument("target", help="File or directory to validate")
-    parser.add_argument("--max-kb", type=int, default=80,
-                        help="Bundle size budget for utilities.css (default 80)")
+    parser.add_argument("--max-kb", type=int, default=None,
+                        help="Bundle size budget for utilities.css. "
+                             "Defaults to bundleSizeBudgetKb from a co-located "
+                             "utilities.tokens.json, or 80 if neither is set.")
     parser.add_argument("--prefixes", default=",".join(DEFAULT_PREFIXES),
                         help="Allowed breakpoint prefixes, comma-separated")
     args = parser.parse_args()
@@ -254,11 +280,15 @@ def main() -> int:
 
     # Bundle-size budget — applies only to the concatenated bundle.
     for f in bundle_files:
+        if args.max_kb is not None:
+            budget_kb = args.max_kb
+        else:
+            budget_kb = find_budget_kb(target, f) or 80
         size = f.stat().st_size
-        if size > args.max_kb * 1024:
+        if size > budget_kb * 1024:
             failures.append(
                 f"{f.name}: bundle size {size} bytes exceeds budget "
-                f"{args.max_kb} KB ({args.max_kb * 1024} bytes)"
+                f"{budget_kb} KB ({budget_kb * 1024} bytes)"
             )
 
     payload = {

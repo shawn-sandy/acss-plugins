@@ -1,5 +1,4 @@
 {
-  "$schema": "./utilities.tokens.schema.json",
   "version": "0.1.0",
   "fpkitUpstream": "@fpkit/acss@6.5.0",
   "bundleSizeBudgetKb": 80,

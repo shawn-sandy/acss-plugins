@@ -79,14 +79,21 @@ def find_project_root(start: Path) -> Optional[Path]:
 
 
 def read_utilities_dir(root: Path) -> tuple[str, str]:
-    """Return (utilities_dir, source) where source is 'configured' or 'default'."""
+    """Return (utilities_dir, source) where source is 'configured' or 'default'.
+
+    A configured `utilitiesDir` is only honored when `(root / utilitiesDir)`
+    actually exists — otherwise the caller would select a non-existent path
+    and `/utility-add` would fail later.
+    """
     target = root / ".acss-target.json"
     if target.is_file():
         try:
             data = json.loads(target.read_text(encoding="utf-8"))
             cd = data.get("utilitiesDir")
-            if isinstance(cd, str) and cd.strip():
-                return cd.strip(), "configured"
+            if isinstance(cd, str):
+                configured = cd.strip()
+                if configured and (root / configured).is_dir():
+                    return configured, "configured"
         except Exception:
             pass
     return DEFAULT_UTILITIES_DIR, "default"
