@@ -7,6 +7,7 @@ All notable changes to the `acss-utilities` plugin are documented here. Format f
 ### Added
 
 - **`docs/`** — developer guide tree mirroring `acss-kit/docs/`: `README.md`, `tutorial.md`, `concepts.md`, `commands.md`, `recipes.md`, `troubleshooting.md`, `architecture.md`. `visual-guide.md` deferred.
+- **`tests/run.sh` integration** — Step 8 runs `validate_utilities.py` over `plugins/acss-utilities/assets/`; Step 9 regenerates the bundle from `utilities.tokens.json` and diffs against the committed copy (idempotency check). Both steps no-op gracefully if the plugin tree is missing. Bad-fixture self-tests are still deferred.
 
 ### Fixed
 
@@ -16,6 +17,8 @@ All notable changes to the `acss-utilities` plugin are documented here. Format f
 - **`detect_utility_target.py`:** only honor `.acss-target.json#utilitiesDir` when `(projectRoot / utilitiesDir)` actually exists; otherwise fall back to `src/styles`.
 - **`utilities.tokens.json`:** drop the dangling `$schema: "./utilities.tokens.schema.json"` pointer — the schema file does not ship in the plugin.
 - **`validate_utilities.py`:** read `bundleSizeBudgetKb` from a co-located `utilities.tokens.json` when `--max-kb` is not passed, so the token field is no longer dead. CLI flag still wins.
+- **`validate_utilities.py`:** distinct context per `@media` condition for the duplicate-selector check, so a class can legitimately appear under two different breakpoints; reject unrecognised single-file targets with a usage error (exit 2) instead of running the validator against an unrelated stylesheet; correct the `seen_selectors` type annotation to `Dict[Tuple[str, str], int]`.
+- **`generate_utilities.py`:** drop unused `os` import.
 
 ## [0.1.0] - 2026-04-28
 
@@ -32,4 +35,4 @@ All notable changes to the `acss-utilities` plugin are documented here. Format f
 - **Token bridge** — `assets/token-bridge.css` aliases acss-kit's `--color-danger`, `--color-primary`, etc. to fpkit-style names (`--color-error`, `--color-error-bg`, `--color-primary-light`) in both `:root` and `[data-theme="dark"]`.
 - **Source-of-truth** — `assets/utilities.tokens.json` is the canonical input for the generator. Includes spacing scale, breakpoints, color role list, family-enable map, and bundle-size budget.
 - **Maintainer skills** — `.claude/skills/utility-author/` (scaffold a new family) and `.claude/skills/utility-update/` (re-validate after token-bridge or naming changes) live in the project, not the plugin.
-- **Tests** — `tests/run.sh` adds a CSS contract check, an idempotency check (regenerate + diff against committed bundle), and four bad-fixture self-tests (PascalCase selector, missing `var()` fallback, missing `[data-theme="dark"]` alias, oversize bundle).
+- **Validation tooling** — the initial release ships `scripts/validate_utilities.py` and `scripts/generate_utilities.py`. Wiring these into the shared `tests/run.sh` harness (CSS contract + idempotency check) and adding bad-fixture self-tests was deferred past `0.1.0`; see the `[Unreleased]` block.

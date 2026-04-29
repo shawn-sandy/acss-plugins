@@ -77,7 +77,17 @@ For an 8px baseline use `use an 8px spacing baseline`.
 /utility-tune add an xs breakpoint at 20rem
 ```
 
-Adds `breakpoints.xs = "20rem"` to the tokens file. The generator emits `.xs\:hide`, `.xs\:p-4`, etc. The validator's allowed-prefix list extends automatically because `--prefixes` defaults to whatever is in the tokens file.
+Adds `breakpoints.xs = "20rem"` to the tokens file. The generator emits `.xs\:hide`, `.xs\:p-4`, etc.
+
+The validator's `--prefixes` flag is **not** auto-derived from the tokens file — its default is `sm,md,lg,xl,print`. After adding a new breakpoint, pass the extended list explicitly:
+
+```bash
+python3 plugins/acss-utilities/scripts/validate_utilities.py \
+  plugins/acss-utilities/assets/ \
+  --prefixes=sm,md,lg,xl,xs,print
+```
+
+(The `/utility-tune` skill takes care of this for you when the tune flow runs the validator. The flag matters only when you invoke the validator manually.)
 
 In JSX, write `<div className="xs:hide">…`. In CSS the rule is `@media (width >= 20rem) { .xs\:hide { … } }`.
 

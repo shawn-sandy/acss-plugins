@@ -14,6 +14,12 @@
 #   5. Manifest / structure replication of verify-plugins.
 #   6. Known-bad self-tests: confirm the validators catch their own
 #      contract violations.
+#   7. detect_package_manager.py --self-test.
+#   8. acss-utilities validator over plugins/acss-utilities/assets/
+#      (selector grammar, var() fallbacks, bridge dark-mode parity,
+#      bundle-size budget).
+#   9. acss-utilities idempotency: regenerate from utilities.tokens.json
+#      and diff against the committed bundle + per-family partials.
 #
 # Why syntax-only TSX validation: the reference docs split TSX across
 # multiple Key Pattern sections containing illustrative JSX or
@@ -151,6 +157,54 @@ else
   red "detect_package_manager self-test FAILED:"
   cat "$DPM_LOG"
   exit 1
+fi
+
+# Step 8
+section "8. acss-utilities validator"
+UTIL_DIR="$REPO_ROOT/plugins/acss-utilities/assets"
+if [ -d "$UTIL_DIR" ]; then
+  UTIL_LOG="$TMP_ROOT/utilities-validate.log"
+  if python3 "$REPO_ROOT/plugins/acss-utilities/scripts/validate_utilities.py" "$UTIL_DIR" >"$UTIL_LOG"; then
+    green "acss-utilities validator OK"
+  else
+    red "acss-utilities validator failed:"
+    cat "$UTIL_LOG"
+    exit 1
+  fi
+else
+  yellow "no plugins/acss-utilities/assets — skipping utilities validator"
+fi
+
+# Step 9
+section "9. acss-utilities idempotency"
+if [ -f "$UTIL_DIR/utilities.tokens.json" ]; then
+  UTIL_REGEN_DIR="$TMP_ROOT/utilities-regen"
+  mkdir -p "$UTIL_REGEN_DIR"
+  REGEN_LOG="$TMP_ROOT/utilities-regen.log"
+  if ! python3 "$REPO_ROOT/plugins/acss-utilities/scripts/generate_utilities.py" \
+         --tokens "$UTIL_DIR/utilities.tokens.json" \
+         --out-dir "$UTIL_REGEN_DIR" >"$REGEN_LOG" 2>&1; then
+    red "acss-utilities generator failed:"
+    cat "$REGEN_LOG"
+    exit 1
+  fi
+  IDEMPOTENT=1
+  if ! diff -q "$UTIL_DIR/utilities.css" "$UTIL_REGEN_DIR/utilities.css" >/dev/null; then
+    IDEMPOTENT=0
+  fi
+  if ! diff -qr "$UTIL_DIR/utilities/" "$UTIL_REGEN_DIR/utilities/" >/dev/null; then
+    IDEMPOTENT=0
+  fi
+  if [ "$IDEMPOTENT" -eq 0 ]; then
+    red "acss-utilities idempotency check failed — regenerated bundle diverges from the committed copy."
+    red "Run \`python3 plugins/acss-utilities/scripts/generate_utilities.py --tokens \\"
+    red "  plugins/acss-utilities/assets/utilities.tokens.json --out-dir plugins/acss-utilities/assets/\` and commit."
+    diff "$UTIL_DIR/utilities.css" "$UTIL_REGEN_DIR/utilities.css" | head -40 || true
+    exit 1
+  fi
+  green "acss-utilities idempotency OK"
+else
+  yellow "no plugins/acss-utilities/assets/utilities.tokens.json — skipping idempotency check"
 fi
 
 section "ALL STEPS GREEN"

@@ -99,18 +99,22 @@ def validate_utility_file(path: Path, prefixes: Tuple[str, ...]) -> List[str]:
     text = path.read_text(encoding="utf-8")
     rules = tinycss2.parse_stylesheet(text, skip_whitespace=True, skip_comments=True)
 
-    # Walk: (selector, prefix-or-None) → count, plus per-prefix variant set.
-    seen_selectors: Dict[str, int] = defaultdict(int)
+    # Walk: (context, selector) → count, plus per-prefix variant set. The
+    # context key is the empty string at top-level or the serialized media
+    # condition (e.g. "(width >= 30rem)") inside an @media — that way the
+    # same selector can legitimately appear under multiple media queries
+    # without tripping the duplicate check.
+    seen_selectors: Dict[Tuple[str, str], int] = defaultdict(int)
     base_classes: Set[str] = set()
     per_bp_classes: Dict[str, Set[str]] = defaultdict(set)
 
-    def visit_qualified(rule, current_prefix: str | None):
+    def visit_qualified(rule, current_ctx: str):
         body = tinycss2.serialize(rule.content) if rule.content else ""
         for m in VAR_NO_FALLBACK_RE.finditer(body):
             failures.append(f"{path.name}: var() without fallback: {m.group(0)}")
         for sel in _selectors_from_prelude(rule.prelude):
             failures.extend(_validate_selector(sel, prefixes))
-            seen_selectors[(current_prefix or "", sel)] += 1
+            seen_selectors[(current_ctx, sel)] += 1
             sm = SELECTOR_RE.match(sel)
             if not sm:
                 continue
@@ -129,13 +133,14 @@ def validate_utility_file(path: Path, prefixes: Tuple[str, ...]) -> List[str]:
             failures.append(f"{path.name}: parser error at line {rule.source_line}: {rule.message}")
             continue
         if rule.type == "qualified-rule":
-            visit_qualified(rule, None)
+            visit_qualified(rule, "")
         elif rule.type == "at-rule" and rule.lower_at_keyword == "media":
+            media_ctx = "@media " + tinycss2.serialize(rule.prelude).strip()
             inner_text = tinycss2.serialize(rule.content) if rule.content else ""
             inner = tinycss2.parse_stylesheet(inner_text, skip_whitespace=True, skip_comments=True)
             for inner_rule in inner:
                 if inner_rule.type == "qualified-rule":
-                    visit_qualified(inner_rule, "media")
+                    visit_qualified(inner_rule, media_ctx)
 
     # Duplicate selectors within the same context.
     for (ctx, sel), count in seen_selectors.items():
@@ -211,8 +216,20 @@ def is_utility_path(path: Path) -> bool:
 
 
 def collect_files(target: Path) -> List[Path]:
+    """Return the CSS files this validator knows how to handle.
+
+    For a single file: only return it if its filename matches a utility
+    bundle/partial or a token-bridge — otherwise the validator's two
+    modes don't apply and the caller would get confusing failures (e.g.
+    selector-grammar errors against an unrelated stylesheet). The empty
+    list signals "no recognised files" and `main()` raises a usage error.
+
+    For a directory: walk the tree and collect every matching file.
+    """
     if target.is_file():
-        return [target]
+        if is_bridge_path(target) or is_utility_path(target):
+            return [target]
+        return []
     files: List[Path] = []
     for p in target.rglob("*.css"):
         if is_bridge_path(p) or is_utility_path(p):
@@ -261,6 +278,17 @@ def main() -> int:
     files = collect_files(target)
 
     if not files:
+        if target.is_file():
+            # Unrecognised filename — the validator's two modes (utility CSS,
+            # token-bridge CSS) are auto-detected by name, so a mismatch is
+            # a usage error rather than a contract violation.
+            reason = (
+                f"unrecognised filename: {target.name}. "
+                f"This validator only handles `utilities.css`, "
+                f"`utilities/<family>.css`, or `token-bridge*.css`."
+            )
+            print(json.dumps({"ok": False, "reasons": [reason]}))
+            return 2
         print(json.dumps({
             "ok": False,
             "reasons": [f"no utility CSS files found under {target}"],
