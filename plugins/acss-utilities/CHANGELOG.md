@@ -4,6 +4,19 @@ All notable changes to the `acss-utilities` plugin are documented here. Format f
 
 ## [Unreleased]
 
+### Added
+
+- **`docs/`** — developer guide tree mirroring `acss-kit/docs/`: `README.md`, `tutorial.md`, `concepts.md`, `commands.md`, `recipes.md`, `troubleshooting.md`, `architecture.md`. `visual-guide.md` deferred.
+
+### Fixed
+
+- **README:** add hex fallbacks to the token-bridge snippet so it matches the shipped `assets/token-bridge.css` and the documented bridge contract.
+- **README:** replace the non-existent `color` family in `/utility-add --families=…` and `/utility-list` examples with real ids (`color-bg`, `color-text`, `color-border`).
+- **`utility-catalogue.md`:** correct the spacing class-count math (`210 base + 210 × 4 bps = 1050`) and the `display` responsive count (only `hide`/`show`/`invisible` get breakpoint variants); fix the `.px-6` example (padding, not margin).
+- **`detect_utility_target.py`:** only honor `.acss-target.json#utilitiesDir` when `(projectRoot / utilitiesDir)` actually exists; otherwise fall back to `src/styles`.
+- **`utilities.tokens.json`:** drop the dangling `$schema: "./utilities.tokens.schema.json"` pointer — the schema file does not ship in the plugin.
+- **`validate_utilities.py`:** read `bundleSizeBudgetKb` from a co-located `utilities.tokens.json` when `--max-kb` is not passed, so the token field is no longer dead. CLI flag still wins.
+
 ## [0.1.0] - 2026-04-28
 
 ### Added

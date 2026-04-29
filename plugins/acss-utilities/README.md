@@ -2,6 +2,8 @@
 
 A Claude Code plugin that adds a Tailwind-style atomic CSS layer to fpkit/acss projects. Generates a single `utilities.css` (committed bundle) and a `token-bridge.css` that aliases the [`acss-kit`](../acss-kit) plugin's OKLCH color roles to the fpkit-style names utility classes reference.
 
+For a guided walkthrough, mental model, command reference, recipes, troubleshooting, and maintainer architecture, see the [developer guide in `docs/`](docs/README.md).
+
 ## Pairs with `acss-kit`
 
 This plugin is designed to sit alongside `acss-kit`. `acss-kit` owns components and themes; `acss-utilities` owns the utility-class layer. They are decoupled — install one, both, or use `acss-utilities` standalone with a hand-written theme.
