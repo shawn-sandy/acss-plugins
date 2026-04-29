@@ -9,8 +9,8 @@ Every family the plugin emits in v1, every class within it, and the CSS custom p
 | `color-bg` | no | 16 (11 roles + 4 `-subtle` + `-transparent`) | `--color-*`, `--color-*-bg` |
 | `color-text` | no | 11 | `--color-*`, `--color-text-*` |
 | `color-border` | no | 11 | `--color-*` |
-| `spacing` | yes (sm/md/lg/xl) | ~210 base × 4 bps = ~1050 | none — literal rem values |
-| `display` | yes (sm/md/lg/xl/print) | 5 base + 5 × 4 bps + `print:hide` + sr-only x2 | none |
+| `spacing` | yes (sm/md/lg/xl) | 210 base + 210 × 4 bps = 1050 | none — literal rem values |
+| `display` | yes (sm/md/lg/xl/print) | 3 responsive base (`hide`/`show`/`invisible`) + 3 × 4 bps + `print:hide` + sr-only ×2 = 18 | none |
 | `flex` | yes (sm/md/lg/xl) | 21 base × 5 = 105 | none |
 | `grid` | yes (sm/md/lg/xl) | 20 base × 5 = 100 | none |
 | `type` | no | 19 | none — literal values from `tokens.type` |
@@ -78,7 +78,7 @@ Examples:
 | `.m-0` | `margin: 0` |
 | `.m-4` | `margin: 1rem` |
 | `.mt-2` | `margin-top: 0.5rem` |
-| `.px-6` | `margin-left: 1.5rem; margin-right: 1.5rem` |
+| `.px-6` | `padding-left: 1.5rem; padding-right: 1.5rem` |
 | `.gap-3` | `gap: 0.75rem` |
 | `.sm:p-4` | wrapped in `@media (width >= 30rem)` |
 

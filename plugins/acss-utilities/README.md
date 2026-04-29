@@ -47,12 +47,12 @@ If `acss-kit` is also installed, the bridge will resolve `--color-error`, `--col
 
 ### `/utility-add [--target=<dir>] [--families=<list>] [--no-bridge]`
 
-Copy `utilities.css` (and `token-bridge.css` unless `--no-bridge`) into the target. With `--families=color,spacing` only those family partials are copied (still concatenated into a single file).
+Copy `utilities.css` (and `token-bridge.css` unless `--no-bridge`) into the target. With `--families=color-bg,spacing` only those family partials are copied (still concatenated into a single file). Family names match `assets/utilities.tokens.json#families` (`color-bg`, `color-text`, `color-border`, `spacing`, `display`, `flex`, `grid`, `type`, `radius`, `shadow`, `position`, `z-index`).
 
 ```shell
 /utility-add
 /utility-add --target=apps/web/src/styles
-/utility-add --families=color,spacing,display
+/utility-add --families=color-bg,color-text,spacing,display
 /utility-add --no-bridge   # using your own theme without acss-kit
 ```
 
@@ -62,7 +62,7 @@ Read-only catalogue. No-arg lists every family; pass a family name to print ever
 
 ```shell
 /utility-list
-/utility-list color
+/utility-list color-bg
 /utility-list spacing
 ```
 
@@ -113,13 +113,13 @@ Responsive variants use the `:` separator escaped to `\:` in CSS — e.g. `.sm:h
 ```css
 :root {
   --color-error: var(--color-danger, #dc2626);
-  --color-error-bg: color-mix(in oklch, var(--color-danger) 12%, var(--color-background));
-  --color-primary-light: color-mix(in oklch, var(--color-primary) 80%, white);
+  --color-error-bg: color-mix(in oklch, var(--color-danger, #dc2626) 12%, var(--color-background, #ffffff));
+  --color-primary-light: color-mix(in oklch, var(--color-primary, #2563eb) 80%, white);
 }
 [data-theme="dark"] {
   --color-error: var(--color-danger, #f87171);
-  --color-error-bg: color-mix(in oklch, var(--color-danger) 18%, var(--color-background));
-  --color-primary-light: color-mix(in oklch, var(--color-primary) 70%, black);
+  --color-error-bg: color-mix(in oklch, var(--color-danger, #f87171) 18%, var(--color-background, #0f172a));
+  --color-primary-light: color-mix(in oklch, var(--color-primary, #7dd3fc) 70%, black);
 }
 ```
 
