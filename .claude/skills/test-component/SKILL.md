@@ -20,15 +20,16 @@ Usage examples (any of these should trigger):
    Lower-case the user's input and strip the words `the`, `a`, `component`. If the result is empty or names a component without a reference doc, list `plugins/acss-kit/skills/components/references/components/*.md` and ask the user to pick.
 
 2. **Read the reference doc.**
-   Read `plugins/acss-kit/skills/components/references/components/<name>.md` once. You need three sections from it:
-   - `## CSS Variables` — first fenced ` ```scss ` block. These are `:root` tokens.
-   - `## SCSS Template` — first fenced ` ```scss ` block. The component styles. Use as-is (CSS nesting is native).
-   - `## Usage Examples` — JSX snippets to convert to plain HTML.
+   Read `plugins/acss-kit/skills/components/references/components/<name>.md` once. You need three sections from it. For each, locate the `##` heading first, then take the first fenced block **within that section's range** (i.e. before the next `##` heading) — never the first fence in the file:
+   - `## CSS Variables` — first ` ```scss ` block in that section. These are `:root` tokens.
+   - `## SCSS Template` — first ` ```scss ` block in that section. The component styles. Use as-is (CSS nesting is native).
+   - `## Usage Examples` — JSX snippets in that section, to convert to plain HTML.
 
 3. **Convert Usage Examples JSX to HTML.**
    The Props Interface in the same doc documents which props map to which `data-*` attributes — read it and follow it. General rules:
-   - The component's root tag and class come from the SCSS Template's root selector (e.g. `.btn` → `<button class="btn">`).
-   - Compound components (`Card.Title`, `Table.Row`, etc.): match the nested SCSS selectors with the matching tag/class.
+   - **Tag:** derive the HTML element from the TSX Template's `UI as="..."` value, or from the root JSX tag in Usage Examples — never from the SCSS selector. A class like `.btn` doesn't tell you whether the element is `<button>`, `<a>`, or `<input>`.
+   - **Class:** the SCSS Template's root selector gives the className (e.g. `.btn` → `class="btn"`).
+   - Compound components (`Card.Title`, `Table.Row`, etc.): use the nested SCSS selectors for the className, and the matching JSX/TSX for the tag.
    - `disabled` prop → `aria-disabled="true"` plus `is-disabled` class. Never the native `disabled` attribute.
    - Drop event handlers (`onClick`, etc.) — this is a static preview.
 
@@ -96,15 +97,15 @@ Usage examples (any of these should trigger):
 5. **Serve it on a lightweight HTTP server, then open it.**
    Use `python3 -m http.server` on port `8765` — zero install, already a project dependency.
 
-   Probe the port; if the server is already up from a previous invocation, reuse it:
+   If `curl` is available, probe the port to reuse an already-running server (an optimization, not required):
    ```sh
    curl -fsS -o /dev/null http://localhost:8765/ 2>/dev/null
    ```
-   On non-zero exit, spawn a new server using the Bash tool with `run_in_background: true` so it survives the turn:
+   On non-zero exit (or if `curl` is missing — skip the probe), spawn a new server using the Bash tool with `run_in_background: true` so it survives the turn:
    ```sh
    python3 -m http.server 8765 --directory tests/.tmp --bind 127.0.0.1
    ```
-   Then `sleep 0.3` to let it bind. If port `8765` is held by something other than our server (curl returns content that doesn't list `preview-*.html`), bump to `8766`/`8767` rather than killing the squatter. If `python3` isn't on PATH, skip the server entirely.
+   Then `sleep 0.3` to let it bind. If the port is already taken (python errors with `OSError: [Errno 98] Address already in use`, or curl shows content that doesn't list `preview-*.html`), bump to `8766`/`8767` and retry — don't kill the squatter. If `python3` isn't on PATH, skip the server entirely and use the `file://` URL.
 
    Open the URL, swallowing errors for headless environments:
    ```sh
@@ -116,7 +117,7 @@ Usage examples (any of these should trigger):
    ```
    Preview: http://localhost:<port>/preview-<name>.html
    Fallback: file:///<abs-path>/tests/.tmp/preview-<name>.html
-   Stop server: pkill -f "http.server <port>"
+   Stop server: pkill -f "http.server <port> --directory tests/.tmp"
    ```
 
 6. **Stay in scope.**
