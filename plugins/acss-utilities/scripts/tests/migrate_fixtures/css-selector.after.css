@@ -1,0 +1,8 @@
+/* CSS escaped-colon selector fixture */
+@media (width >= 30rem) {
+  .sm-hide { display: none !important; }
+  .sm-show { display: revert !important; }
+}
+@media (width >= 48rem) {
+  .md-flex-row { flex-direction: row; }
+}

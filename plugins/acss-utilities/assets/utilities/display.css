@@ -19,23 +19,23 @@
   clip: auto; white-space: normal;
 }
 @media (width >= 30rem) {
-.sm\:hide { display: none !important; }
-.sm\:show { display: revert !important; }
-.sm\:invisible { visibility: hidden !important; }
+.sm-hide { display: none !important; }
+.sm-show { display: revert !important; }
+.sm-invisible { visibility: hidden !important; }
 }
 @media (width >= 48rem) {
-.md\:hide { display: none !important; }
-.md\:show { display: revert !important; }
-.md\:invisible { visibility: hidden !important; }
+.md-hide { display: none !important; }
+.md-show { display: revert !important; }
+.md-invisible { visibility: hidden !important; }
 }
 @media (width >= 62rem) {
-.lg\:hide { display: none !important; }
-.lg\:show { display: revert !important; }
-.lg\:invisible { visibility: hidden !important; }
+.lg-hide { display: none !important; }
+.lg-show { display: revert !important; }
+.lg-invisible { visibility: hidden !important; }
 }
 @media (width >= 80rem) {
-.xl\:hide { display: none !important; }
-.xl\:show { display: revert !important; }
-.xl\:invisible { visibility: hidden !important; }
+.xl-hide { display: none !important; }
+.xl-show { display: revert !important; }
+.xl-invisible { visibility: hidden !important; }
 }
-@media print { .print\:hide { display: none !important; } }
+@media print { .print-hide { display: none !important; } }

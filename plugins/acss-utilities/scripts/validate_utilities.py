@@ -6,7 +6,7 @@ Two modes (auto-detected by filename):
 
   Mode A — utility CSS files (`utilities.css` or `utilities/<family>.css`)
     - Selectors must be `.kebab-case`, with optional escaped breakpoint
-      prefix (e.g. `.sm\\:hide`) and optional pseudo-class (e.g. `:focus`).
+      prefix (e.g. `.sm-hide`) and optional pseudo-class (e.g. `:focus`).
     - Every `var(--x)` must include a fallback (`var(--x, …)`).
     - No duplicate selectors at the same nesting level.
     - Every responsive variant present at one breakpoint must be present
@@ -55,12 +55,13 @@ except ImportError:
 # from the same source.
 DEFAULT_PREFIXES = ("sm", "md", "lg", "xl", "print")
 
-# A utility selector: `.<prefix>\:<name>` or `.<name>`, with optional
-# pseudo-class (e.g. `:focus`, `:focus-within`).
+# A utility selector: `.<body>` or `.<bp>-<name>`, with optional pseudo-class
+# (e.g. `:focus`, `:focus-within`). Stage A: canonical form only. Stage B
+# prefix detection is done in validate_utility_file by checking whether body
+# starts with a known breakpoint prefix followed by `-`.
 SELECTOR_RE = re.compile(
     r"^\."
-    r"(?:(?P<prefix>[a-z][a-z0-9-]*)\\:)?"        # optional escaped prefix
-    r"(?P<name>[a-z][a-z0-9-]*)"
+    r"(?P<body>[a-z][a-z0-9-]*)"
     r"(?P<pseudo>(?::[a-z-]+)*)$"
 )
 
@@ -79,19 +80,19 @@ def _selectors_from_prelude(prelude) -> List[str]:
     return [s.strip() for s in text.split(",") if s.strip()]
 
 
-def _validate_selector(sel: str, prefixes: Tuple[str, ...]) -> List[str]:
-    failures: List[str] = []
+def _validate_selector(sel: str, prefixes: Tuple[str, ...] = DEFAULT_PREFIXES) -> List[str]:
+    """Stage A: canonical form check. Also rejects bare prefix names as bodies.
+
+    A selector like `.sm:hide` looks like the old colon syntax (body=`sm`,
+    pseudo=`:hide`) and must be rejected — breakpoint prefix strings are
+    reserved and cannot appear as standalone class names.
+    """
     m = SELECTOR_RE.match(sel)
     if not m:
-        failures.append(f"selector not in canonical form: {sel}")
-        return failures
-    prefix = m.group("prefix")
-    if prefix and prefix not in prefixes:
-        failures.append(
-            f"selector {sel}: unknown breakpoint prefix '{prefix}' "
-            f"(allowed: {', '.join(prefixes)})"
-        )
-    return failures
+        return [f"selector not in canonical form: {sel}"]
+    if m.group("body") in prefixes:
+        return [f"selector not in canonical form: {sel}"]
+    return []
 
 
 def validate_utility_file(path: Path, prefixes: Tuple[str, ...]) -> List[str]:
@@ -109,24 +110,43 @@ def validate_utility_file(path: Path, prefixes: Tuple[str, ...]) -> List[str]:
     per_bp_classes: Dict[str, Set[str]] = defaultdict(set)
 
     def visit_qualified(rule, current_ctx: str):
-        body = tinycss2.serialize(rule.content) if rule.content else ""
-        for m in VAR_NO_FALLBACK_RE.finditer(body):
-            failures.append(f"{path.name}: var() without fallback: {m.group(0)}")
+        rule_body = tinycss2.serialize(rule.content) if rule.content else ""
+        for var_m in VAR_NO_FALLBACK_RE.finditer(rule_body):
+            failures.append(f"{path.name}: var() without fallback: {var_m.group(0)}")
         for sel in _selectors_from_prelude(rule.prelude):
             failures.extend(_validate_selector(sel, prefixes))
             seen_selectors[(current_ctx, sel)] += 1
-            sm = SELECTOR_RE.match(sel)
-            if not sm:
+            m = SELECTOR_RE.match(sel)
+            if not m:
                 continue
-            prefix = sm.group("prefix") or ""
-            name = sm.group("name")
-            # Pseudo-classes don't participate in parity checks.
-            if sm.group("pseudo"):
+            sel_body = m.group("body")
+            # Pseudo-classes don't participate in parity/collision checks.
+            if m.group("pseudo"):
                 continue
-            if not prefix:
-                base_classes.add(name)
+            # Stage B: detect if this selector uses a known breakpoint prefix.
+            detected_prefix = ""
+            detected_name = sel_body
+            for bp in prefixes:
+                if sel_body.startswith(bp + "-"):
+                    detected_prefix = bp
+                    detected_name = sel_body[len(bp) + 1:]
+                    break
+            if not detected_prefix:
+                base_classes.add(sel_body)
             else:
-                per_bp_classes[prefix].add(name)
+                # Collision guard: prefixed selectors must be inside the right @media.
+                in_width = "width >=" in current_ctx
+                in_print = "print" in current_ctx and "width" not in current_ctx
+                if detected_prefix == "print":
+                    if not in_print:
+                        failures.append(
+                            f"{path.name}: base class '.{sel_body}' collides with breakpoint prefix — rename"
+                        )
+                elif not in_width:
+                    failures.append(
+                        f"{path.name}: base class '.{sel_body}' collides with breakpoint prefix — rename"
+                    )
+                per_bp_classes[detected_prefix].add(detected_name)
 
     for rule in rules:
         if rule.type == "error":
@@ -148,9 +168,19 @@ def validate_utility_file(path: Path, prefixes: Tuple[str, ...]) -> List[str]:
             ctx_label = ctx or "top-level"
             failures.append(f"{path.name}: duplicate selector {sel} in {ctx_label} ({count}×)")
 
-    # Responsive parity: every base class that appears prefixed at one bp
-    # should appear at every other declared bp (`print` is exempt — fpkit
-    # only ships `.print\:hide`).
+    # Check 1: base-class-existence — every responsive variant must have a
+    # corresponding base class in the same file. Without this, a generator
+    # bug could emit `.sm-bogus` at all breakpoints with no `.bogus` base.
+    for bp, names in per_bp_classes.items():
+        for name in names:
+            if name not in base_classes:
+                failures.append(
+                    f"{path.name}: responsive variant '.{bp}-{name}' has no base class '.{name}'"
+                )
+
+    # Check 3: responsive parity — every base class that appears prefixed at
+    # one bp should appear at every other declared bp (`print` is exempt —
+    # fpkit only ships `.print-hide`).
     declared_bps = sorted(b for b in per_bp_classes if b != "print")
     if declared_bps:
         for bp in declared_bps:
@@ -162,7 +192,7 @@ def validate_utility_file(path: Path, prefixes: Tuple[str, ...]) -> List[str]:
                 missing = [other for other in declared_bps if cls not in per_bp_classes[other]]
                 if missing:
                     failures.append(
-                        f"{path.name}: responsive parity gap — '.{bp}\\:{cls}' "
+                        f"{path.name}: responsive parity gap — '.{bp}-{cls}' "
                         f"is declared but missing at: {', '.join(missing)}"
                     )
 

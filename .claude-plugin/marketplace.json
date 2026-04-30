@@ -29,7 +29,7 @@
     {
       "name": "acss-utilities",
       "source": "./plugins/acss-utilities",
-      "description": "Tailwind-style atomic CSS utility classes for fpkit/acss projects, mirroring @fpkit/acss@6.5.0 conventions (.bg-primary, .mt-4, .sm:hide, etc.). Pairs with acss-kit via a token-bridge that aliases acss-kit's OKLCH roles to fpkit-style names in both light and dark modes. Run /utility-add to drop the bundle into your project.",
+      "description": "Tailwind-style atomic CSS utility classes for fpkit/acss projects (.bg-primary, .mt-4, .sm-hide). Hyphen-prefix responsive variants — no CSS escaping needed. Pairs with acss-kit via a token-bridge. Run /utility-add to drop the bundle into your project.",
       "category": "development",
       "tags": [
         "utility-classes",

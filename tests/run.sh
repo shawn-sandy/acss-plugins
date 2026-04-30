@@ -20,6 +20,7 @@
 #      bundle-size budget).
 #   9. acss-utilities idempotency: regenerate from utilities.tokens.json
 #      and diff against the committed bundle + per-family partials.
+#  10. migrate_classnames.py fixture round-trip + idempotency.
 #
 # Why syntax-only TSX validation: the reference docs split TSX across
 # multiple Key Pattern sections containing illustrative JSX or
@@ -205,6 +206,53 @@ if [ -f "$UTIL_DIR/utilities.tokens.json" ]; then
   green "acss-utilities idempotency OK"
 else
   yellow "no plugins/acss-utilities/assets/utilities.tokens.json — skipping idempotency check"
+fi
+
+# Step 10
+section "10. migrate_classnames.py fixture round-trip + idempotency"
+MIGRATE_SCRIPT="$REPO_ROOT/plugins/acss-utilities/scripts/migrate_classnames.py"
+FIXTURES_DIR="$REPO_ROOT/plugins/acss-utilities/scripts/tests/migrate_fixtures"
+if [ -f "$MIGRATE_SCRIPT" ] && [ -d "$FIXTURES_DIR" ]; then
+  MIGRATE_LOG="$TMP_ROOT/migrate-classnames.log"
+  MIGRATE_FAIL=0
+  MIGRATE_TMP="$TMP_ROOT/migrate-fixtures"
+  mkdir -p "$MIGRATE_TMP"
+  for before in "$FIXTURES_DIR"/*.before.*; do
+    [ -f "$before" ] || continue
+    bname="$(basename "$before")"
+    ext="${bname##*.}"
+    stem="${bname%.before.*}"
+    after="$FIXTURES_DIR/${stem}.after.${ext}"
+    [ -f "$after" ] || continue
+    tmp_copy="$MIGRATE_TMP/${bname}"
+    cp "$before" "$tmp_copy"
+    # Run once (write mode)
+    python3 "$MIGRATE_SCRIPT" "$tmp_copy" --write >/dev/null 2>&1
+    # Compare to .after fixture
+    if ! diff -q "$tmp_copy" "$after" >/dev/null 2>&1; then
+      echo "FAIL (round-trip): $stem" >> "$MIGRATE_LOG"
+      diff "$after" "$tmp_copy" >> "$MIGRATE_LOG" 2>&1 || true
+      MIGRATE_FAIL=1
+      continue
+    fi
+    # Run again (idempotency)
+    cp "$tmp_copy" "${tmp_copy}.orig"
+    python3 "$MIGRATE_SCRIPT" "$tmp_copy" --write >/dev/null 2>&1
+    if ! diff -q "${tmp_copy}.orig" "$tmp_copy" >/dev/null 2>&1; then
+      echo "FAIL (idempotency): $stem" >> "$MIGRATE_LOG"
+      MIGRATE_FAIL=1
+    fi
+    rm -f "${tmp_copy}.orig"
+  done
+  if [ "$MIGRATE_FAIL" -eq 0 ]; then
+    green "migrate_classnames fixture tests OK"
+  else
+    red "migrate_classnames fixture tests FAILED:"
+    cat "$MIGRATE_LOG"
+    exit 1
+  fi
+else
+  yellow "migrate_classnames.py or fixtures not found — skipping"
 fi
 
 section "ALL STEPS GREEN"

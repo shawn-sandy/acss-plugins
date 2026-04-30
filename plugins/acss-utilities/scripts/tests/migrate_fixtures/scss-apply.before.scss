@@ -1,0 +1,7 @@
+/* SCSS @apply fixture */
+.card {
+  @apply hide sm:show md:flex-row;
+}
+.btn {
+  @apply bg-primary lg:p-6 xl:text-lg;
+}

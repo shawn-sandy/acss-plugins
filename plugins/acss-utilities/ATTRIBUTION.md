@@ -8,9 +8,12 @@ The plugin tracks **`@fpkit/acss@6.5.0`** (the same pin used by `acss-kit`'s com
 
 ## What we mirror verbatim
 
-- **Class names** for color (`.bg-*`, `.text-*`, `.border-*`), display (`.hide`, `.show`, `.invisible`, `.sr-only`, `.sr-only-focusable`), responsive variants (`.sm:hide`, `.md:show`, `.lg:invisible`, `.xl:hide`, `.print:hide`), and the `:` separator (escaped as `\:` in CSS).
+- **Class names** for color (`.bg-*`, `.text-*`, `.border-*`), display (`.hide`, `.show`, `.invisible`, `.sr-only`, `.sr-only-focusable`), and responsive variant base names (`hide`, `show`, `invisible`).
 - **Breakpoints**: `sm: 30rem`, `md: 48rem`, `lg: 62rem`, `xl: 80rem`. Identical to `_display.scss` in upstream.
+- **Modern range-query syntax** (`@media (width >= …)`) matching fpkit's generated CSS.
 - **`!important` policy** for display/visibility utilities (matches `_display.scss`).
+
+**Class-name divergence (intentional):** fpkit upstream uses escaped-colon responsive variants (`.sm\:hide` in CSS, `sm:hide` in JSX). This plugin uses plain hyphen-prefix variants (`.sm-hide` in both). Token values, breakpoints, and media-query syntax remain aligned with fpkit; only the responsive class-name separator differs.
 
 Per-family upstream sources (when applicable):
 
