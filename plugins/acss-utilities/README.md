@@ -11,7 +11,7 @@ This plugin is designed to sit alongside `acss-kit`. `acss-kit` owns components 
 | Plugin | Owns |
 |---|---|
 | [`acss-kit`](../acss-kit) | Components, themes (light/dark/brand), OKLCH role catalogue |
-| `acss-utilities` (this) | Utility classes (`.bg-primary`, `.mt-4`, `.sm:hide`), token-bridge |
+| `acss-utilities` (this) | Utility classes (`.bg-primary`, `.mt-4`, `.sm-hide`), token-bridge |
 
 ## Why utility classes
 
@@ -96,7 +96,7 @@ Mirroring fpkit upstream where present, plus standard atomic-CSS additions (see 
 | `color-bg` | `.bg-primary`, `.bg-success`, `.bg-error`, `.bg-surface`, `.bg-transparent` | no |
 | `color-text` | `.text-primary`, `.text-error`, `.text-muted` | no |
 | `color-border` | `.border-primary`, `.border-error`, `.border-muted` | no |
-| `display` | `.hide`, `.show`, `.invisible`, `.sr-only`, `.sr-only-focusable`, `.print:hide` | yes |
+| `display` | `.hide`, `.show`, `.invisible`, `.sr-only`, `.sr-only-focusable`, `.print-hide` | yes |
 | `spacing` | `.m-4`, `.mt-2`, `.px-6`, `.gap-3` | yes |
 | `flex` | `.flex`, `.flex-col`, `.justify-center`, `.items-center` | yes |
 | `grid` | `.grid`, `.grid-cols-2`, `.grid-cols-12` | yes |
@@ -106,7 +106,13 @@ Mirroring fpkit upstream where present, plus standard atomic-CSS additions (see 
 | `position` | `.relative`, `.absolute`, `.fixed`, `.sticky` | no |
 | `z-index` | `.z-10`, `.z-20`, `.z-50`, `.z-auto` | no |
 
-Responsive variants use the `:` separator escaped to `\:` in CSS — e.g. `.sm:hide` is written as `.sm\:hide` in the stylesheet but used as `<div className="sm:hide">…` in JSX. Breakpoints: `sm: 30rem`, `md: 48rem`, `lg: 62rem`, `xl: 80rem`.
+Responsive variants use a plain hyphen prefix — `.sm-hide`, `.md-p-6`, `.lg-flex-row`. No CSS escaping needed in the stylesheet or JSX `className` strings. Breakpoints: `sm: 30rem`, `md: 48rem`, `lg: 62rem`, `xl: 80rem`.
+
+### Responsive variants
+
+This plugin diverges from fpkit upstream class naming: instead of the escaped-colon form (`.sm\:hide` / `className="sm:hide"`), all responsive variants use a single hyphen separator (`.sm-hide` / `className="sm-hide"`). Token values, breakpoint widths, and media-query range syntax still mirror fpkit.
+
+**Migrating from 0.1.0:** search-and-replace in JSX `className` strings and CSS `@apply` directives — `sm:` → `sm-`, `md:` → `md-`, `lg:` → `lg-`, `xl:` → `xl-`, `print:` → `print-`. Use `scripts/migrate_classnames.py` for an automated dry-run.
 
 ## Token bridge
 

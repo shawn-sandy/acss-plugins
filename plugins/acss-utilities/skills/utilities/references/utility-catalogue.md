@@ -10,7 +10,7 @@ Every family the plugin emits in v1, every class within it, and the CSS custom p
 | `color-text` | no | 11 | `--color-*`, `--color-text-*` |
 | `color-border` | no | 11 | `--color-*` |
 | `spacing` | yes (sm/md/lg/xl) | 210 base + 210 × 4 bps = 1050 | none — literal rem values |
-| `display` | yes (sm/md/lg/xl/print) | 3 responsive base (`hide`/`show`/`invisible`) + 3 × 4 bps + `print:hide` + sr-only ×2 = 18 | none |
+| `display` | yes (sm/md/lg/xl/print) | 3 responsive base (`hide`/`show`/`invisible`) + 3 × 4 bps + `print-hide` + sr-only ×2 = 18 | none |
 | `flex` | yes (sm/md/lg/xl) | 21 base × 5 = 105 | none |
 | `grid` | yes (sm/md/lg/xl) | 20 base × 5 = 100 | none |
 | `type` | no | 19 | none — literal values from `tokens.type` |
@@ -69,7 +69,7 @@ Generated from `tokens.spacing.{baseline, scale, properties}`. Each (property, s
 - **Properties**: `m`, `mt`, `mb`, `ml`, `mr`, `mx`, `my`, `p`, `pt`, `pb`, `pl`, `pr`, `px`, `py`, `gap`
 - **Scale**: `[0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32]`
 - **Baseline**: `0.25rem` (so `.m-4 = 1rem`, `.p-8 = 2rem`)
-- **Responsive**: yes — every class has `.sm:`, `.md:`, `.lg:`, `.xl:` variants
+- **Responsive**: yes — every class has `.sm-`, `.md-`, `.lg-`, `.xl-` variants
 
 Examples:
 
@@ -80,7 +80,7 @@ Examples:
 | `.mt-2` | `margin-top: 0.5rem` |
 | `.px-6` | `padding-left: 1.5rem; padding-right: 1.5rem` |
 | `.gap-3` | `gap: 0.75rem` |
-| `.sm:p-4` | wrapped in `@media (width >= 30rem)` |
+| `.sm-p-4` | wrapped in `@media (width >= 30rem)` |
 
 ## display
 
@@ -93,8 +93,8 @@ Layout / visibility primitives.
 | `.invisible` | `visibility: hidden !important` | preserves layout |
 | `.sr-only` | absolute clip rect | screen-reader-only utility |
 | `.sr-only-focusable` | absolute clip rect, becomes static on focus | skip-link pattern |
-| `.print:hide` | `display: none !important` inside `@media print` | print-specific |
-| `.sm:hide` etc. | `display: none !important` inside `@media (width >= …)` | responsive |
+| `.print-hide` | `display: none !important` inside `@media print` | print-specific |
+| `.sm-hide` etc. | `display: none !important` inside `@media (width >= …)` | responsive |
 
 `.sr-only` and `.sr-only-focusable` are not responsive — they're accessibility primitives that should always be active regardless of viewport.
 

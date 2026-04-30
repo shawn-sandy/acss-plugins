@@ -77,21 +77,19 @@ Every class in the bundle is documented in [`references/utility-catalogue.md`](.
 
 ## Step 4 — Hide a class on small screens
 
-Responsive prefixes use `sm:`, `md:`, `lg:`, `xl:`. In your JSX, the colon is **not** escaped:
+Responsive prefixes use `sm-`, `md-`, `lg-`, `xl-`. Use them the same way in JSX and in the stylesheet — no escaping required:
 
 ```tsx
-<aside className="hide md:show">…</aside>
+<aside className="hide md-show">…</aside>
 ```
 
 This element is hidden by default and revealed at `≥ 48rem` (the `md` breakpoint). The CSS rule it matches looks like:
 
 ```css
 @media (width >= 48rem) {
-  .md\:show { display: revert !important; }
+  .md-show { display: revert !important; }
 }
 ```
-
-Note the `\:` in the CSS file — that's the escaped form. JSX/HTML always uses the unescaped `md:show`.
 
 See [`references/breakpoints.md`](../skills/utilities/references/breakpoints.md) for the full breakpoint table.
 

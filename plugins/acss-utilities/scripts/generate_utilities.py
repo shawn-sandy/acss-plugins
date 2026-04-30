@@ -18,9 +18,9 @@ Stdlib only.
 
 Class conventions match fpkit/acss upstream:
   - kebab-case selectors, no prefix (`.bg-primary`, `.mt-4`)
-  - responsive variants via escaped colon (`.sm\\:hide`) at breakpoints
+  - responsive variants via hyphen prefix (`.sm-hide`) at breakpoints
     sm/md/lg/xl from tokens.breakpoints
-  - print:hide for the print media query
+  - print-hide for the print media query
   - !important on display/visibility utilities only (composes elsewhere)
 """
 from __future__ import annotations
@@ -71,11 +71,11 @@ def _section(title: str, body: str) -> str:
 
 
 def _wrap_responsive(body: str, family: str, tokens: dict, emit_base: Callable[[str], str]) -> str:
-    """Append @media blocks with `.bp\\:<class>` variants for each breakpoint."""
+    """Append @media blocks with `.bp-<class>` variants for each breakpoint."""
     parts = [body]
     for bp in _bp_keys(tokens):
         width = tokens["breakpoints"][bp]
-        prefixed = emit_base(bp + r"\:")
+        prefixed = emit_base(bp + "-")
         parts.append(f"@media (width >= {width}) {{\n{prefixed}}}")
     return "\n".join(parts)
 
@@ -181,8 +181,8 @@ def emit_display(tokens: dict) -> str:
 
     if tokens["families"]["display"].get("responsive"):
         for bp, width in tokens["breakpoints"].items():
-            body += f"@media (width >= {width}) {{\n{block(bp + chr(92) + ':')}}}\n"
-    body += "@media print { .print\\:hide { display: none !important; } }\n"
+            body += f"@media (width >= {width}) {{\n{block(bp + '-')}}}\n"
+    body += "@media print { .print-hide { display: none !important; } }\n"
     return _section("display utilities", body)
 
 

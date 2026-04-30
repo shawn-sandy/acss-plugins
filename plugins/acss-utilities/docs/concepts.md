@@ -43,23 +43,23 @@ Five prefixes ship by default: `sm`, `md`, `lg`, `xl`, `print`. The breakpoint w
 | `md` | 48rem | `@media (width >= 48rem)` |
 | `lg` | 62rem | `@media (width >= 62rem)` |
 | `xl` | 80rem | `@media (width >= 80rem)` |
-| `print` | — | `@media print { .print\:hide { … } }` (only `hide` is emitted) |
+| `print` | — | `@media print { .print-hide { … } }` (only `hide` is emitted) |
 
-In the stylesheet the colon is escaped as `\:`. In your JSX/HTML it is **not** escaped:
+Responsive class names use a plain hyphen prefix — no escaping in the stylesheet or in JSX:
 
 ```tsx
-<div className="hide md:show lg:hide">…</div>
+<div className="hide md-show lg-hide">…</div>
 ```
 
-If you write `.sm:hide` in CSS without the backslash, the selector is invalid and the rule never matches. See [`references/breakpoints.md`](../skills/utilities/references/breakpoints.md).
+See [`references/breakpoints.md`](../skills/utilities/references/breakpoints.md) for the full breakpoint table and class-naming rules.
 
-Not every family is responsive. Color, type, radius, shadow, position, and z-index emit only base classes. Spacing, display, flex, and grid emit the full `sm/md/lg/xl` set. The `families.<name>.responsive` flag in the tokens file controls this.
+Not every family is responsive. Color, type, radius, shadow, position, and z-index emit only base classes. Spacing, display, flex, and grid emit the full `sm-/md-/lg-/xl-` set. The `families.<name>.responsive` flag in the tokens file controls this.
 
 ## `!important` is reserved for display and visibility
 
 Utility classes generally compose with component styles. They do **not** stamp `!important` on every property, because the user should be able to override `.bg-primary` with a more specific component rule.
 
-The exceptions are `display`, `visibility`, and the `print:hide` / `sm:hide` family — these need to win over any positioning or layout rule that the component author may have set. So:
+The exceptions are `display`, `visibility`, and the `print-hide` / `sm-hide` family — these need to win over any positioning or layout rule that the component author may have set. So:
 
 ```css
 .hide { display: none !important; }

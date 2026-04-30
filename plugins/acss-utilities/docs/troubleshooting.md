@@ -20,18 +20,21 @@ pip3 install --user tinycss2
 
 ---
 
-## `.sm:hide` is not firing
+## `.sm-hide` is not firing
 
-**Symptom:** A class like `.md:show` or `.lg:hide` does not match any element.
+**Symptom:** A class like `.md-show` or `.lg-hide` does not match any element.
 
-**Cause:** The CSS file uses an escaped colon (`.md\:show`); the JSX/HTML uses an **unescaped** colon (`md:show`). If you write `.md:show` in your stylesheet, the parser treats `:show` as a pseudo-class and the rule never matches.
+**Cause (migrating from 0.1.x):** You may still be using the old colon-based class names in JSX (`md:show`) while the new bundle ships only `.md-show`. The colon form is no longer valid.
 
-**Fix:**
+**Fix:** Run the migration script to update all JSX/CSS references:
 
-- **In stylesheets** (the bundled `utilities.css` and any custom rules): always write `\:` — `.md\:show { … }`.
-- **In JSX / HTML / template literals**: never escape — `<div className="md:show">…`.
+```bash
+python3 plugins/acss-utilities/scripts/migrate_classnames.py src/ --write
+```
 
-The bundled `utilities.css` already gets this right; the issue only comes up when you author additional utilities by hand.
+Or do a manual search-and-replace: `sm:` → `sm-`, `md:` → `md-`, `lg:` → `lg-`, `xl:` → `xl-`, `print:` → `print-` in all JSX `className` strings.
+
+**Cause (hand-authored CSS):** If you write `.md-show` in a custom stylesheet at the top level (outside any `@media` block), the validator will reject it with "collides with breakpoint prefix". Move it inside `@media (width >= 48rem)` or rename it to avoid the `md-` prefix.
 
 ---
 
