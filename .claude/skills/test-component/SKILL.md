@@ -17,30 +17,25 @@ Usage examples (any of these should trigger):
 ## Steps
 
 1. **Resolve the component name.**
-   - Lower-case it. Strip filler words ("the", "a", "component").
-   - Verify `plugins/acss-kit/skills/components/references/components/<name>.md` exists.
-   - If the name is ambiguous or missing, list `plugins/acss-kit/skills/components/references/components/*.md` and ask the user to pick.
+   Lower-case the user's input and strip the words `the`, `a`, `component`. If the result is empty or names a component without a reference doc, list `plugins/acss-kit/skills/components/references/components/*.md` and ask the user to pick.
 
 2. **Read the reference doc.**
-   Read the whole file. You need three sections:
-   - `## CSS Variables` — first fenced ``` ```scss ``` block. These are `:root` tokens.
-   - `## SCSS Template` — first fenced ``` ```scss ``` block. The component styles. Use as-is (CSS nesting is native).
-   - `## Usage Examples` — JSX snippets you'll convert to plain HTML.
+   Read `plugins/acss-kit/skills/components/references/components/<name>.md` once. You need three sections from it:
+   - `## CSS Variables` — first fenced ` ```scss ` block. These are `:root` tokens.
+   - `## SCSS Template` — first fenced ` ```scss ` block. The component styles. Use as-is (CSS nesting is native).
+   - `## Usage Examples` — JSX snippets to convert to plain HTML.
 
 3. **Convert Usage Examples JSX to HTML.**
-   Each component's reference doc tells you how the JSX maps to DOM. The general rule for `acss-kit`:
-   - The React component renders a single semantic element with a class and data attributes.
-   - Look at the SCSS Template's root selector (e.g. `.btn`, `.alert`, `.card`) — that's the className.
-   - Props that map to `data-*` attributes (`color="primary"` → `data-color="primary"`, `size="lg"` → `data-btn="lg"`, `variant="outline"` → `data-style="outline"`) are documented in the Props Interface.
-   - For Button specifically: combine `size` + `block` + raw `data-btn` into a single space-separated `data-btn` token (see Key Pattern: data-btn Merging in `button.md`).
-   - For compound components (Card.Title, Card.Content, Table.Row, etc.) check the SCSS for the nested selectors and use the matching tag/class.
-   - Replace `disabled` prop with `aria-disabled="true"` and add the `is-disabled` class — never use the native `disabled` attribute.
+   The Props Interface in the same doc documents which props map to which `data-*` attributes — read it and follow it. General rules:
+   - The component's root tag and class come from the SCSS Template's root selector (e.g. `.btn` → `<button class="btn">`).
+   - Compound components (`Card.Title`, `Table.Row`, etc.): match the nested SCSS selectors with the matching tag/class.
+   - `disabled` prop → `aria-disabled="true"` plus `is-disabled` class. Never the native `disabled` attribute.
    - Drop event handlers (`onClick`, etc.) — this is a static preview.
 
-   Aim for one `<section>` per variant family (color, size, style, state) with a small heading. Cover every distinct example that appears in Usage Examples.
+   Lay out one `<section>` per variant family (color, size, style, state) with a small heading. Cover every distinct example from Usage Examples.
 
 4. **Generate the HTML file.**
-   Write to `tests/.tmp/preview-<name>.html` (create `tests/.tmp/` if missing). Template:
+   Run `mkdir -p tests/.tmp` and write `tests/.tmp/preview-<name>.html` using this template:
 
    ````html
    <!doctype html>
@@ -99,40 +94,33 @@ Usage examples (any of these should trigger):
    - If the SCSS uses `@use`, `@mixin`, `@include`, `@if`, or `$variables` (rare in this repo — components are kept var()-driven), call that out and skip those lines with an HTML comment explaining what was dropped. The user can decide whether to address it.
 
 5. **Serve it on a lightweight HTTP server, then open it.**
-   Python 3 is already a project dependency, so `python3 -m http.server` gives us a zero-install static server. Default port: `8765`.
+   Use `python3 -m http.server` on port `8765` — zero install, already a project dependency.
 
-   First, check whether a server is already up on that port (re-runs of this skill should reuse it, not spawn duplicates):
+   Probe the port; if the server is already up from a previous invocation, reuse it:
    ```sh
    curl -fsS -o /dev/null http://localhost:8765/ 2>/dev/null
    ```
-   - Exit 0 → server already running, skip the spawn step.
-   - Non-zero → start the server. Use the **Bash tool with `run_in_background: true`** so it keeps running after this turn:
-     ```sh
-     python3 -m http.server 8765 --directory tests/.tmp --bind 127.0.0.1
-     ```
-     Then poll the port up to ~5 times with a short sleep until `curl` returns 0, so the open step doesn't race the server's startup.
-   - If port `8765` is taken by something that *isn't* our server (curl returns HTML you don't recognize, or the server's directory listing doesn't show `preview-*.html`), bump to `8766`, `8767`, etc. Don't kill whatever's already on `8765`.
-
-   Then open the URL, swallowing errors so headless environments don't fail:
+   On non-zero exit, spawn a new server using the Bash tool with `run_in_background: true` so it survives the turn:
    ```sh
-   xdg-open  http://localhost:8765/preview-<name>.html 2>/dev/null \
-     || open http://localhost:8765/preview-<name>.html 2>/dev/null \
+   python3 -m http.server 8765 --directory tests/.tmp --bind 127.0.0.1
+   ```
+   Then `sleep 0.3` to let it bind. If port `8765` is held by something other than our server (curl returns content that doesn't list `preview-*.html`), bump to `8766`/`8767` rather than killing the squatter. If `python3` isn't on PATH, skip the server entirely.
+
+   Open the URL, swallowing errors for headless environments:
+   ```sh
+   xdg-open  http://localhost:<port>/preview-<name>.html 2>/dev/null \
+     || open http://localhost:<port>/preview-<name>.html 2>/dev/null \
      || true
    ```
-   **Always** print both URLs so the user has a manual fallback:
+   Always print both URLs so the user has a manual fallback, and tell them how to stop the server:
    ```
-   Preview: http://localhost:8765/preview-<name>.html
-   Fallback (no server): file:///<abs-path>/tests/.tmp/preview-<name>.html
+   Preview: http://localhost:<port>/preview-<name>.html
+   Fallback: file:///<abs-path>/tests/.tmp/preview-<name>.html
+   Stop server: pkill -f "http.server <port>"
    ```
 
-   If `python3` isn't on PATH (extremely unlikely in this repo — every script under `plugins/acss-kit/scripts/` requires it), skip the server step entirely and use only the `file://` URL.
-
-   Mention to the user that the server is running in the background and can be stopped with `pkill -f "http.server 8765"` (or whatever port was used) when they're done.
-
-6. **Don't over-engineer.**
-   - No screenshot generation, no Puppeteer, no React, no Vite, no theme assembly, no `npx serve` / `live-server` / any node-side dep. Stick with `python3 -m http.server` — already on PATH.
-   - Don't write tests, don't validate accessibility, don't run the full `tests/` harness — there's a separate `/review-component` skill for that.
-   - If the user asks for something the static preview can't show (e.g. "test the click handler", "test focus trap"), say so explicitly and recommend `tests/e2e.sh` instead.
+6. **Stay in scope.**
+   If the user asks for something a static preview can't show (click handlers, focus trap, real interaction), say so and recommend `tests/e2e.sh` instead. Don't extend this skill into a general test harness.
 
 ## Edge cases
 
