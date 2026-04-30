@@ -3,7 +3,10 @@
 
 `agentic-acss-plugins` is a Claude Code plugin marketplace for building accessible React components and CSS themes for fpkit/acss projects.
 
-As of `0.3.0`, the marketplace ships one plugin: `acss-kit`.
+The marketplace ships two plugins:
+
+- `acss-kit` — accessible React components and OKLCH CSS themes for fpkit/acss projects.
+- `acss-utilities` — Tailwind-style atomic CSS utility classes paired with `acss-kit`'s theme tokens via a bridge file.
 
 ## Install
 
@@ -12,6 +15,7 @@ Run these commands inside a Claude Code session:
 ```text
 /plugin marketplace add shawn-sandy/agentic-acss-plugins
 /plugin install acss-kit@shawn-sandy-agentic-acss-plugins
+/plugin install acss-utilities@shawn-sandy-agentic-acss-plugins
 ```
 
 For local testing from this repo:
@@ -19,9 +23,10 @@ For local testing from this repo:
 ```text
 /plugin marketplace add /absolute/path/to/agentic-acss-plugins
 /plugin install acss-kit@agentic-acss-plugins
+/plugin install acss-utilities@agentic-acss-plugins
 ```
 
-Use `/plugin list` to confirm the plugin is installed and to see available slash commands.
+Use `/plugin list` to confirm the plugins are installed and to see available slash commands.
 
 ## Prerequisites
 

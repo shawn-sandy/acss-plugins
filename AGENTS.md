@@ -8,9 +8,10 @@ A Claude Code **plugin marketplace** - not a Node.js or Python package. There ar
 
 **Stack:** Claude Code plugin format, Python 3 (scripts), SCSS/CSS custom properties (generated output).
 
-The repo contains one plugin:
+The repo contains two plugins:
 
 - `plugins/acss-kit` - accessible React components and CSS themes for fpkit/acss projects.
+- `plugins/acss-utilities` - Tailwind-style atomic CSS utility classes paired with `acss-kit`'s OKLCH theme tokens via a bridge file.
 
 Maintainer tooling for working on this repo lives at `.claude/` (review agents, authoring/release skills, validation commands, advisory rules, hooks) — see [`.claude/README.md`](./.claude/README.md) for the index.
 
@@ -18,6 +19,7 @@ Install from a Claude Code session:
 ```
 /plugin marketplace add shawn-sandy/agentic-acss-plugins
 /plugin install acss-kit@shawn-sandy-agentic-acss-plugins
+/plugin install acss-utilities@shawn-sandy-agentic-acss-plugins
 ```
 
 ## Plugin structure
@@ -50,9 +52,9 @@ Body delegates to the master SKILL.md, never re-implements logic inline.
 
 ## Version bumps
 
-Plugin versions live in one authoritative place:
+Plugin versions live in one authoritative place per plugin:
 
-- `plugins/acss-kit/.claude-plugin/plugin.json` - Claude Code and `/plugin update` read this
+- `plugins/<plugin>/.claude-plugin/plugin.json` - Claude Code and `/plugin update` read this
 - `.claude-plugin/marketplace.json` - omit a per-plugin `version` field here
 
 Bump only `plugin.json`. Do not add a `version` key to `marketplace.json` entries.
