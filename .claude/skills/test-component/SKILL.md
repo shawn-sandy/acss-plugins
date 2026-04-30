@@ -98,20 +98,39 @@ Usage examples (any of these should trigger):
    - Paste the SCSS Template verbatim into the `<style>` tag. Modern CSS handles `&:hover`, `&[data-attr]`, and nested selectors natively. Do NOT compile.
    - If the SCSS uses `@use`, `@mixin`, `@include`, `@if`, or `$variables` (rare in this repo — components are kept var()-driven), call that out and skip those lines with an HTML comment explaining what was dropped. The user can decide whether to address it.
 
-5. **Open it.**
-   Try in this order, swallowing errors:
+5. **Serve it on a lightweight HTTP server, then open it.**
+   Python 3 is already a project dependency, so `python3 -m http.server` gives us a zero-install static server. Default port: `8765`.
+
+   First, check whether a server is already up on that port (re-runs of this skill should reuse it, not spawn duplicates):
    ```sh
-   xdg-open tests/.tmp/preview-<name>.html 2>/dev/null \
-     || open tests/.tmp/preview-<name>.html 2>/dev/null \
+   curl -fsS -o /dev/null http://localhost:8765/ 2>/dev/null
+   ```
+   - Exit 0 → server already running, skip the spawn step.
+   - Non-zero → start the server. Use the **Bash tool with `run_in_background: true`** so it keeps running after this turn:
+     ```sh
+     python3 -m http.server 8765 --directory tests/.tmp --bind 127.0.0.1
+     ```
+     Then poll the port up to ~5 times with a short sleep until `curl` returns 0, so the open step doesn't race the server's startup.
+   - If port `8765` is taken by something that *isn't* our server (curl returns HTML you don't recognize, or the server's directory listing doesn't show `preview-*.html`), bump to `8766`, `8767`, etc. Don't kill whatever's already on `8765`.
+
+   Then open the URL, swallowing errors so headless environments don't fail:
+   ```sh
+   xdg-open  http://localhost:8765/preview-<name>.html 2>/dev/null \
+     || open http://localhost:8765/preview-<name>.html 2>/dev/null \
      || true
    ```
-   Then **always** print the absolute path and `file://` URL so the user can open it manually if no GUI is available:
+   **Always** print both URLs so the user has a manual fallback:
    ```
-   Preview: file:///<abs-path>/tests/.tmp/preview-<name>.html
+   Preview: http://localhost:8765/preview-<name>.html
+   Fallback (no server): file:///<abs-path>/tests/.tmp/preview-<name>.html
    ```
 
+   If `python3` isn't on PATH (extremely unlikely in this repo — every script under `plugins/acss-kit/scripts/` requires it), skip the server step entirely and use only the `file://` URL.
+
+   Mention to the user that the server is running in the background and can be stopped with `pkill -f "http.server 8765"` (or whatever port was used) when they're done.
+
 6. **Don't over-engineer.**
-   - No screenshot generation, no Puppeteer, no React, no Vite, no theme assembly. Just the component's own CSS + the example HTML.
+   - No screenshot generation, no Puppeteer, no React, no Vite, no theme assembly, no `npx serve` / `live-server` / any node-side dep. Stick with `python3 -m http.server` — already on PATH.
    - Don't write tests, don't validate accessibility, don't run the full `tests/` harness — there's a separate `/review-component` skill for that.
    - If the user asks for something the static preview can't show (e.g. "test the click handler", "test focus trap"), say so explicitly and recommend `tests/e2e.sh` instead.
 
@@ -124,4 +143,4 @@ Usage examples (any of these should trigger):
 
 ## What success looks like
 
-User says "test the button". You produce `tests/.tmp/preview-button.html` in under 5 seconds, attempt to open it, and print the `file://` path. The file shows: default button, every color variant in a row, every size variant in a row, every style variant (outline/pill/text/icon) in a row, a disabled example, and a block-width example — all styled by the component's actual CSS.
+User says "test the button". In under 5 seconds you produce `tests/.tmp/preview-button.html`, start (or reuse) `python3 -m http.server 8765 --directory tests/.tmp` in the background, attempt to open `http://localhost:8765/preview-button.html`, and print both that URL and the `file://` fallback. The page shows: default button, every color variant in a row, every size variant in a row, every style variant (outline/pill/text/icon) in a row, a disabled example, and a block-width example — all styled by the component's actual CSS.
