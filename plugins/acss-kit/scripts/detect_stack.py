@@ -103,8 +103,12 @@ ENTRYPOINT_CANDIDATES = {
     "next": [
         "app/layout.tsx",
         "app/layout.jsx",
+        "src/app/layout.tsx",
+        "src/app/layout.jsx",
         "pages/_app.tsx",
         "pages/_app.jsx",
+        "src/pages/_app.tsx",
+        "src/pages/_app.jsx",
     ],
     "remix": ["app/root.tsx", "app/root.jsx"],
     "astro": [],
@@ -187,7 +191,7 @@ def has_css_modules(root: Path) -> bool:
     if not src.is_dir():
         return False
     for path in src.rglob("*.module.*"):
-        if path.suffix in (".css", ".scss"):
+        if path.suffix in (".css", ".scss", ".sass"):
             return True
     return False
 
@@ -212,8 +216,20 @@ def detect_stack(root: Path) -> dict:
     has_tsconfig = (root / "tsconfig.json").is_file()
     entry = detect_entrypoint(root, framework)
 
-    result = {
-        "source": "detected" if framework != "unknown" else "unknown",
+    reasons = list(fw_reasons)
+    if framework != "unknown" and entry is None:
+        reasons.append(
+            f"Detected framework={framework} but no known entrypoint file was present — "
+            "ask the developer to confirm their entrypoint and persist it under stack.entrypointFile."
+        )
+
+    if framework == "unknown" or entry is None:
+        source = "unknown"
+    else:
+        source = "detected"
+
+    return {
+        "source": source,
         "projectRoot": str(root),
         "framework": framework,
         "frameworkVersion": version,
@@ -221,13 +237,8 @@ def detect_stack(root: Path) -> dict:
         "cssPipeline": pipeline,
         "tsconfig": has_tsconfig,
         "entrypointFile": entry,
-        "reasons": list(fw_reasons),
+        "reasons": reasons,
     }
-    if framework != "unknown" and entry is None:
-        result["reasons"].append(
-            f"Detected framework={framework} but no known entrypoint file was present."
-        )
-    return result
 
 
 def main() -> int:
@@ -260,6 +271,7 @@ def self_test() -> int:
         expected_framework: str,
         expected_pipeline: Optional[list] = None,
         expected_entry: Optional[str] = None,
+        expected_source: Optional[str] = None,
     ) -> None:
         nonlocal passed, failed
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -274,6 +286,8 @@ def self_test() -> int:
                 checks.append(("cssPipeline", expected_pipeline, result["cssPipeline"]))
             if expected_entry is not None:
                 checks.append(("entrypointFile", expected_entry, result["entrypointFile"]))
+            if expected_source is not None:
+                checks.append(("source", expected_source, result["source"]))
             mismatches = [
                 f"{key} expected={want!r} got={got!r}"
                 for key, want, got in checks
@@ -295,10 +309,22 @@ def self_test() -> int:
         expected_entry="src/main.tsx",
     )
     run(
-        "next.config.mjs → next",
+        "next.config.mjs → next (top-level app/)",
         {"package.json": react_pkg, "next.config.mjs": "", "app/layout.tsx": ""},
         "next",
         expected_entry="app/layout.tsx",
+    )
+    run(
+        "next.config.mjs → next (src/app/ layout)",
+        {"package.json": react_pkg, "next.config.mjs": "", "src/app/layout.tsx": ""},
+        "next",
+        expected_entry="src/app/layout.tsx",
+    )
+    run(
+        "next.config.mjs → next (src/pages/_app)",
+        {"package.json": react_pkg, "next.config.mjs": "", "src/pages/_app.tsx": ""},
+        "next",
+        expected_entry="src/pages/_app.tsx",
     )
     run(
         "remix.config.js → remix",
@@ -307,9 +333,27 @@ def self_test() -> int:
         expected_entry="app/root.tsx",
     )
     run(
-        "astro.config.mjs → astro",
+        "astro.config.mjs → astro (no layout: source=unknown)",
         {"package.json": react_pkg, "astro.config.mjs": ""},
         "astro",
+        expected_source="unknown",
+    )
+    run(
+        "astro.config.mjs → astro (with layout: source=detected)",
+        {
+            "package.json": react_pkg,
+            "astro.config.mjs": "",
+            "src/layouts/Base.astro": "",
+        },
+        "astro",
+        expected_entry="src/layouts/Base.astro",
+        expected_source="detected",
+    )
+    run(
+        "next detected but no entrypoint → source=unknown",
+        {"package.json": react_pkg, "next.config.mjs": ""},
+        "next",
+        expected_source="unknown",
     )
     run(
         "react-scripts dep → cra",
@@ -343,6 +387,16 @@ def self_test() -> int:
             "package.json": '{"name":"t","dependencies":{"react":"18","vite":"5"}}',
             "src/main.tsx": "",
             "src/Foo.module.scss": ".foo{}",
+        },
+        "vite",
+        expected_pipeline=["css-modules"],
+    )
+    run(
+        "css-modules detected via *.module.sass",
+        {
+            "package.json": '{"name":"t","dependencies":{"react":"18","vite":"5"}}',
+            "src/main.tsx": "",
+            "src/Foo.module.sass": ".foo",
         },
         "vite",
         expected_pipeline=["css-modules"],
