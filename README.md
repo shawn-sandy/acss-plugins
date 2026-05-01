@@ -6,13 +6,17 @@ A Claude Code plugin marketplace for building accessible React applications with
 
 | Plugin | Purpose |
 |---|---|
-| [`acss-kit`](./plugins/acss-kit) | Generate accessible React components and CSS themes for fpkit/acss projects. Two skills: **components** (markdown-as-source TSX/SCSS generation via `/kit-add`) and **styles** (OKLCH theme generation via `/theme-create` and friends, with WCAG 2.2 AA validation). |
+| [`acss-kit`](./plugins/acss-kit) | Generate accessible React components and CSS themes for fpkit/acss projects. Run `/setup` to bootstrap a project (sass check, `ui.tsx` copy, starter theme), then `/kit-add` for components and `/theme-create` (or `/style-tune`) for themes. Three skills: **components** (markdown-as-source TSX/SCSS generation), **styles** (OKLCH theme generation with WCAG 2.2 AA validation), and the **component-form** pilot. |
+| [`acss-utilities`](./plugins/acss-utilities) | Tailwind-style atomic CSS utility classes (`.bg-primary`, `.mt-4`, `.sm-hide`) for fpkit/acss projects. Hyphen-prefix responsive variants — no CSS escaping needed. Pairs with `acss-kit` via a token-bridge so utility colors resolve against the same OKLCH roles. Run `/utility-add` to drop the bundle into your project; `/utility-list`, `/utility-tune`, and `/utility-bridge` round out the workflow. |
+
+The two plugins are decoupled — install one, both, or use `acss-utilities` standalone with a hand-written theme.
 
 ## Install
 
 ```shell
 /plugin marketplace add shawn-sandy/agentic-acss-plugins
 /plugin install acss-kit@shawn-sandy-agentic-acss-plugins
+/plugin install acss-utilities@shawn-sandy-agentic-acss-plugins
 ```
 
 ## Migration
@@ -20,6 +24,8 @@ A Claude Code plugin marketplace for building accessible React applications with
 If you previously installed `acss-kit-builder`, `acss-theme-builder`, `acss-app-builder`, or `acss-component-specs` — these have been consolidated into the single `acss-kit` plugin (or, in the case of `acss-app-builder` and `acss-component-specs`, removed entirely). Uninstall the old plugins and install `acss-kit` instead. See [`plugins/acss-kit/CHANGELOG.md`](./plugins/acss-kit/CHANGELOG.md) for the full migration notes.
 
 Existing `.acss-target.json` files at project roots remain compatible — the schema is unchanged.
+
+If you installed `acss-utilities` 0.1.0, the 0.2.0 release switched responsive variants from the escaped-colon form (`.sm\:hide`) to a plain hyphen (`.sm-hide`) — see [`plugins/acss-utilities/CHANGELOG.md`](./plugins/acss-utilities/CHANGELOG.md) and the `scripts/migrate_classnames.py` dry-run helper.
 
 ## Testing locally
 
