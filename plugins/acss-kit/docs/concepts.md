@@ -88,12 +88,19 @@ This means you can safely re-run `/kit-add dialog` after editing `button/button.
 
 ## .acss-target.json — project config
 
-On the first `/kit-add` run in a project, the plugin writes a `.acss-target.json` file at the project root:
+On the first `/kit-add` run in a project, the plugin writes a `.acss-target.json` file at the project root. After 0.5.0 it also captures a `stack` block describing the build tool, CSS pipeline, and entrypoint so subsequent runs can tailor advice (no Tailwind hint when Tailwind isn't installed; no Sass install prompt when Sass is already present):
 
 ```json
 {
-  "componentsDir": "src/components/fpkit"
+  "componentsDir": "src/components/fpkit",
+  "stack": {
+    "framework": "vite",
+    "cssPipeline": ["sass"],
+    "entrypointFile": "src/main.tsx"
+  }
 }
 ```
 
-This file tells the SKILL where to write generated components. Commit it to git so subsequent `/kit-add` runs use the same path. If you need to change the target directory, edit the file directly or delete it and re-run `/kit-add` (you will be prompted again).
+This file tells the SKILL where to write generated components and what to verify after writing. Commit it to git so subsequent `/kit-add`, `/theme-create`, and `/utility-add` runs reuse it. To change the target directory, edit the file directly or delete it and re-run `/kit-add`.
+
+After every generation, `/kit-add` runs `verify_integration.py` to check that the user's `entrypointFile` actually imports the new artifacts. Missing imports surface as a numbered fix-up list — the plugin never auto-edits the entrypoint, so the developer keeps full control of the wiring.

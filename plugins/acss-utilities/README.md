@@ -156,7 +156,8 @@ plugins/acss-utilities/
 ├── scripts/
 │   ├── generate_utilities.py
 │   ├── validate_utilities.py
-│   └── detect_utility_target.py
+│   └── detect_utility_target.py        # stack detection + entrypoint verification delegate to acss-kit's
+│                                        #   detect_stack.py and verify_integration.py at runtime
 └── assets/
     ├── utilities.css                    # committed bundle
     ├── utilities/                       # per-family partials

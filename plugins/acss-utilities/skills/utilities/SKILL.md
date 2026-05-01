@@ -33,19 +33,21 @@ The committed `assets/utilities.css` and `assets/utilities/<family>.css` partial
 1. Run `${CLAUDE_PLUGIN_ROOT}/scripts/detect_utility_target.py`. Capture JSON.
    - `source: "configured"` or `"default"` → use `utilitiesDir` from result.
    - `source: "none"` (exit 1) → halt with the reasons array; suggest `--target=<dir>`.
-2. If `--target=<dir>` was passed, override the detected `utilitiesDir`.
-3. If `--families=<list>` was passed:
+2. Run `${CLAUDE_PLUGIN_ROOT}/../acss-kit/scripts/detect_stack.py <project_root>` to classify framework + entrypoint. If the cross-plugin path is unavailable (acss-kit not installed), skip with a warning and the verification step (8) will be a no-op. When detection succeeds, merge the result into `.acss-target.json` under a `stack` key.
+3. If `--target=<dir>` was passed, override the detected `utilitiesDir`.
+4. If `--families=<list>` was passed:
    - Parse comma-separated family names. Validate against `assets/utilities/`.
    - Concatenate the requested family partials in canonical order (the order in `FAMILY_ORDER` in `generate_utilities.py`) plus the bundle header.
    - Write the concatenated result to `<target>/utilities.css`.
-4. Otherwise copy the prebuilt `${CLAUDE_PLUGIN_ROOT}/assets/utilities.css` verbatim to `<target>/utilities.css`.
-5. Unless `--no-bridge`, copy `${CLAUDE_PLUGIN_ROOT}/assets/token-bridge.css` to `<target>/token-bridge.css`.
-6. Print the import snippet:
+5. Otherwise copy the prebuilt `${CLAUDE_PLUGIN_ROOT}/assets/utilities.css` verbatim to `<target>/utilities.css`.
+6. Unless `--no-bridge`, copy `${CLAUDE_PLUGIN_ROOT}/assets/token-bridge.css` to `<target>/token-bridge.css`.
+7. Print the import snippet:
    ```ts
    import "./styles/token-bridge.css";   // first
    import "./styles/utilities.css";       // then
    ```
-7. Print a summary: files written, total bundle size in KB, families included.
+8. Print a summary: files written, total bundle size in KB, families included.
+9. Run `${CLAUDE_PLUGIN_ROOT}/../acss-kit/scripts/verify_integration.py <project_root>` (skip if acss-kit was not present in step 2). Exit 0 → done. Exit 1 → print the `reasons` array as a numbered fix-up list. Do not auto-edit the entrypoint.
 
 ### References to load
 
