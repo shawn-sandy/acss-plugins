@@ -25,7 +25,9 @@ If a description names something that's not in `catalog.md`, the skill halts and
 
 The runtime parser (Step A2) reads three blocks the canonical embedded-markdown shape declares: `## Generation Contract`, `## Props Interface`, `## Usage Examples`. Components that exist only as **inline catalog entries** in `catalog.md` (currently `Badge`) use a shorter shape (`**Generation Contract:**`, `**Key Props:**`, `**Usage:**`) that the parser cannot consume reliably.
 
-For v0.1, creator mode supports only components with a dedicated `references/components/<name>.md` file. If the user describes a component that lives only as an inline catalog entry, halt with:
+For v0.1, creator mode supports only components with a dedicated `references/components/<name>.md` file. The components currently living only as inline catalog entries — and therefore **not** supported by v0.1 — are: **Badge, Tag, Heading, Text/Paragraph, Details, Progress**. (This list is not part of the dispatch table; A1 doesn't include them, so a description matching one of these names falls through to the "no mapping found" halt.)
+
+If the user describes a component in that set, halt with:
 
 > creator-mode v0.1 supports components that have a dedicated reference doc under `references/components/<name>.md`. `<Component>` currently lives only as an inline entry in `catalog.md` — promote it to a dedicated doc with the `component-author` maintainer skill, then re-run.
 
@@ -197,7 +199,7 @@ Compound APIs (Card with `Card.Title` / `Card.Content` / `Card.Footer`, Table wi
 
 #### A3.5. State-control props (demo defaults)
 
-Some required props are not "content" but state — they bind the rendered component to caller state (Alert / Dialog `open`, Disclosure `expanded`, Checkbox `checked` when used in controlled mode). For these, the snippet emits an explicit demo default so the rendered example is visible, and Step F's summary lists them as TODOs to wire up. This is the **only** carve-out from the no-silent-defaults rule in A3.
+Some required props are not "content" but state — they bind the rendered component to caller state. The clearest case in the current catalog is Alert's `open: boolean` (required by `AlertProps`); Checkbox's optional `checked`/`onChange` pair behaves similarly when the user wants a controlled demo. For these, the snippet emits an explicit demo default so the rendered example is visible, and Step F's summary lists them as TODOs to wire up. This is the **only** carve-out from the no-silent-defaults rule in A3.
 
 | Prop name (exact match) | Demo default in snippet | Summary note |
 |-------------------------|-------------------------|--------------|
@@ -207,8 +209,10 @@ Some required props are not "content" but state — they bind the rendered compo
 | `checked` | `false` | "`checked` defaults to `false` for the snippet — wire to caller state." |
 
 Two rules:
+
 1. The carve-out applies only to props whose **name** matches the table above. Any other required prop (`alt` on Img, `labelFor` on Field, `href` on Link, `title` on a slot-bearing component) follows the halt-on-unresolved rule from A5.
-2. When a state-control prop has an `on*` callback sibling (e.g. `open` + `onDismiss`, `checked` + `onChange`), emit a no-op `() => {}` placeholder for the callback and add a paired summary line so the snippet is paste-ready. Never emit a state-control prop without its callback wired (TypeScript would fail and the snippet would be useless).
+2. When a state-control prop has a matching `on*` callback (e.g. `open` + `onDismiss?`, `checked` + `onChange?`) and the callback exists in the Props Interface, emit a no-op `() => {}` placeholder alongside the demo default and add a paired summary line. This is a paste-readiness recommendation, not a typing requirement — most of the matching callbacks (`onDismiss?`, `onChange?`) are declared optional in the reference docs, so a TypeScript build would succeed without one. The no-op exists so the rendered demo behaves predictably (e.g. clicking Alert's dismiss button doesn't throw because the handler is undefined).
+3. Note that **Dialog is not in this set**: the Dialog reference doc uses `dialogRef: React.RefObject<HTMLDialogElement>` plus `openOnMount?: boolean` for its open/close pattern, not a `open` boolean. Treat its required `dialogRef` as a regular required prop that halts via A5; the user must supply or accept a stub `useRef<HTMLDialogElement>(null)` line in the surrounding code.
 
 #### A3.6. Component-declared safe defaults
 
