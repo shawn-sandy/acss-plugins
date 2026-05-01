@@ -104,12 +104,15 @@ The logic lives entirely in `SKILL.md`. Do not duplicate generation logic inside
     "cssPipeline": ["sass"],
     "tsconfig": true,
     "entrypointFile": "src/main.tsx",
+    "cssEntryFile": "src/styles/index.scss",
     "detectedAt": "2026-05-01T00:00:00Z"
   }
 }
 ```
 
 `componentsDir` and `utilitiesDir` are optional — the detectors fall back to `src/components/fpkit` and `src/styles` and refuse stale entries that point at deleted directories. The `stack` block is also optional; downstream scripts (`verify_integration.py`) emit a reason pointing back to `detect_stack.py` when it is absent.
+
+`stack.cssEntryFile` is added by `/setup` Step 7.5 (`scripts/detect_css_entry.py`) when the user picks (or supplies) a CSS/SCSS entry to receive the generated `light.css` / `dark.css` `@import` lines. It is independent of `entrypointFile`: `entrypointFile` is the TSX root (typically `src/main.tsx`), while `cssEntryFile` is the stylesheet root (e.g. `src/styles/index.scss`). `verify_integration.py` accepts theme imports living in either file, so projects that route all styles through SCSS no longer trip the validator with an empty TSX entrypoint.
 
 The SKILL reads the file during Step A3 and writes it if absent (`scripts/detect_target.py`), then refines it during Step A3.1 (`scripts/detect_stack.py`). Step G runs `scripts/verify_integration.py` to confirm the entrypoint actually imports the generated artifacts. Commit `.acss-target.json` to git so subsequent `/kit-add` and `/theme-create` runs reuse the same configuration.
 

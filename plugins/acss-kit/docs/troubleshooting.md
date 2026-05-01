@@ -24,6 +24,49 @@ Either package satisfies the check.
 
 ---
 
+## "Theme generated but my app still looks unstyled"
+
+**Symptom:** `/setup` reports `Created src/styles/theme/light.css` and `dark.css`, but the running app shows no theme — text is browser-default, buttons aren't tinted, dark mode doesn't switch.
+
+**Cause:** The theme CSS files exist on disk but nothing imports them. Step 7.5 of `/setup` should append `@import` lines to your project's main CSS/SCSS file; when it doesn't run (e.g. you ran `/setup --no-theme`, declined the prompt, or the project had no detectable entry file), the theme is never loaded into the cascade.
+
+**Fix — re-run the wiring:** Either re-run `/setup` (idempotent — it picks up where it left off), or open `.acss-target.json` at the project root and inspect `stack.cssEntryFile`. If the field is missing, `/setup` did not wire any entry; if it points to a file, confirm that file imports `light.css` and `dark.css`.
+
+To wire by hand, append these lines to your main CSS/SCSS entry (e.g. `src/styles/index.scss`):
+
+```scss
+@import "./theme/light.css";
+@import "./theme/dark.css";
+```
+
+Then make sure that file is itself imported from your app entrypoint (typically `src/main.tsx`):
+
+```ts
+import './styles/index.scss';
+```
+
+Run `python3 plugins/acss-kit/scripts/verify_integration.py <project-root>` to confirm — it accepts theme imports living in either `stack.entrypointFile` (TSX) or `stack.cssEntryFile` (SCSS/CSS).
+
+---
+
+## "I want the theme imports in a different CSS file than /setup chose"
+
+**Symptom:** `/setup` Step 7.5 wired the theme into `src/styles/index.scss`, but you want it in a different file (e.g. `src/index.css` because your project doesn't use SCSS).
+
+**Fix:** Edit `.acss-target.json` to point `stack.cssEntryFile` at the file you actually want, then move (or delete + re-add) the `@import` lines:
+
+```json
+{
+  "stack": {
+    "cssEntryFile": "src/index.css"
+  }
+}
+```
+
+Or simply delete the `cssEntryFile` key and re-run `/setup` — the detector will list every candidate it finds and let you pick the right one.
+
+---
+
 ## "Components are generating into the wrong directory"
 
 **Symptom:** Files appear in a different folder than expected.
