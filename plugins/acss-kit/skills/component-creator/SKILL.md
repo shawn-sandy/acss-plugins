@@ -1,6 +1,6 @@
 ---
 name: component-creator
-description: Use when the user describes a UI element in natural language and wants it generated — "create a primary pill button that says Add to cart", "make me a soft warning alert titled 'Heads up' with body 'Your card expires next month'", "build a card with a heading 'Plan' and a primary button labelled Upgrade", "scaffold a danger badge", "design a small filled outline link". Triggers include "create a <component>", "make me a <component>", "build a <component>", "design a <component>", "generate a <component>", "scaffold a <component>" — for any component listed in `references/components/catalog.md`.
+description: Use when the user describes a UI element in natural language and wants it generated — "create a primary pill button that says Add to cart", "make me a soft warning alert titled 'Heads up' with body 'Your card expires next month'", "build a card with a heading 'Plan' and a primary button labelled Upgrade", "design a small filled outline link". Triggers include "create a <component>", "make me a <component>", "build a <component>", "design a <component>", "generate a <component>", "scaffold a <component>" — for any component with a dedicated reference doc under `references/components/<name>.md`.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 metadata:
   version: "0.1.0"
@@ -21,6 +21,16 @@ The skill does not maintain a per-component synonym table. The reference doc's P
 
 If a description names something that's not in `catalog.md`, the skill halts and says so rather than guessing.
 
+### Components without a dedicated reference doc
+
+The runtime parser (Step A2) reads three blocks the canonical embedded-markdown shape declares: `## Generation Contract`, `## Props Interface`, `## Usage Examples`. Components that exist only as **inline catalog entries** in `catalog.md` (currently `Badge`) use a shorter shape (`**Generation Contract:**`, `**Key Props:**`, `**Usage:**`) that the parser cannot consume reliably.
+
+For v0.1, creator mode supports only components with a dedicated `references/components/<name>.md` file. If the user describes a component that lives only as an inline catalog entry, halt with:
+
+> creator-mode v0.1 supports components that have a dedicated reference doc under `references/components/<name>.md`. `<Component>` currently lives only as an inline entry in `catalog.md` — promote it to a dedicated doc with the `component-author` maintainer skill, then re-run.
+
+This avoids quietly mis-parsing `**Key Props:**` as `## Props Interface`.
+
 ---
 
 ## Authoring Modes
@@ -33,7 +43,6 @@ Examples:
 - "Create a primary pill button that says 'Add to cart'."
 - "Make me a soft warning alert titled 'Heads up' with body 'Your card expires next month'."
 - "Build a card with a heading 'Plan' and a primary button labelled Upgrade."
-- "Scaffold a danger badge with the text '3'."
 - "Design a small outline icon-button with `aria-label` 'Close'."
 
 ### Mode 2 — Structured spec (fallback)
@@ -68,7 +77,6 @@ Recognised noun-to-component mappings (collapse synonyms before lookup):
 | `button`, `btn`, `cta`, `call to action` | Button | `references/components/button.md` |
 | `icon button`, `icon-button` | IconButton | `references/components/icon-button.md` |
 | `alert`, `banner`, `notification`, `toast`-like static | Alert | `references/components/alert.md` |
-| `badge`, `chip`, `pill label`, `count` | Badge | `references/components/catalog.md` (Badge entry) |
 | `card`, `panel`, `tile` | Card | `references/components/card.md` |
 | `dialog`, `modal` | Dialog | `references/components/dialog.md` |
 | `popover`, `tooltip-like static`, `floating card` | Popover | `references/components/popover.md` |
@@ -285,7 +293,7 @@ Run the validation matrix in Step H against the resolved spec **before** generat
 
 ### E1. Single-element components
 
-For components flagged single-element in A2 (Button, IconButton, Alert, Badge, Link, Img, Icon, Input, Checkbox, Field, Popover trigger), emit:
+For components flagged single-element in A2 (Button, IconButton, Alert, Link, Img, Icon, Input, Checkbox, Field, Popover trigger), emit:
 
 ```tsx
 <{{COMPONENT}} {{PROPS}}>
@@ -339,7 +347,7 @@ export default function {{NAME}}({{HANDLER_SIGNATURE}}) {
 
 ### E4. Snippet mode
 
-Print the bare JSX from E1 or E2 in a fenced TSX block. Snippet mode does **not** reuse E3's relative path — E3 is anchored at `src/components/<Name>.tsx`, but a snippet is pasted into an arbitrary file (often `src/App.tsx`, a route file, or a layout) where that anchor doesn't apply.
+Print **the import lines followed by the JSX from E1 or E2**, both inside a single fenced TSX block, so the user can paste a self-contained snippet. Snippet mode does **not** reuse E3's relative path — E3 is anchored at `src/components/<Name>.tsx`, but a snippet is pasted into an arbitrary file (often `src/App.tsx`, a route file, or a layout) where that anchor doesn't apply.
 
 Resolve the import path in this order:
 
@@ -442,7 +450,7 @@ Run after Step A and before Step E writes anything. Each row is either a hard ha
 | Resolved value not in the prop's union literal | Halt — list the supported values. |
 | Two same-axis synonyms in one description (e.g. "primary danger button", "small large alert") | Halt — reject as conflicting. |
 | Slot content empty / whitespace-only after A4 | Halt — never write a component with no accessible content. |
-| Slot content > 80 chars | Confirm — long inline labels are usually a sign the user wants a different component. Offer the most likely alternative (Button-text → Banner; Alert-title → Card-title; Link-text → Banner) drawn from `catalog.md`. |
+| Slot content > 80 chars | Confirm — long inline labels are usually a sign the user wants a different component. Offer the most likely alternative (Button-text → Alert; Alert-title → Card; Link-text → Alert or Card) drawn from `catalog.md`. |
 
 ### H2. Component-flagged rules
 

@@ -6,7 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
 
 # /kit-create
 
-Creator mode — describe a UI element in plain English and have it generated as a paste-ready snippet (or standalone component file). Works with any component listed in `references/components/catalog.md` (Button, Alert, Card, Dialog, Badge, Link, Input, Field, Checkbox, IconButton, Img, Icon, List, Table, Popover, Nav).
+Creator mode — describe a UI element in plain English and have it generated as a paste-ready snippet (or standalone component file). Works with any component that has a dedicated reference doc under `references/components/<name>.md` (Button, Alert, Card, Dialog, Link, Input, Field, Checkbox, IconButton, Img, Icon, List, Table, Popover, Nav). Components that exist only as inline catalog entries (currently Badge) are not supported in v0.1 — promote them with the `component-author` maintainer skill first.
 
 ## Usage
 
@@ -20,7 +20,6 @@ Creator mode — describe a UI element in plain English and have it generated as
 /kit-create primary pill button that says "Add to cart"
 /kit-create soft warning alert titled "Heads up" with body "Your card expires next month"
 /kit-create card with a heading "Plan" and content "Premium tier with all features"
-/kit-create danger badge with the text "3"
 /kit-create small outline icon-button with aria-label "Close"
 ```
 

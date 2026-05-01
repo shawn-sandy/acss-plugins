@@ -213,15 +213,15 @@ The skill (`component-creator`) auto-triggers on phrases like *"create a primary
 
 ### What happens step by step
 
-The full workflow lives in [`skills/component-creator/SKILL.md`](../skills/component-creator/SKILL.md). Quick view:
+The full workflow lives in [`skills/component-creator/SKILL.md`](../skills/component-creator/SKILL.md) — see SKILL.md for the canonical Step A–I lettering. Quick view (phase names; not lettered to avoid drift):
 
-- **Step A — Parse.** Dispatch the component noun against `catalog.md`; load the matched reference doc; resolve phrases against its Props Interface using two global synonym tables (colour family, size family) plus per-prop union literals.
-- **Step B — Resolve target.** Run `scripts/detect_target.py` to read `componentsDir` and learn whether the project has been initialized (`source: "generated"` vs `"none"`).
-- **Step C — Vendor.** Run `/kit-add <component> [...dependencies]` whenever Step B reported a clean project (`source: "none"` — first-run bootstrap) or any of the matched component's vendored files are missing in an existing project. After `/kit-add` completes, re-run `detect_target.py` to confirm `source` is now `"generated"` before proceeding.
-- **Step D — Validate.** Generic rules (empty slots, > 80-char content, two-axis conflicts, missing required props) plus any `## Generation Notes — Creator Mode` rules the matched reference doc declares (v0.2).
-- **Step E — Generate.** Single-element components emit a flat JSX block; compound components (Card, Table, List) emit dotted children only when the description named the slot. Snippet imports use the project's entrypoint-relative path; file mode writes `src/components/<Name>.tsx`.
-- **Step F — Accessibility.** Delegated to the matched reference doc's `## Accessibility` section; the skill enforces only that generation doesn't strip those guarantees.
-- **Step G — Refinement turns.** Imperative follow-ups ("make it larger", "swap to secondary", "change the title to '<X>'") merge into the in-memory spec and re-emit. Saying *"start over"* clears the spec.
+- **Parse.** Dispatch the component noun against `catalog.md`; load the matched reference doc; resolve phrases against its Props Interface using two global synonym tables (colour family, size family) plus per-prop union literals.
+- **Resolve target & vendor.** Run `scripts/detect_target.py` to read `componentsDir` and learn whether the project has been initialized (`source: "generated"` vs `"none"`). When `source: "none"` or any of the matched component's vendored files are missing, run `/kit-add <component> [...dependencies]` to bootstrap, then re-run `detect_target.py` to confirm `source: "generated"` before proceeding. (SKILL.md Steps B + B4.)
+- **Choose output mode.** Snippet (default — paste-ready import + JSX in a fenced TSX block) or file mode (writes `src/components/<Name>.tsx`).
+- **Validate.** Generic rules (empty slots, > 80-char content, two-axis conflicts, missing required props excluding the A3.5 / A3.6 carve-outs) plus any `## Generation Notes — Creator Mode` rules the matched reference doc declares (v0.2).
+- **Generate.** Single-element components emit a flat JSX block; compound components (Card, Table, List) emit dotted children only when the description named the slot. Snippet imports are computed relative to `stack.entrypointFile`; file mode writes `src/components/<Name>.tsx`.
+- **Accessibility.** Delegated to the matched reference doc's `## Accessibility` section; the skill enforces only that generation doesn't strip those guarantees.
+- **Refinement turns.** Imperative follow-ups ("make it larger", "swap to secondary", "change the title to '<X>'") merge into the in-memory spec and re-emit. Saying *"start over"* clears the spec.
 
 ### Carve-outs
 
@@ -236,7 +236,6 @@ Two carve-outs from the no-silent-defaults rule:
 /kit-create primary pill button that says "Add to cart"
 /kit-create soft warning alert titled "Heads up" with body "Your card expires next month"
 /kit-create card with a heading "Plan" and content "Premium tier with all features"
-/kit-create danger badge with the text "3"
 /kit-create small outline icon-button with aria-label "Close"
 ```
 
