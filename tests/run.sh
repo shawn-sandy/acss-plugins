@@ -17,6 +17,8 @@
 #   7. detect_package_manager.py --self-test.
 #   7a. detect_stack.py --self-test (framework + cssPipeline + entrypoint).
 #   7b. verify_integration.py --self-test (entrypoint wiring checks).
+#   7c. detect_css_entry.py --self-test (CSS/SCSS entry candidates +
+#       @import / @use scan).
 #   8. acss-utilities validator over plugins/acss-utilities/assets/
 #      (selector grammar, var() fallbacks, bridge dark-mode parity,
 #      bundle-size budget).
@@ -179,6 +181,16 @@ if python3 "$REPO_ROOT/plugins/acss-kit/scripts/verify_integration.py" --self-te
 else
   red "verify_integration self-test FAILED:"
   cat "$VI_LOG"
+  exit 1
+fi
+
+section "7c. detect_css_entry.py --self-test"
+DCE_LOG="$TMP_ROOT/detect-css-entry.log"
+if python3 "$REPO_ROOT/plugins/acss-kit/scripts/detect_css_entry.py" --self-test >"$DCE_LOG"; then
+  green "detect_css_entry self-test OK"
+else
+  red "detect_css_entry self-test FAILED:"
+  cat "$DCE_LOG"
   exit 1
 fi
 

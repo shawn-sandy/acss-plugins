@@ -3,7 +3,7 @@ name: setup
 description: Use when the user runs /setup or asks to "set up", "bootstrap", "initialize", or "prepare" a project for acss-kit components and themes. One-time first-run init — detects package manager, prints the sass install command, writes .acss-target.json, copies ui.tsx, optionally seeds a starter theme. Cross-domain skill (touches both components and styles concerns) — deliberately not nested under either domain skill.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 metadata:
-  version: "0.4.0"
+  version: "0.5.0"
 ---
 
 # SKILL: setup
@@ -20,6 +20,7 @@ Front-load the one-time project configuration that would otherwise run piecemeal
 - `.acss-target.json` exists at the project root
 - `<componentsDir>/ui.tsx` is present
 - `src/styles/theme/light.css` and `dark.css` exist (unless `--no-theme` was passed)
+- The project's main CSS/SCSS entry imports `light.css` and `dark.css`, and `stack.cssEntryFile` records the choice in `.acss-target.json` (skipped with `--no-theme`)
 
 ## Prerequisites
 
@@ -197,6 +198,61 @@ Checkpoint: `Wrote <generated files>` or `Theme files already present, skipped`.
 
 ---
 
+## Step 7.5 — Wire theme imports into the project's CSS/SCSS entry
+
+Skip this step entirely if `--no-theme` was passed, or if neither `light.css` nor `dark.css` ended up present (e.g. theme generation failed in Step 7). The goal is to make the generated theme actually take effect by adding `@import` lines to the project's main CSS/SCSS file.
+
+### 7.5a — Detect candidate entry files
+
+Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_css_entry.py <projectRoot>`.
+
+Parse the JSON. The script returns `candidates[]` ordered by priority, each with a relative `path` and an `imports` map keyed by `light.css`, `dark.css`, `token-bridge.css`, `utilities.css`. A non-null value is the 1-based line number where that basename appears in an import-bearing line (`import`, `require(`, `@import`, `@use`, `@forward`).
+
+### 7.5b — Choose a target file
+
+Branch on the output:
+
+- **`source: "detected"` and exactly one candidate** — use that path. No prompt.
+- **`source: "detected"` and multiple candidates** — call `AskUserQuestion`:
+  - Question: `Which file should the acss-kit theme imports be added to?`
+  - One option per candidate; label is the relative path; description notes which tracked imports already exist (e.g. `already imports light.css, dark.css` or `no theme imports yet`).
+  - The user's free-text "Other" answer is treated as a path relative to `projectRoot`. If the file does not exist, create it.
+- **`source: "none"`** — call `AskUserQuestion` with a single question:
+  - Question: `No CSS/SCSS entry file was detected. Where should the theme imports go?`
+  - Options: `src/styles/index.scss (Recommended)`, `src/styles/index.css`, `src/index.css`. Free-text "Other" is honoured.
+  - If the chosen file does not exist, create the parent directory and write an empty file. Add the file path to `created[]`.
+
+Resolve the chosen path to `<projectRoot>/<chosen>`. Re-read its `imports` map (re-run `detect_css_entry.py` or read the file fresh) so the next sub-step can skip lines that are already wired.
+
+### 7.5c — Append the import block (idempotent)
+
+Compute the relative path from the chosen entry file's directory to `<projectRoot>/src/styles/theme/`. Build the desired import block:
+
+```scss
+/* acss-kit theme — managed by /setup */
+@import "<rel>/theme/light.css";
+@import "<rel>/theme/dark.css";
+/* token-bridge.css + utilities.css load here once /utility-* runs */
+```
+
+For a pure `.css` entry file, use `@import url("<rel>/theme/light.css");` instead so it parses under plain CSS.
+
+Skip any line whose basename appears non-null in the `imports` map from 7.5b. If both `light.css` and `dark.css` are already imported, do not write anything — print `Theme imports already present in <chosen>, skipped` and continue to 7.5d.
+
+When at least one line is new, append the block (only the lines that aren't already present) at the **top** of the file, after any leading `@charset` directive, leading block comment, or existing `@use` lines (Sass requires `@use` to precede `@import`). Read the file, splice the block into the correct location, and write the result back.
+
+Add the chosen file to `created[]` if it was newly written, otherwise to `kept[]` with a `(theme imports appended)` flag.
+
+### 7.5d — Persist the choice
+
+Read `<projectRoot>/.acss-target.json`. Set `stack.cssEntryFile` to the chosen relative path. If `stack` is absent, create it with just this key (other detectors will populate the rest later). Preserve every other field. Write the file back.
+
+This makes `verify_integration.py` accept the SCSS entry as a valid place for theme imports — see `plugins/acss-kit/scripts/verify_integration.py`.
+
+Checkpoint: `Wired theme imports into <chosen>` or `Theme imports already present in <chosen>, skipped`.
+
+---
+
 ## Step 8 — Print summary
 
 If `paused=true` (Step 4 halted), print:
@@ -216,6 +272,7 @@ Created:
   - .acss-target.json
   - src/styles/theme/light.css
   - src/styles/theme/dark.css
+  - src/styles/index.scss   (theme imports wired in)
 
 Kept (already present):
   - sass in devDependencies

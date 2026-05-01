@@ -74,6 +74,7 @@ What it does:
 3. Writes `.acss-target.json` at your project root (or reuses existing).
 4. Copies `ui.tsx` (the polymorphic foundation component) verbatim to your target directory.
 5. Seeds `src/styles/theme/light.css` and `dark.css` from a prompt for a seed hex color.
+6. Detects your project's main CSS/SCSS entry (`src/styles/index.scss`, `src/index.css`, `app/globals.css`, etc.), prompts you to pick when multiple candidates exist or to specify a path when none are found, and idempotently appends `@import` lines for the new theme files. The chosen file is recorded under `stack.cssEntryFile` in `.acss-target.json`.
 
 Pass `--no-theme` to skip theme generation, or `--target=<dir>` to override the component output directory.
 

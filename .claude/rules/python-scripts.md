@@ -10,7 +10,8 @@ Current scripts in `plugins/acss-kit/scripts/`:
 - `detect_target.py` — detects the target project type (Vite, etc.) for skill routing
 - `detect_package_manager.py` — detects the active package manager (pnpm/yarn/bun/npm) via lockfile inspection; outputs install command
 - `detect_stack.py` — classifies framework (vite/next/remix/astro/cra), bundler, CSS pipeline (tailwind/sass/postcss/css-modules), tsconfig presence, and entrypoint file. Detector contract; includes `--self-test`. Persisted by SKILLs into `.acss-target.json` under a `stack` key
-- `verify_integration.py` — read-only post-step that checks the user's entrypoint imports the artifacts written by `/kit-add`, `/theme-create`, and `/utility-add` (token-bridge.css, utilities.css, theme css, components dir). Exit 0 when all wired up, exit 1 with `reasons` listing each missing import. Detector contract; report-only — never edits user files
+- `detect_css_entry.py` — finds candidate CSS / SCSS entry files (e.g. `src/styles/index.scss`, `src/index.css`, `app/globals.css`) and reports which `light.css` / `dark.css` / `token-bridge.css` / `utilities.css` imports each candidate already carries. Used by `/setup` Step 7.5 to wire theme imports. Detector contract; includes `--self-test`. The chosen file is persisted at `stack.cssEntryFile` in `.acss-target.json`
+- `verify_integration.py` — read-only post-step that checks the user's entrypoint imports the artifacts written by `/kit-add`, `/theme-create`, and `/utility-add` (token-bridge.css, utilities.css, theme css, components dir). Also accepts theme imports living in `stack.cssEntryFile` (SCSS/CSS) instead of the TSX entrypoint. Exit 0 when all wired up, exit 1 with `reasons` listing each missing import. Detector contract; report-only — never edits user files
 - `generate_palette.py` — OKLCH palette math; outputs palette JSON
 - `oklch_shift.py` — shifts a hex color in OKLCH space (`--hue`, `--chroma`, `--lightness`); used by the `style-tune` skill for color deltas
 - `_oklch.py` — internal shared module exposing `hex_to_oklch`, `oklch_to_hex`, `in_gamut`. Imported by `generate_palette.py` and `oklch_shift.py`. Underscore prefix marks it as internal — no CLI, no detector contract.
@@ -32,7 +33,7 @@ For scripts whose output is parsed by slash commands or skills.
 - Exit 0 on success, 1 on logical failure (e.g. nothing detected)
 - Always include a `"reasons"` array in the JSON — empty `[]` on success, populated on failure
 
-Detectors: `detect_target.py`, `detect_package_manager.py`, `detect_stack.py`, `verify_integration.py`, `detect_utility_target.py`.
+Detectors: `detect_target.py`, `detect_package_manager.py`, `detect_stack.py`, `detect_css_entry.py`, `verify_integration.py`, `detect_utility_target.py`.
 
 ## Generator / validator contract (pipeline-friendly, human-readable)
 
