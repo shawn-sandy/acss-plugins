@@ -22,15 +22,17 @@ When this command is invoked, follow the full bootstrap workflow documented in t
 
 ### Quick Reference
 
-1. **Verify project** — confirm React + TypeScript project is present
-2. **React version** — detect React 19+ and warn if ui.tsx adaptation may be needed
-3. **Package manager** — auto-detect from lockfile or `package.json#packageManager` field
-4. **sass check** — if missing, print the exact install command and stop (no side effects)
-5. **Target directory** — read `.acss-target.json` or prompt for target dir and write the file
-6. **ui.tsx** — copy `${CLAUDE_PLUGIN_ROOT}/assets/foundation/ui.tsx` to target dir (verbatim)
-7. **Starter theme** — seed `src/styles/theme/light.css` and `dark.css` via OKLCH pipeline (skip with `--no-theme`)
-8. **Wire theme imports** — detect the project's main CSS/SCSS entry (`detect_css_entry.py`), prompt when ambiguous or absent, append `@import` lines idempotently, and record the choice in `stack.cssEntryFile`
-9. **Summary** — tabulate `created` vs `kept` artifacts and print next steps
+Step numbers below match the canonical sequence in [`skills/setup/SKILL.md`](../skills/setup/SKILL.md):
+
+- **Step 1 — Verify project** — confirm React + TypeScript project is present
+- **Step 2 — React version** — detect React 19+ and warn if ui.tsx adaptation may be needed
+- **Step 3 — Package manager** — auto-detect from lockfile or `package.json#packageManager` field
+- **Step 4 — sass check** — if missing, print the exact install command and stop (no side effects)
+- **Step 5 — Target directory** — read `.acss-target.json` or prompt for target dir and write the file
+- **Step 6 — ui.tsx** — copy `${CLAUDE_PLUGIN_ROOT}/assets/foundation/ui.tsx` to target dir (verbatim)
+- **Step 7 — Starter theme** — seed `src/styles/theme/light.css` and `dark.css` via OKLCH pipeline (skip with `--no-theme`)
+- **Step 7.5 — Wire theme imports** — detect the project's main CSS/SCSS entry (`detect_css_entry.py`), prompt when ambiguous or absent, append `@import` lines idempotently, and record the choice in `stack.cssEntryFile`
+- **Step 8 — Summary** — tabulate `created` vs `kept` artifacts and print next steps
 
 ### After Setup
 

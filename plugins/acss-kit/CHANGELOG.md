@@ -21,7 +21,7 @@ All notable changes to the `acss-kit` plugin are documented here. Format follows
 ### Changed
 
 - **`.acss-target.json` schema is now additive with a `stack` block** — `{ framework, bundler, cssPipeline, tsconfig, entrypointFile, cssEntryFile, detectedAt }`. Existing `componentsDir` / `utilitiesDir` consumers are unaffected; the detectors and verifiers degrade gracefully when the block is absent (they emit a reason pointing back to `detect_stack.py`). `cssEntryFile` is populated by `/setup` Step 7.5 when the user picks (or supplies) a CSS/SCSS entry.
-- **`scripts/verify_integration.py` — accepts theme imports in `stack.cssEntryFile`** in addition to the TSX `entrypointFile`. `find_import_line()` now recognizes Sass `@import`, `@use`, and `@forward` lines so the same scanner works against `.scss` / `.css` files. The "theme files present but not imported" reason names both candidate files when `cssEntryFile` is set.
+- **`scripts/verify_integration.py` — accepts wired-up artifacts in `stack.cssEntryFile`** in addition to the TSX `entrypointFile`. The cross-file scan covers `light.css`, `dark.css`, `token-bridge.css`, and `utilities.css` (so `/utility-*` flows that route imports through SCSS no longer trip the verifier). The bridge-before-utilities ordering check now runs inside whichever file holds both imports and is skipped when the imports are split across files. `find_import_line()` recognises Sass `@import`, `@use`, and `@forward` lines. When `stack.cssEntryFile` is configured but the file does not exist, an explicit reason directs the user to re-run `/setup` or remove the stale entry.
 
 ### Fixed
 
