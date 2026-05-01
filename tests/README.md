@@ -196,6 +196,8 @@ Create a signup form with email and password.
 
 The `component-form` skill should auto-trigger, vendor any missing form dependencies through `/kit-add`, and write a form under `src/forms/`.
 
+- **Optional:** to visually verify a generated component's CSS variants in a browser, see [Preview a generated component in a browser](../plugins/acss-kit/docs/recipes.md#preview-a-generated-component-in-a-browser). This is a static-HTML preview, not a revival of the removed dev server.
+
 ### Reset
 
 ```sh

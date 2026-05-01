@@ -77,7 +77,14 @@ plugins/acss-kit
   PASS  skills/ contains SKILL.md files
   PASS  commands/ has .md files
 
-Summary: 1 plugin checked, 0 failures total.
+plugins/acss-utilities
+  PASS  Manifest fields (name, version, description)
+  PASS  Marketplace entry has no version key
+  PASS  README.md present
+  PASS  skills/ contains SKILL.md files
+  PASS  commands/ has .md files
+
+Summary: 2 plugins checked, 0 failures total.
 ```
 
 If all pass: "All plugins passed structural checks."

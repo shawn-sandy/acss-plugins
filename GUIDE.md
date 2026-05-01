@@ -3,7 +3,10 @@
 
 `agentic-acss-plugins` is a Claude Code plugin marketplace for building accessible React components and CSS themes for fpkit/acss projects.
 
-As of `0.3.0`, the marketplace ships one plugin: `acss-kit`.
+The marketplace ships two plugins:
+
+- `acss-kit` — accessible React components and OKLCH CSS themes for fpkit/acss projects.
+- `acss-utilities` — Tailwind-style atomic CSS utility classes paired with `acss-kit`'s theme tokens via a bridge file.
 
 ## Install
 
@@ -12,6 +15,7 @@ Run these commands inside a Claude Code session:
 ```text
 /plugin marketplace add shawn-sandy/agentic-acss-plugins
 /plugin install acss-kit@shawn-sandy-agentic-acss-plugins
+/plugin install acss-utilities@shawn-sandy-agentic-acss-plugins
 ```
 
 For local testing from this repo:
@@ -19,9 +23,10 @@ For local testing from this repo:
 ```text
 /plugin marketplace add /absolute/path/to/agentic-acss-plugins
 /plugin install acss-kit@agentic-acss-plugins
+/plugin install acss-utilities@agentic-acss-plugins
 ```
 
-Use `/plugin list` to confirm the plugin is installed and to see available slash commands.
+Use `/plugin list` to confirm the plugins are installed and to see available slash commands.
 
 ## Prerequisites
 
@@ -32,7 +37,7 @@ Use `/plugin list` to confirm the plugin is installed and to see available slash
 npm install -D sass
 ```
 
-## Commands
+## acss-kit Commands
 
 ### `/kit-list [component]`
 
@@ -96,6 +101,26 @@ Create a signup form with email and password.
 
 It vendors required form dependencies through `/kit-add` when needed, then writes a self-contained React form under `src/forms/`.
 
+## acss-utilities Commands
+
+The `acss-utilities` plugin adds a Tailwind-style atomic CSS layer (`.bg-primary`, `.mt-4`, `.sm-hide`) and a token-bridge that aliases `acss-kit`'s OKLCH roles to fpkit-style names. See the [`acss-utilities` README](plugins/acss-utilities/README.md) and [developer guide](plugins/acss-utilities/docs/README.md) for the full reference.
+
+### `/utility-add`
+
+Drops the generated `utilities.css` bundle and `token-bridge.css` into your project.
+
+### `/utility-list`
+
+Lists utility families and their classes.
+
+### `/utility-bridge`
+
+Regenerates `token-bridge.css` against the active `acss-kit` theme, emitting both `:root` and `[data-theme="dark"]` blocks for parity.
+
+### `/utility-tune`
+
+Adjusts `utilities.tokens.json` (spacing baseline, breakpoints, family enables) from a natural-language request, regenerates the bundle, and validates the result.
+
 ## Migration From Prior Plugins
 
 `acss-kit` replaces the previous marketplace entries:
@@ -124,4 +149,6 @@ Existing `.acss-target.json` files remain compatible.
 - [Root README](README.md) for marketplace overview and install notes.
 - [acss-kit README](plugins/acss-kit/README.md) for full plugin behavior.
 - [acss-kit developer docs](plugins/acss-kit/docs/README.md) for contributor workflows.
+- [acss-utilities README](plugins/acss-utilities/README.md) for utility-class behavior.
+- [acss-utilities developer guide](plugins/acss-utilities/docs/README.md) for the command reference, recipes, and architecture notes.
 - [tests README](tests/README.md) for local smoke testing.
