@@ -150,16 +150,21 @@ Same halt rule: if the resolved size isn't in the prop's union, ask. Some compon
 
 For every other union-typed prop on the component (e.g. Button's `variant: 'text' | 'pill' | 'icon' | 'outline'`, Alert's `variant: 'outlined' | 'filled' | 'soft'`, Card's `as: 'div' | 'section' | 'article'`), match the user's description literally against the union members. Common adjective-style synonyms also apply:
 
-| Synonym group | Resolves to whichever union member matches |
-|---------------|--------------------------------------------|
+| Synonym group | Canonical target |
+|---------------|------------------|
 | `pill`, `rounded`, `round`, `capsule` | `pill` |
-| `outline`, `outlined`, `bordered`, `ghost` | `outline` or `outlined` |
+| `outline`, `outlined`, `bordered`, `ghost` | `outline` (or `outlined` — see deterministic rule below) |
 | `filled`, `solid` | `filled` |
 | `soft`, `subtle`, `tonal` | `soft` |
 | `text`, `link-style`, `flat` | `text` |
 | `dismissible`, `closable`, `with close button` | `dismissible: true` |
 
-If a synonym maps to a literal that doesn't exist on the matched component, **fall back to the literal as written** if it exists on the component, else `AskUserQuestion`. Never invent a literal the component doesn't accept.
+**Resolution rule (deterministic):**
+
+1. **Literal match wins.** If the user's phrase exactly matches a union member of the matched prop (case-insensitive), use that member — regardless of synonym group. This is what makes "make me an outlined alert" pick `outlined` on Alert and "outline button" pick `outline` on Button.
+2. **Single-spelling fallback.** If the literal phrase isn't in the union but a single canonical-or-alternate spelling exists (`outline` xor `outlined`, `dismissable` xor `dismissible`), use the one that exists.
+3. **Both spellings exist.** When the union carries both `outline` and `outlined` (or any other canonical/alternate pair) and the user's phrase is a non-literal synonym (`bordered`, `ghost`), halt via `AskUserQuestion` listing both supported values rather than guessing.
+4. **Synonym maps to nothing.** If none of the synonym group's targets exists on the component, halt via `AskUserQuestion` listing the actual union members. Never invent a literal the component doesn't accept.
 
 #### A3.3. Boolean props
 
@@ -170,7 +175,7 @@ Any prop typed `boolean` is set to `true` when the description contains an affir
 | `disabled` | `disabled`, `inactive`, `unavailable` |
 | `block` | `full width`, `full-width`, `block`, `stretch`, `100% wide` |
 | `dismissible` | `dismissible`, `closable`, `with close button`, `with X button` |
-| `pauseOnHover` | omit unless explicitly named — defaults are component-defined |
+| `pauseOnHover` | `pause on hover`, `pause on focus`, `pause on hover/focus`. Otherwise omit (the component's declared default applies). |
 | `hideIcon` | `no icon`, `hide the icon`, `without an icon` |
 | `external` (Link) | `external`, `opens in a new tab`, `target blank` |
 
@@ -293,7 +298,9 @@ Run the validation matrix in Step H against the resolved spec **before** generat
 
 ### E1. Single-element components
 
-For components flagged single-element in A2 (Button, IconButton, Alert, Link, Img, Icon, Input, Checkbox, Field, Popover trigger), emit:
+For components flagged single-element in A2 (Button, IconButton, Alert, Link, Img, Icon, Input, Checkbox, Field, Popover trigger), emit one of two shapes depending on whether `{{CHILDREN}}` resolved to non-empty content:
+
+**Branch 1 — children present** (Button, Alert, Link, etc.):
 
 ```tsx
 <{{COMPONENT}} {{PROPS}}>
@@ -301,12 +308,26 @@ For components flagged single-element in A2 (Button, IconButton, Alert, Link, Im
 </{{COMPONENT}}>
 ```
 
+**Branch 2 — no children** (Img, Icon, Input, Checkbox — components with no `children` slot or whose Props Interface declares `children` as optional and the description provided none):
+
+```tsx
+<{{COMPONENT}} {{PROPS}} />
+```
+
 Substitution:
+
 - `{{COMPONENT}}` — the `export_name` from the Generation Contract.
 - `{{PROPS}}` — one space-separated `key={value}` (or boolean shorthand) per resolved prop, in the order they appear in the Props Interface. Omit unresolved props so the component's declared default applies.
-- `{{CHILDREN}}` — the resolved `children` slot from A3.4. Self-closing `<{{COMPONENT}} />` if the component has no children content (e.g. Img, Icon).
+- `{{CHILDREN}}` — the resolved `children` slot from A3.4.
 
-For self-closing components and required props (e.g. `Img` requires `alt`, `Field` requires `labelFor`), the absence-check in A5 has already halted if missing.
+**Branch selection is deterministic:**
+
+1. If the component's Props Interface declares no `children` slot, always emit Branch 2.
+2. If `children` is present in the Props Interface and `{{CHILDREN}}` resolved to non-empty content, emit Branch 1.
+3. If `children` is present but optional and `{{CHILDREN}}` is empty, emit Branch 2 (self-closing keeps the JSX terse and TypeScript-clean).
+4. If `children` is required and `{{CHILDREN}}` is empty, A5 has already halted before reaching Step E.
+
+For required props (e.g. `Img` requires `alt`, `Field` requires `labelFor`), the absence-check in A5 has already halted if missing.
 
 ### E2. Compound components
 
@@ -374,7 +395,7 @@ Build the entire output in memory; write to disk only on success (file mode). If
 The generated component is WCAG 2.2 AA by construction because it delegates to the vendored component. Each reference doc's `## Accessibility` section is the authoritative spec; this skill only enforces that the **generation** doesn't strip those guarantees:
 
 - Required-prop halts (A5) prevent emitting components with missing accessible names (`aria-label` on icon-only controls; `alt` on Img; `labelFor` on Field).
-- Boolean disabled flags use the typed `disabled` prop, never the raw HTML attribute, so `aria-disabled` + tab-order patterns survive.
+- Pass `disabled` through the **component's typed `disabled` prop** rather than wiring the native HTML attribute directly. The component's prop handler (e.g. Button's `useDisabledState`) is what preserves the `aria-disabled` + tab-order pattern (WCAG 2.1.1); a raw `<button disabled>` would skip the keyboard-discoverability part. The DOM attribute still appears in the rendered output — the rule is about which prop the **generator** wires, not about what ends up in HTML.
 - Compound components (E2) emit slot content only when provided, so empty `<Card.Title>` placeholders never ship and never break the aria-labelledby chain.
 
 The Step G summary's "Refine" line includes a link back to the matched reference doc's Accessibility section so users can verify before pasting.
