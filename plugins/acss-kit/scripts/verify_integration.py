@@ -45,6 +45,7 @@ Output (JSON to stdout):
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -94,20 +95,39 @@ def find_import_line(text: str, basename: str) -> Optional[int]:
 
 
 def find_any_use(root: Path, components_dir: str) -> bool:
-    """Return True if any *.tsx/*.ts/*.jsx/*.js under src/ references componentsDir."""
+    """Return True if any *.tsx/*.ts/*.jsx/*.js under src/ imports from componentsDir.
+
+    Matches a normalized path fragment (e.g. "components/fpkit/" or the dir relative
+    to src/) inside import/require statements only. Avoids the false positives of
+    matching the bare last segment anywhere in the file body.
+    """
     src = root / "src"
     if not src.is_dir():
         return False
-    needle = components_dir.replace("\\", "/")
-    last_segment = needle.rstrip("/").split("/")[-1] or needle
+
+    normalized = components_dir.replace("\\", "/").strip().strip("/")
+    if not normalized:
+        return False
+
+    candidates: set[str] = {normalized, f"{normalized}/"}
+    if normalized.startswith("src/"):
+        rel = normalized[len("src/"):]
+        if rel:
+            candidates.add(rel)
+            candidates.add(f"{rel}/")
+
     for ext in ("*.tsx", "*.ts", "*.jsx", "*.js"):
         for path in src.rglob(ext):
             try:
                 txt = path.read_text(encoding="utf-8", errors="ignore")
             except Exception:
                 continue
-            if last_segment in txt:
-                return True
+            for line in txt.splitlines():
+                stripped = line.strip().replace("\\", "/")
+                if not (stripped.startswith("import") or stripped.startswith("require(")):
+                    continue
+                if any(candidate in stripped for candidate in candidates):
+                    return True
     return False
 
 
@@ -145,6 +165,13 @@ def verify(root: Path) -> dict:
         }
 
     entry_text = entrypoint_path.read_text(encoding="utf-8", errors="ignore")
+    entry_dir = entrypoint_path.parent
+
+    def import_spec_for(artifact_path: Path) -> str:
+        rel = os.path.relpath(artifact_path, entry_dir).replace(os.sep, "/")
+        if not rel.startswith(".") and not rel.startswith("/"):
+            rel = f"./{rel}"
+        return rel
 
     bridge_path = root / utilities_dir / "token-bridge.css"
     utilities_path = root / utilities_dir / "utilities.css"
@@ -158,7 +185,7 @@ def verify(root: Path) -> dict:
         if not imported:
             reasons.append(
                 f"token-bridge.css written to {utilities_dir}/ but not imported in "
-                f"{entrypoint_rel} — add: import './{utilities_dir.removeprefix('src/')}/token-bridge.css';"
+                f"{entrypoint_rel} — add: import '{import_spec_for(bridge_path)}';"
             )
 
     if utilities_path.is_file():
@@ -168,7 +195,7 @@ def verify(root: Path) -> dict:
         if not imported:
             reasons.append(
                 f"utilities.css written to {utilities_dir}/ but not imported in "
-                f"{entrypoint_rel} — add: import './{utilities_dir.removeprefix('src/')}/utilities.css';"
+                f"{entrypoint_rel} — add: import '{import_spec_for(utilities_path)}';"
             )
 
     if (
@@ -345,6 +372,32 @@ def self_test() -> int:
             "src/components/fpkit/ui.tsx": "export const UI = {};",
         },
         expect_ok=True,
+    )
+    run(
+        "find_any_use rejects bare-segment false positive (string mention only, no import)",
+        {
+            "package.json": pkg,
+            ".acss-target.json": target_with_entry,
+            "src/main.tsx": "// docs reference: see fpkit upstream\n",
+            "src/components/fpkit/ui.tsx": "export const UI = {};",
+        },
+        expect_ok=False,
+        expect_reason_substr="ui.tsx is vendored",
+    )
+    run(
+        "Next-style entrypoint outside src/: relpath suggestion is correct",
+        {
+            "package.json": pkg,
+            ".acss-target.json": json.dumps({
+                "componentsDir": "src/components/fpkit",
+                "utilitiesDir": "src/styles",
+                "stack": {"entrypointFile": "app/layout.tsx"},
+            }),
+            "app/layout.tsx": "export default function L(){return null}\n",
+            "src/styles/token-bridge.css": ":root{}",
+        },
+        expect_ok=False,
+        expect_reason_substr="../src/styles/token-bridge.css",
     )
 
     total = passed + failed
