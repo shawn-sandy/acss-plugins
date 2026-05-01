@@ -182,7 +182,7 @@ Props typed `React.ReactNode`, `string`, or marked as content slots in the JSDoc
 
 | Slot prop (typical names) | Source in description |
 |---------------------------|-----------------------|
-| `children` | Quoted string, `that says <X>`, `labeled <X>`, `with text <X>` (see A4) |
+| `children` | Quoted string, `that says <X>`, `labelled <X>`, `with text <X>` (see A4) |
 | `title`, `heading` | `titled "<X>"`, `with the title "<X>"`, `header "<X>"` |
 | `body`, `description`, `message` | `body "<X>"`, `with body "<X>"`, `message "<X>"` |
 | `actions` | "with a primary button labelled <X>" → defer to refinement turn (Step G); **omit the prop entirely** so the component's declared default (typically `undefined`) applies, and list the deferred sub-component in the post-generation summary. Do **not** emit `actions={null}` — `null` and `undefined` are not equivalent for a `React.ReactNode` slot. |
@@ -222,7 +222,7 @@ This is a one-row table at v0.1; v0.2 surfaces the pattern via each reference do
 Quoted strings in the description are the primary source for slot content. Resolution order:
 
 1. Quoted strings in the order they appear: `"Add to cart"`, `'Sign in'`, `“Save”` → assigned to slots in the order the slots are declared in the Props Interface (children first, then title, then body, then actions). When a slot prop is named explicitly in the description ("titled 'Heads up'"), that slot wins regardless of order.
-2. The phrases `that says <X>`, `labeled <X>`, `with text <X>`, `for <X>` → assigned to `children` (or the component's primary content slot if `children` is absent).
+2. The phrases `that says <X>`, `labelled <X>`, `with text <X>`, `for <X>` → assigned to `children` (or the component's primary content slot if `children` is absent).
 3. Imperative verb-phrase fallback (e.g. *"a delete button"* → `Delete` for `children`). Capitalise the first letter; do not pluralise.
 4. Nothing inferable for a required slot → `AskUserQuestion`. Never write a component with placeholder content.
 
@@ -565,7 +565,7 @@ Output:
 
 ### Example 5 — Halt on conflict
 
-> **User:** "Build me a primary danger button labeled Save."
+> **User:** "Build me a primary danger button labelled Save."
 
 Two same-axis synonyms (H1 row 3 fires). The skill halts via `AskUserQuestion`:
 
