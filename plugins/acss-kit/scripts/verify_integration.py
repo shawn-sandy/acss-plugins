@@ -180,7 +180,6 @@ def verify(root: Path) -> dict:
         }
 
     entry_text = entrypoint_path.read_text(encoding="utf-8", errors="ignore")
-    entry_dir = entrypoint_path.parent
 
     css_entry_text = ""
     css_entry_missing = False
@@ -211,11 +210,25 @@ def verify(root: Path) -> dict:
     def imported_anywhere(basename: str) -> bool:
         return find_in_any(basename) is not None
 
-    def import_spec_for(artifact_path: Path) -> str:
-        rel = os.path.relpath(artifact_path, entry_dir).replace(os.sep, "/")
+    def relpath_from(importer_rel: str, artifact_path: Path) -> str:
+        importer_dir = (root / importer_rel).parent
+        rel = os.path.relpath(artifact_path, importer_dir).replace(os.sep, "/")
         if not rel.startswith(".") and not rel.startswith("/"):
             rel = f"./{rel}"
         return rel
+
+    def import_fixup_hint(artifact_path: Path) -> str:
+        """Build a 'where to add it' hint that names each candidate importer
+        with the right syntax for that file (JS/TS `import` vs Sass `@import`)
+        and a relative path computed from that importer's own directory."""
+        hints = [
+            f"{entrypoint_rel}: import '{relpath_from(entrypoint_rel, artifact_path)}';"
+        ]
+        if css_entry_rel and not css_entry_missing:
+            hints.append(
+                f"{css_entry_rel}: @import \"{relpath_from(css_entry_rel, artifact_path)}\";"
+            )
+        return " or ".join(hints)
 
     bridge_path = root / utilities_dir / "token-bridge.css"
     utilities_path = root / utilities_dir / "utilities.css"
@@ -233,7 +246,7 @@ def verify(root: Path) -> dict:
         if not imported:
             reasons.append(
                 f"token-bridge.css written to {utilities_dir}/ but not imported in "
-                f"{in_files} — add: import '{import_spec_for(bridge_path)}';"
+                f"{in_files} — add {import_fixup_hint(bridge_path)}"
             )
 
     if utilities_path.is_file():
@@ -243,7 +256,7 @@ def verify(root: Path) -> dict:
         if not imported:
             reasons.append(
                 f"utilities.css written to {utilities_dir}/ but not imported in "
-                f"{in_files} — add: import '{import_spec_for(utilities_path)}';"
+                f"{in_files} — add {import_fixup_hint(utilities_path)}"
             )
 
     # The bridge-before-utilities ordering check only makes sense when both
@@ -497,6 +510,25 @@ def self_test() -> int:
             "src/styles/utilities.css": ".m-1{}",
         },
         expect_ok=True,
+    )
+    run(
+        "fixup hint names cssEntryFile with @import syntax when configured",
+        {
+            "package.json": pkg,
+            ".acss-target.json": json.dumps({
+                "componentsDir": "src/components/fpkit",
+                "utilitiesDir": "src/styles",
+                "stack": {
+                    "entrypointFile": "src/main.tsx",
+                    "cssEntryFile": "src/styles/index.scss",
+                },
+            }),
+            "src/main.tsx": "console.log('hi');\n",
+            "src/styles/index.scss": "body { margin: 0; }\n",
+            "src/styles/token-bridge.css": ":root{}",
+        },
+        expect_ok=False,
+        expect_reason_substr="src/styles/index.scss: @import \"./token-bridge.css\";",
     )
     run(
         "cssEntryFile configured but missing → explicit reason",

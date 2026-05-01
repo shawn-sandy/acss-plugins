@@ -6,7 +6,7 @@ One-time first-run bootstrap. Run once after installing the plugin so subsequent
 
 **Signature**
 
-```
+```text
 /setup [--no-theme] [--target=<dir>]
 ```
 
@@ -49,7 +49,7 @@ Step labels below match the canonical sequence in [`skills/setup/SKILL.md`](../s
 
 ### Examples
 
-```
+```text
 /setup                                # full bootstrap with prompts
 /setup --no-theme                     # only init the component foundation
 /setup --target=src/ui/fpkit/         # override the components target
@@ -116,7 +116,12 @@ Prints created and skipped files, plus an import and JSX usage snippet.
 
 **Step G — Verify integration**
 
-Runs `scripts/verify_integration.py`. Reads `stack.entrypointFile` (TSX) and the optional `stack.cssEntryFile` (SCSS/CSS) recorded during `/setup`, then checks that the entrypoint actually imports `<componentsDir>/ui.tsx`, the token bridge, utilities CSS, and theme CSS (whichever are present on disk). Theme imports are accepted in either file — when `/setup` Step 7.5 wired them into `src/styles/index.scss`, an empty `main.tsx` no longer trips the validator. Missing imports are printed as a numbered fix-up list — the plugin never auto-edits the entrypoint.
+Runs `scripts/verify_integration.py`. Reads `stack.entrypointFile` (TSX) and the optional `stack.cssEntryFile` (SCSS/CSS) recorded during `/setup`, then runs two flavours of check (whichever artifacts are present on disk):
+
+- **`token-bridge.css`, `utilities.css`, theme CSS (`light.css` / `dark.css`)** — the verifier scans both `entrypointFile` and `cssEntryFile` and accepts an `import` / `require()` / `@import` / `@use` line in either file. The bridge-before-utilities ordering check runs inside whichever file holds both imports.
+- **`<componentsDir>/ui.tsx`** — the verifier walks every `*.tsx` / `*.ts` / `*.jsx` / `*.js` file under `src/` (not just the entrypoint) and considers the foundation "used" as soon as any of them imports a path containing `componentsDir`. This avoids false negatives when the entrypoint only renders a router and the actual fpkit usage lives in feature files.
+
+Missing imports are printed as a numbered fix-up list with concrete suggestions — the plugin never auto-edits user code.
 
 ### Examples
 
