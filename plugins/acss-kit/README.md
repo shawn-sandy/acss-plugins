@@ -4,10 +4,11 @@ A Claude Code plugin for building accessible React applications with the [fpkit/
 
 ## What you get
 
-Two top-level skills (plus two pilot skills):
+Two top-level skills, one cross-domain setup skill, and two pilot skills:
 
 - **`components`** — accessible React components from markdown specs. `/kit-add <component>` walks the dependency tree and writes self-contained TSX + SCSS into your project.
 - **`styles`** — CSS theme generation. `/theme-create`, `/theme-brand`, `/theme-update`, `/theme-extract` for OKLCH palettes with WCAG 2.2 AA validation.
+- **`setup`** — cross-domain first-run skill backing `/setup`. Runs the sass check, copies `ui.tsx`, and seeds light/dark theme. Idempotent.
 - **`component-form`** — pilot per-component skill that auto-triggers on phrases like "create a signup form", "add a contact form".
 - **`style-tune`** — pilot per-feel skill that auto-triggers on phrases like "warmer button", "softer card", "tone down the primary", "more spacious cards", "more elevated dialog". `/style-tune` is the explicit fallback. Routes between theme-role and component-SCSS edits with atomic WCAG pre-validation.
 
@@ -237,7 +238,7 @@ The full CSS Token Convention — 18 defined `--color-*` properties (15 required
 
 ## The UI Foundation Component
 
-`ui.tsx` is the only file copied verbatim from fpkit. It is a polymorphic React component (~333 lines, zero dependencies beyond React) that renders as any HTML element via the `as` prop, forwards all props (including ARIA attributes), and provides type-safe refs matching the rendered element type.
+`ui.tsx` is the only file copied verbatim from fpkit. It is a polymorphic React component (~170 lines, zero dependencies beyond React) that renders as any HTML element via the `as` prop, forwards all props (including ARIA attributes), and provides type-safe refs matching the rendered element type.
 
 All generated components build on top of `UI`. It is copied to your target directory on first `/kit-add` run and should not be deleted.
 
@@ -272,7 +273,7 @@ The required `## Accessibility` section is load-bearing — don't strip a11y pat
 
 Most components live as reference docs. Composable, complex, or high-iteration components can be promoted to their own skill at `skills/component-<name>/SKILL.md` with discovery-friendly trigger phrases in the frontmatter `description`.
 
-In 0.3.0 the only component promoted to a skill is `Form` (see `skills/component-form/SKILL.md`). It serves as a pilot — adopt the per-component skill pattern for additional components only after observing trigger reliability in real usage.
+As of 0.4.1 the only component promoted to a skill is `Form` (see `skills/component-form/SKILL.md`). It serves as a pilot — adopt the per-component skill pattern for additional components only after observing trigger reliability in real usage.
 
 ### 4. Log verification status
 
@@ -331,7 +332,7 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
         architecture.md                    # UI internals, polymorphic pattern
         composition.md                     # Compound patterns, decision tree
         css-variables.md                   # Naming + fallback strategy
-        components/                        # 18 component reference docs
+        components/                        # 16 component reference docs + catalog.md + foundation.md
     styles/
       SKILL.md                             # Styles skill workflow
       references/
