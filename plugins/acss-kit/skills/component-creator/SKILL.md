@@ -104,7 +104,7 @@ Do not parse the SCSS or accessibility blocks for parsing; those are reference m
 
 ### A3. Resolve user phrases against the prop set
 
-For every prop in the parsed Props Interface, attempt to resolve a value from the description in this order — first match wins, no silent defaults.
+For every prop in the parsed Props Interface, attempt to resolve a value from the description in this order — first match wins, no silent defaults. The one carve-out is the **state-control prop** set in A3.5 (`open`, `expanded`, `checked`, `visible`), which receives an explicit demo default and a paired summary note rather than halting; this is the only place the skill emits a value the user did not supply.
 
 #### A3.1. Global synonyms (apply to every component)
 
@@ -177,10 +177,37 @@ Props typed `React.ReactNode`, `string`, or marked as content slots in the JSDoc
 | `children` | Quoted string, `that says <X>`, `labeled <X>`, `with text <X>` (see A4) |
 | `title`, `heading` | `titled "<X>"`, `with the title "<X>"`, `header "<X>"` |
 | `body`, `description`, `message` | `body "<X>"`, `with body "<X>"`, `message "<X>"` |
-| `actions` | "with a primary button labelled <X>" → defer to refinement turn (Step G) and emit `actions={null}` for now, listing the deferred sub-component in the post-generation summary |
+| `actions` | "with a primary button labelled <X>" → defer to refinement turn (Step G); **omit the prop entirely** so the component's declared default (typically `undefined`) applies, and list the deferred sub-component in the post-generation summary. Do **not** emit `actions={null}` — `null` and `undefined` are not equivalent for a `React.ReactNode` slot. |
 | `aria-label` | `with aria-label "<X>"`, or — for icon-only components — required separately (see Step H) |
 
 Compound APIs (Card with `Card.Title` / `Card.Content` / `Card.Footer`, Table with rows/cells, List with items) follow the slot pattern but render as nested elements rather than props — see Step E2.
+
+#### A3.5. State-control props (demo defaults)
+
+Some required props are not "content" but state — they bind the rendered component to caller state (Alert / Dialog `open`, Disclosure `expanded`, Checkbox `checked` when used in controlled mode). For these, the snippet emits an explicit demo default so the rendered example is visible, and Step F's summary lists them as TODOs to wire up. This is the **only** carve-out from the no-silent-defaults rule in A3.
+
+| Prop name (exact match) | Demo default in snippet | Summary note |
+|-------------------------|-------------------------|--------------|
+| `open` | `true` | "`open` is a demo default — wire it to caller state (e.g. `useState`)." |
+| `expanded` | `true` | (same) |
+| `visible` | `true` | (same) |
+| `checked` | `false` | "`checked` defaults to `false` for the snippet — wire to caller state." |
+
+Two rules:
+1. The carve-out applies only to props whose **name** matches the table above. Any other required prop (`alt` on Img, `labelFor` on Field, `href` on Link, `title` on a slot-bearing component) follows the halt-on-unresolved rule from A5.
+2. When a state-control prop has an `on*` callback sibling (e.g. `open` + `onDismiss`, `checked` + `onChange`), emit a no-op `() => {}` placeholder for the callback and add a paired summary line so the snippet is paste-ready. Never emit a state-control prop without its callback wired (TypeScript would fail and the snippet would be useless).
+
+#### A3.6. Component-declared safe defaults
+
+Distinct from A3.5 (state placeholders), some required props have a safe default that's **always** correct unless the user explicitly overrides it. These are documented in the matched component's reference doc (typically inline in the Props Interface JSDoc) and emitted unconditionally — no summary note, no halt.
+
+| Component | Prop | Safe default | Source |
+|-----------|------|--------------|--------|
+| Button | `type` | `"button"` | `references/components/button.md` Props Interface: *"Required — prevents implicit submit in forms"*. The reference doc's TSX Template also defaults to `type = 'button'`. |
+
+The skill detects this case by reading the matched reference doc's Props Interface for a JSDoc starting with `Required — ...` paired with a default value in the TSX Template's destructured signature. If both are present, the default is treated as A3.6-safe.
+
+This is a one-row table at v0.1; v0.2 surfaces the pattern via each reference doc's `## Generation Notes — Creator Mode` block so new components can declare their own safe defaults without editing this skill.
 
 ### A4. Content extraction
 
@@ -196,7 +223,7 @@ Preserve the user's casing for explicit quoted strings; sentence-case derived ph
 ### A5. Ambiguity check
 
 Halt with `AskUserQuestion` whenever:
-- A required prop (per the Props Interface — including `open: boolean` for Alert, `labelFor` for Field, `alt` for Img) is unresolved.
+- A required prop (per the Props Interface — e.g. `labelFor` for Field, `alt` for Img, `href` for Link) is unresolved AND its name is **not** covered by A3.5 (state-control demo defaults: `open`, `expanded`, `visible`, `checked`) or A3.6 (component-declared safe defaults: Button's `type`). Props in those carve-outs take their declared default instead of halting.
 - A colour-family prop is unresolved AND the description doesn't say "neutral" / "default".
 - A synonym maps to two different prop axes (e.g. *"compact"* could be size `sm` or could mean `block: false`).
 - Two synonyms collide within an axis (e.g. *"large compact button"* — pick one; never silently keep the last-seen).
@@ -210,7 +237,7 @@ Identical to `component-form` Step B. Reuses `scripts/detect_target.py`.
 
 ### B1. Run the detector
 
-```
+```bash
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <project_root>
 ```
 
@@ -312,7 +339,21 @@ export default function {{NAME}}({{HANDLER_SIGNATURE}}) {
 
 ### E4. Snippet mode
 
-Print the bare JSX from E1 or E2 in a fenced TSX block. Include the import lines from E3 above the JSX so the snippet is paste-ready, but do **not** write to disk.
+Print the bare JSX from E1 or E2 in a fenced TSX block. Snippet mode does **not** reuse E3's relative path — E3 is anchored at `src/components/<Name>.tsx`, but a snippet is pasted into an arbitrary file (often `src/App.tsx`, a route file, or a layout) where that anchor doesn't apply.
+
+Resolve the import path in this order:
+
+1. **`stack.entrypointFile` from `.acss-target.json`** — when present, compute the relative path from `<entrypointFile>` to `componentsDir`. For a typical Vite project with `entrypointFile: src/App.tsx` and `componentsDir: src/components/fpkit`, this gives `./components/fpkit`.
+2. **No stack info** — fall back to a path relative to the project root (e.g. `src/components/fpkit/<file-stem>/<file-stem>`) and prepend a one-line comment to the snippet noting that the user should adjust the import to match the file they're pasting into.
+
+The fallback comment looks like:
+
+```tsx
+// adjust import path to your file's location relative to <componentsDir>
+import Button from 'src/components/fpkit/button/button'
+```
+
+When the entrypoint-relative path resolves cleanly, omit the comment — the snippet is paste-ready as-is for files at that depth. Do **not** write to disk in either branch.
 
 ### E5. Atomic generation
 
@@ -374,7 +415,7 @@ In **snippet mode**, print a fresh snippet. Do not ask the user to "diff" the pr
 
 Lists only the **changed** axes plus the unchanged spec for context:
 
-```
+```text
 Refined HeadsUpAlert:
   variant: outlined → soft     ← changed
   severity=warning  title="Heads up"  body="Your card expires next month"   (unchanged)
@@ -397,7 +438,7 @@ Run after Step A and before Step E writes anything. Each row is either a hard ha
 
 | Combination | Action |
 |-------------|--------|
-| Required prop unresolved (per Props Interface) | Halt — the absence-check in A5 already fires; H1 is the safety net. |
+| Required prop unresolved (per Props Interface, excluding A3.5 state-control and A3.6 safe-default props) | Halt — the absence-check in A5 already fires; H1 is the safety net. |
 | Resolved value not in the prop's union literal | Halt — list the supported values. |
 | Two same-axis synonyms in one description (e.g. "primary danger button", "small large alert") | Halt — reject as conflicting. |
 | Slot content empty / whitespace-only after A4 | Halt — never write a component with no accessible content. |
@@ -453,7 +494,7 @@ Resolved spec:
 - `title: "Heads up"` (named slot wins over positional)
 - `children: "Your card expires next month"` (body / message)
 - `dismissible: true`
-- `open: true` (required; defaulted on first generation, with a note in the summary that it should be wired to state)
+- `open: true` (A3.5 state-control demo default, paired with a no-op `onDismiss` callback per A3.5 rule 2; summary flags both as wire-to-caller-state TODOs)
 
 Output:
 

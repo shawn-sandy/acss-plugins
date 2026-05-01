@@ -10,13 +10,13 @@ Creator mode — describe a UI element in plain English and have it generated as
 
 ## Usage
 
-```
+```bash
 /kit-create <description>
 ```
 
 **Examples:**
 
-```
+```bash
 /kit-create primary pill button that says "Add to cart"
 /kit-create soft warning alert titled "Heads up" with body "Your card expires next month"
 /kit-create card with a heading "Plan" and content "Premium tier with all features"
