@@ -178,22 +178,22 @@ Button.displayName = 'Button'
 
 ```scss
 // Size tokens
---btn-size-xs: 0.6875rem;
---btn-size-sm: 0.8125rem;
---btn-size-md: 0.9375rem;   // default
+--btn-size-xs: 0.625rem;
+--btn-size-sm: 0.6875rem;
+--btn-size-md: 0.8125rem;   // default
 --btn-size-lg: 1.125rem;
---btn-size-xl: 1.25rem;
+--btn-size-xl: 1.5rem;
 
 // Base
 --btn-display: inline-flex;
 --btn-align: center;
 --btn-justify: center;
 --btn-gap: 0.5rem;
---btn-fs: var(--btn-size-md, 0.9375rem);
+--btn-fs: var(--btn-size-md, 0.8125rem); 
 --btn-fw: 500;
 --btn-radius: 0.375rem;
---btn-padding-block: calc(var(--btn-fs, 0.9375rem) * 0.5);
---btn-padding-inline: calc(var(--btn-fs, 0.9375rem) * 1.5);
+--btn-padding-block: calc(var(--btn-fs, 0.8125rem) * 0.5);
+--btn-padding-inline: calc(var(--btn-fs, 0.8125rem) * 1.5);
 --btn-bg: transparent;
 --btn-color: currentColor;
 --btn-border: 1px solid currentColor;
@@ -234,11 +234,11 @@ Button.displayName = 'Button'
   align-items: var(--btn-align, center);
   justify-content: var(--btn-justify, center);
   gap: var(--btn-gap, 0.5rem);
-  font-size: var(--btn-fs, 0.9375rem);
+  font-size: var(--btn-fs, 0.8125rem);
   font-weight: var(--btn-fw, 500);
   border-radius: var(--btn-radius, 0.375rem);
-  padding-block: var(--btn-padding-block, 0.46875rem);
-  padding-inline: var(--btn-padding-inline, 1.40625rem);
+  padding-block: var(--btn-padding-block, 0.40625rem);
+  padding-inline: var(--btn-padding-inline, 1.21875rem);
   background: var(--btn-bg, transparent);
   color: var(--btn-color, currentColor);
   border: var(--btn-border, 1px solid currentColor);
@@ -270,10 +270,10 @@ Button.displayName = 'Button'
   }
 
   // Size variants (data-btn attribute)
-  &[data-btn~="xs"] { font-size: var(--btn-size-xs, 0.6875rem); }
-  &[data-btn~="sm"] { font-size: var(--btn-size-sm, 0.8125rem); }
+  &[data-btn~="xs"] { font-size: var(--btn-size-xs, 0.625rem); }
+  &[data-btn~="sm"] { font-size: var(--btn-size-sm, 0.6875rem); }
   &[data-btn~="lg"] { font-size: var(--btn-size-lg, 1.125rem); }
-  &[data-btn~="xl"] { font-size: var(--btn-size-xl, 1.25rem); }
+  &[data-btn~="xl"] { font-size: var(--btn-size-xl, 1.5rem); }
   &[data-btn~="block"] { width: 100%; display: flex; }
 
   // Style variants (data-style attribute)
@@ -327,33 +327,40 @@ Button.displayName = 'Button'
 WCAG 2.2 AA compliance for the generated `Button` component.
 
 **Keyboard interaction**
+
 - `Enter` and `Space` activate the button (native `<button>` behavior; preserved by not overriding the element type).
 - The button stays in tab order when disabled — see "Disabled state" below.
 
 **ARIA & screen reader**
+
 - Native `<button>` provides an implicit `role="button"`; do not add an explicit `role` attribute.
 - Disabled state uses `aria-disabled="true"` instead of the native `disabled` attribute. Screen readers announce as "dimmed" / "unavailable" while the element remains keyboard-discoverable (WCAG 2.1.1 Keyboard).
 - The `is-disabled` class is paired with `aria-disabled` so visual and assistive-tech states stay in sync.
 - For icon-only buttons (`variant="icon"`), always pass an `aria-label` — the icon glyph is not an accessible name on its own.
 
 **Focus management**
+
 - `:focus-visible` outline at `var(--btn-focus-outline, 2px solid currentColor)` with `var(--btn-focus-outline-offset, 2px)`. The outline color is `currentColor` so it inherits a visible value across light and dark themes.
 - Focus styling is distinct from disabled styling so a focused-disabled button is still visible.
 - Pointer and keyboard handlers are gated by `useDisabledState`'s wrappers — the handlers no-op while disabled but the focus state itself is preserved.
 
 **Target size**
+
 - Default size (`md`) with `--btn-padding-block` / `--btn-padding-inline` produces a touch target ≥ 44×44 px, meeting WCAG 2.5.8 Target Size Minimum (Level AA).
 - Smaller sizes (`xs`, `sm`) may fall below 44 px. Use them only in dense UI where surrounding spacing or input precision compensates.
 
 **Color contrast**
+
 - Disabled opacity `0.6` reduces the effective contrast of the button against its background. Confirm the disabled appearance still meets WCAG 1.4.11 Non-text Contrast (3:1) for UI components in both light and dark theme modes.
 - Color variants (`primary`, `danger`, `success`, `warning`) rely on the project's `--color-*` tokens — see the `styles` skill's CSS Token Convention for required contrast pairings between button surface and label text.
 
 **Disabled state**
+
 - Always pass the typed `disabled?: boolean` prop, never the raw HTML `disabled`. The component renders `aria-disabled="true"` and keeps the element focusable.
 - `pointer-events: none` on `[aria-disabled="true"]` blocks click activation; keyboard activation is short-circuited inside `useDisabledState`'s wrappers. The element remains in the tab order so users discovering it via keyboard learn the action exists but is currently unavailable.
 
 **WCAG 2.2 AA criteria addressed**
+
 - 1.4.11 Non-text Contrast (UI states stay legible)
 - 2.1.1 Keyboard (full keyboard operability, including disabled state)
 - 2.4.7 Focus Visible (`:focus-visible` outline)
