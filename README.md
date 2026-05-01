@@ -1,8 +1,8 @@
 # agentic-acss-plugins
 
-A Claude Code **plugin marketplace** for building accessible React applications with the [fpkit/acss](https://github.com/shawn-sandy/acss) design system. Two plugins, one install command, no npm package to add.
+A Claude Code **plugin marketplace** for building accessible React applications with the [fpkit/acss](https://github.com/shawn-sandy/acss) design system. Two decoupled plugins, no npm package to add.
 
-> **What this is:** a marketplace of [Claude Code plugins](https://docs.claude.com/en/docs/claude-code/plugins) — markdown-as-source skills, slash commands, and Python 3 stdlib scripts. There is no Node.js build, no `npm install` for the marketplace itself, no CI pipeline. Plugins drop generated TSX/SCSS/CSS straight into your project using local imports.
+> **What this is:** a marketplace of [Claude Code plugins](https://docs.claude.com/en/docs/claude-code/plugins) — markdown-as-source skills, slash commands, and Python 3 scripts (mostly stdlib-only; `acss-utilities/scripts/validate_utilities.py` uses `tinycss2`). There is no Node.js build and no publish pipeline; the only GitHub Actions workflows are Claude-driven review automations under `.github/workflows/`. Plugins drop generated TSX/SCSS/CSS straight into your project using local imports.
 >
 > **Who it's for:** developers working in **React + TypeScript + Sass** projects who want accessible components and a token-driven theming system without taking on a new runtime dependency.
 
@@ -17,7 +17,7 @@ The two plugins are **decoupled** — install one, both, or use `acss-utilities`
 
 ## Quickstart
 
-Inside any Claude Code session running in your React + TS project:
+Inside any Claude Code session running in your React + TS project — register the marketplace once, then install whichever plugin(s) you need:
 
 ```text
 /plugin marketplace add shawn-sandy/agentic-acss-plugins
@@ -59,7 +59,7 @@ Then bootstrap and add your first component + theme:
 
 **Skills:**
 
-- **`components`** — markdown-as-source TSX/SCSS templates with embedded accessibility patterns. 18 component references.
+- **`components`** — markdown-as-source TSX/SCSS templates with embedded accessibility patterns. 16 component references plus a `catalog` index and a shared `foundation` doc.
 - **`styles`** — OKLCH theme generation, role catalogue, palette algorithm, brand presets, WCAG 2.2 AA validation.
 - **`component-form`** — pilot per-component skill that auto-triggers on natural-language form requests (e.g. *"Create a signup form with email and password"*) and vendors form dependencies via `/kit-add`.
 - **`setup`** — cross-domain init skill backing `/setup`.
