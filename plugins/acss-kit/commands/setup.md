@@ -29,7 +29,8 @@ When this command is invoked, follow the full bootstrap workflow documented in t
 5. **Target directory** — read `.acss-target.json` or prompt for target dir and write the file
 6. **ui.tsx** — copy `${CLAUDE_PLUGIN_ROOT}/assets/foundation/ui.tsx` to target dir (verbatim)
 7. **Starter theme** — seed `src/styles/theme/light.css` and `dark.css` via OKLCH pipeline (skip with `--no-theme`)
-8. **Summary** — tabulate `created` vs `kept` artifacts and print next steps
+8. **Wire theme imports** — detect the project's main CSS/SCSS entry (`detect_css_entry.py`), prompt when ambiguous or absent, append `@import` lines idempotently, and record the choice in `stack.cssEntryFile`
+9. **Summary** — tabulate `created` vs `kept` artifacts and print next steps
 
 ### After Setup
 

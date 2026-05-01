@@ -81,13 +81,27 @@ def read_target(root: Path) -> dict:
     return {}
 
 
+_IMPORT_PREFIXES: tuple[str, ...] = (
+    "import",
+    "require(",
+    "@import",
+    "@use",
+    "@forward",
+)
+
+
 def find_import_line(text: str, basename: str) -> Optional[int]:
-    """Return 1-based line number of the first import line referencing basename."""
+    """Return 1-based line number of the first import line referencing basename.
+
+    Recognises JS/TS (`import`, `require(`) and Sass (`@import`, `@use`,
+    `@forward`) statements so the same scanner works against both the TSX
+    entrypoint and an SCSS/CSS entry file.
+    """
     for idx, line in enumerate(text.splitlines(), start=1):
         stripped = line.strip()
         if not stripped:
             continue
-        if not (stripped.startswith("import") or stripped.startswith("require(")):
+        if not any(stripped.startswith(prefix) for prefix in _IMPORT_PREFIXES):
             continue
         if basename in stripped:
             return idx
@@ -137,6 +151,7 @@ def verify(root: Path) -> dict:
     utilities_dir = target.get("utilitiesDir") or DEFAULT_UTILITIES_DIR
     stack = target.get("stack") or {}
     entrypoint_rel = stack.get("entrypointFile")
+    css_entry_rel = stack.get("cssEntryFile")
 
     checks: list[dict] = []
     reasons: list[str] = []
@@ -166,6 +181,19 @@ def verify(root: Path) -> dict:
 
     entry_text = entrypoint_path.read_text(encoding="utf-8", errors="ignore")
     entry_dir = entrypoint_path.parent
+
+    css_entry_text = ""
+    if css_entry_rel:
+        css_entry_path = root / css_entry_rel
+        if css_entry_path.is_file():
+            css_entry_text = css_entry_path.read_text(encoding="utf-8", errors="ignore")
+
+    def imported_anywhere(basename: str) -> bool:
+        if find_import_line(entry_text, basename) is not None:
+            return True
+        if css_entry_text and find_import_line(css_entry_text, basename) is not None:
+            return True
+        return False
 
     def import_spec_for(artifact_path: Path) -> str:
         rel = os.path.relpath(artifact_path, entry_dir).replace(os.sep, "/")
@@ -220,14 +248,15 @@ def verify(root: Path) -> dict:
                 theme_files.append((candidate, base))
                 break
     if theme_files:
-        any_imported = any(
-            find_import_line(entry_text, name) is not None for name, _ in theme_files
-        )
+        any_imported = any(imported_anywhere(name) for name, _ in theme_files)
         checks.append({"artifact": "theme css", "imported": any_imported})
         if not any_imported:
             names = ", ".join(sorted({name for name, _ in theme_files}))
+            in_files = entrypoint_rel
+            if css_entry_rel:
+                in_files = f"{entrypoint_rel} or {css_entry_rel}"
             reasons.append(
-                f"Theme files present ({names}) but no theme CSS imported in {entrypoint_rel}."
+                f"Theme files present ({names}) but no theme CSS imported in {in_files}."
             )
 
     ui_path = root / components_dir / "ui.tsx"
@@ -244,6 +273,7 @@ def verify(root: Path) -> dict:
         "ok": not reasons,
         "projectRoot": str(root),
         "entrypointFile": entrypoint_rel,
+        "cssEntryFile": css_entry_rel,
         "checks": checks,
         "reasons": reasons,
     }
@@ -383,6 +413,48 @@ def self_test() -> int:
         },
         expect_ok=False,
         expect_reason_substr="ui.tsx is vendored",
+    )
+    run(
+        "theme imported via SCSS cssEntryFile counts as wired",
+        {
+            "package.json": pkg,
+            ".acss-target.json": json.dumps({
+                "componentsDir": "src/components/fpkit",
+                "utilitiesDir": "src/styles",
+                "stack": {
+                    "entrypointFile": "src/main.tsx",
+                    "cssEntryFile": "src/styles/index.scss",
+                },
+            }),
+            "src/main.tsx": "import './styles/index.scss';\n",
+            "src/styles/index.scss": (
+                "@import \"./theme/light.css\";\n"
+                "@import \"./theme/dark.css\";\n"
+            ),
+            "src/styles/theme/light.css": ":root{}",
+            "src/styles/theme/dark.css": ":root{}",
+        },
+        expect_ok=True,
+    )
+    run(
+        "theme files present but neither entry nor cssEntry imports them",
+        {
+            "package.json": pkg,
+            ".acss-target.json": json.dumps({
+                "componentsDir": "src/components/fpkit",
+                "utilitiesDir": "src/styles",
+                "stack": {
+                    "entrypointFile": "src/main.tsx",
+                    "cssEntryFile": "src/styles/index.scss",
+                },
+            }),
+            "src/main.tsx": "console.log('hi');\n",
+            "src/styles/index.scss": "body { margin: 0; }\n",
+            "src/styles/theme/light.css": ":root{}",
+            "src/styles/theme/dark.css": ":root{}",
+        },
+        expect_ok=False,
+        expect_reason_substr="src/main.tsx or src/styles/index.scss",
     )
     run(
         "Next-style entrypoint outside src/: relpath suggestion is correct",
