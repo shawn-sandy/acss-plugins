@@ -172,6 +172,16 @@ The validator's full pair list (10 pairs at default thresholds) is in `scripts/v
 
 ---
 
+## Integration verification (all flows)
+
+After any flow writes theme CSS to disk and `validate_theme.py` succeeds, run `${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <project_root>` to confirm the entrypoint actually imports the generated theme. The verifier reads `stack.entrypointFile` from `.acss-target.json` (populated by `detect_stack.py` during `/kit-add` first-run, or after `/setup`).
+
+- Exit 0 → theme is wired up. Done.
+- Exit 1 → print the `reasons` array as a numbered fix-up list. Do not auto-edit the entrypoint — the developer adds the import themselves.
+- If `.acss-target.json` lacks a `stack` block, the verifier exits 1 with a hint to run `detect_stack.py` first. Surface that hint and continue (theme generation itself succeeded).
+
+---
+
 ## Error handling (all flows)
 
 | Situation | Action |

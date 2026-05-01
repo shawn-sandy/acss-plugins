@@ -107,11 +107,13 @@ Generate one or more components into your project.
 
 1. **Init check** — verifies sass is in devDependencies; copies `ui.tsx` (the foundation component) to your target directory if not already present.
 2. **Target directory** — runs `scripts/detect_target.py`. If `.acss-target.json` is missing, asks where to generate files (default: `src/components/fpkit/`).
-3. **Dependency resolution** — reads the component's Generation Contract, walks the dependency tree recursively.
-4. **Preview** — shows the full file tree that will be created and waits for confirmation.
-5. **Bottom-up generation** — generates leaf dependencies first (e.g., `icon.tsx` before `icon-button.tsx` before `dialog.tsx`).
-6. **Skip existing** — files that already exist are skipped and imported from instead of overwritten.
-7. **Summary** — displays created/skipped files and an import/usage snippet.
+3. **Stack detection** — runs `scripts/detect_stack.py` to classify framework (vite/next/remix/astro/cra), CSS pipeline, and entrypoint file; persists the result into `.acss-target.json` under a `stack` key.
+4. **Dependency resolution** — reads the component's Generation Contract, walks the dependency tree recursively.
+5. **Preview** — shows the full file tree that will be created and waits for confirmation.
+6. **Bottom-up generation** — generates leaf dependencies first (e.g., `icon.tsx` before `icon-button.tsx` before `dialog.tsx`).
+7. **Skip existing** — files that already exist are skipped and imported from instead of overwritten.
+8. **Summary** — displays created/skipped files and an import/usage snippet.
+9. **Verify integration** — runs `scripts/verify_integration.py` against the recorded `stack.entrypointFile`. Missing imports are surfaced as a numbered fix-up list; the plugin never auto-edits the entrypoint.
 
 ### Auto-trigger: form generation
 
@@ -273,7 +275,7 @@ The required `## Accessibility` section is load-bearing — don't strip a11y pat
 
 Most components live as reference docs. Composable, complex, or high-iteration components can be promoted to their own skill at `skills/component-<name>/SKILL.md` with discovery-friendly trigger phrases in the frontmatter `description`.
 
-As of 0.4.1 the only component promoted to a skill is `Form` (see `skills/component-form/SKILL.md`). It serves as a pilot — adopt the per-component skill pattern for additional components only after observing trigger reliability in real usage.
+Currently, the only component promoted to a skill is `Form` (see `skills/component-form/SKILL.md`). It serves as a pilot — adopt the per-component skill pattern for additional components only after observing trigger reliability in real usage.
 
 ### 4. Log verification status
 
@@ -318,6 +320,8 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
   scripts/
     detect_target.py                       # Manages .acss-target.json
     detect_package_manager.py             # Detects pnpm/yarn/bun/npm from lockfile
+    detect_stack.py                        # Classifies framework/bundler/cssPipeline/entrypoint into .acss-target.json#stack
+    verify_integration.py                  # Read-only post-step: checks entrypoint imports the artifacts that were written
     generate_palette.py                    # OKLCH palette math
     oklch_shift.py                         # Hex + per-channel OKLCH offsets → hex
     _oklch.py                              # Internal hex↔OKLCH helpers (shared by generate_palette + oklch_shift)

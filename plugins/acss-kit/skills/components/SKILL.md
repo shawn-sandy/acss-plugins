@@ -64,6 +64,34 @@ Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <project_root>` to r
 
 Remember the answer for the current session as well, so subsequent `/kit-add` calls don't re-read the file unnecessarily.
 
+### A3.1. Detect the build stack
+
+Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_stack.py <project_root>` to classify framework, bundler, CSS pipeline, and entrypoint. Capture the JSON.
+
+1. If `source: "detected"`, merge the result into `.acss-target.json` under a `stack` key (preserve existing `componentsDir`/`utilitiesDir`):
+
+   ```json
+   {
+     "componentsDir": "src/components/fpkit",
+     "stack": {
+       "framework": "vite",
+       "bundler": "vite",
+       "cssPipeline": ["sass"],
+       "tsconfig": true,
+       "entrypointFile": "src/main.tsx",
+       "detectedAt": "2026-05-01T00:00:00Z"
+     }
+   }
+   ```
+
+   Skip re-detection on later runs unless `package.json`'s mtime is newer than `stack.detectedAt`.
+
+2. If `source: "unknown"`, surface the `reasons` array verbatim and ask the developer to confirm framework + entrypoint by hand. Record their answer under `stack` so subsequent runs skip the prompt.
+
+3. If `source: "none"` (no React project root), halt — `/kit-add` cannot proceed.
+
+Use `stack.cssPipeline` to tailor advice: when it contains `"tailwind"`, note that fpkit components and Tailwind utilities coexist but the user should not migrate component SCSS into `@apply`. When it omits `"sass"`, fall through to Step A2's install instruction.
+
 ### A4. Copy UI foundation
 
 Check if `ui.tsx` exists in the target directory.
@@ -365,6 +393,17 @@ Import and usage:
   <Button type="button" disabled>Disabled (stays focusable)</Button>
   <Button type="button" data-color="primary" data-btn="lg">Primary Large</Button>
 ```
+
+---
+
+## Step G — Verify Integration
+
+After Step F, run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <project_root>` to check that the user's entrypoint actually imports the artifacts that were just written.
+
+- Exit 0 → everything is wired up. No further action.
+- Exit 1 → the script returns a `reasons` array. Print each reason as a numbered fix-up list. Do **not** auto-edit the entrypoint — the developer must add imports themselves so they retain ownership of the wiring.
+
+The verifier reads `stack.entrypointFile` from `.acss-target.json`, so Step A3.1 must have run successfully. If `stack.entrypointFile` is missing or stale, the verifier exits 1 with a reason pointing back to `detect_stack.py`.
 
 ---
 
