@@ -1,22 +1,109 @@
 # agentic-acss-plugins
 
-A Claude Code plugin marketplace for building accessible React applications with the [fpkit/acss](https://github.com/shawn-sandy/acss) design system.
+A Claude Code **plugin marketplace** for building accessible React applications with the [fpkit/acss](https://github.com/shawn-sandy/acss) design system. Two decoupled plugins, no npm package to add.
+
+> **What this is:** a marketplace of [Claude Code plugins](https://docs.claude.com/en/docs/claude-code/plugins) — markdown-as-source skills, slash commands, and Python 3 scripts (mostly stdlib-only; `acss-utilities/scripts/validate_utilities.py` uses `tinycss2`). There is no Node.js build and no publish pipeline; the only GitHub Actions workflows are Claude-driven review automations under `.github/workflows/`. Plugins drop generated TSX/SCSS/CSS straight into your project using local imports.
+>
+> **Who it's for:** developers working in **React + TypeScript + Sass** projects who want accessible components and a token-driven theming system without taking on a new runtime dependency.
 
 ## Plugins in this marketplace
 
-| Plugin | Purpose |
-|---|---|
-| [`acss-kit`](./plugins/acss-kit) | Generate accessible React components and CSS themes for fpkit/acss projects. Run `/setup` to bootstrap a project (sass check, `ui.tsx` copy, starter theme), then `/kit-add` for components and `/theme-create` or `/style-tune` for theme and component-style work. Skills: **setup** (project bootstrap), **components** (markdown-as-source TSX/SCSS generation), **styles** (OKLCH theme generation and component SCSS tuning with WCAG 2.2 AA validation), plus the **style-tune** and **component-form** pilots. |
-| [`acss-utilities`](./plugins/acss-utilities) | Tailwind-style atomic CSS utility classes (`.bg-primary`, `.mt-4`, `.sm-hide`) for fpkit/acss projects. Hyphen-prefix responsive variants — no CSS escaping needed. Pairs with `acss-kit` via a token-bridge so utility colors resolve against the same OKLCH roles. Run `/utility-add` to drop the bundle into your project; `/utility-list`, `/utility-tune`, and `/utility-bridge` round out the workflow. |
+| Plugin | Version | What it ships |
+|---|---|---|
+| [`acss-kit`](./plugins/acss-kit) | 0.4.1 | Accessible React components and OKLCH CSS themes. Three skills (`components`, `styles`, plus the `component-form` pilot) and 8 slash commands covering setup, component generation, theme creation, brand presets, image/Figma extraction, and natural-language style tuning. |
+| [`acss-utilities`](./plugins/acss-utilities) | 0.2.0 | Tailwind-style atomic CSS utility classes (`.bg-primary`, `.mt-4`, `.sm-hide`) generated from a token source-of-truth. Hyphen-prefix responsive variants — no CSS escaping. Pairs with `acss-kit` via a token-bridge so utility colors resolve against the same OKLCH roles. |
 
-The two plugins are decoupled — install one, both, or use `acss-utilities` standalone with a hand-written theme.
+The two plugins are **decoupled** — install one, both, or use `acss-utilities` standalone with a hand-written theme.
 
-## Install
+## Quickstart
 
-```shell
+Inside any Claude Code session running in your React + TS project — register the marketplace once, then install whichever plugin(s) you need:
+
+```text
 /plugin marketplace add shawn-sandy/agentic-acss-plugins
 /plugin install acss-kit@shawn-sandy-agentic-acss-plugins
 /plugin install acss-utilities@shawn-sandy-agentic-acss-plugins
+```
+
+Then bootstrap and add your first component + theme:
+
+```text
+/setup                       # one-time init: sass check, ui.tsx copy, .acss-target.json, optional starter theme
+/kit-add button card         # generate accessible React components into src/components/fpkit
+/theme-create "#4f46e5" --mode=both   # OKLCH light + dark theme, WCAG 2.2 AA validated
+/utility-add                 # optional: drop utilities.css + token-bridge.css for atomic classes
+```
+
+`/plugin list` confirms what's installed and surfaces every available slash command.
+
+### Prerequisites
+
+- React + TypeScript project
+- `sass` or `sass-embedded` in `devDependencies` (`npm install -D sass`)
+- Claude Code 2.x with plugin support
+
+## Command reference
+
+### acss-kit
+
+| Command | Purpose |
+|---|---|
+| [`/setup`](./plugins/acss-kit/commands/setup.md) | Bootstrap a project — package-manager detection, sass install hint, `.acss-target.json`, `ui.tsx` copy, optional starter theme. |
+| [`/kit-list [component]`](./plugins/acss-kit/commands/kit-list.md) | List available component references or inspect one in detail. |
+| [`/kit-add <component> ...`](./plugins/acss-kit/commands/kit-add.md) | Generate accessible React components using local imports only. No `@fpkit/acss` package. |
+| [`/theme-create <hex> [--mode=light\|dark\|both]`](./plugins/acss-kit/commands/theme-create.md) | Generate semantic CSS theme files from a seed color and validate required WCAG contrast pairs. |
+| [`/theme-brand <name> [--from=<hex>]`](./plugins/acss-kit/commands/theme-brand.md) | Scaffold a `brand-<name>.css` preset that layers over light/dark. |
+| [`/theme-update <file> <--color-role=#hex> ...`](./plugins/acss-kit/commands/theme-update.md) | Edit role values in an existing theme file and re-validate contrast. |
+| [`/theme-extract <image\|figma-url>`](./plugins/acss-kit/commands/theme-extract.md) | Pull a primary brand color from a design input and run the theme generation flow. |
+| [`/style-tune <description>`](./plugins/acss-kit/commands/style-tune.md) | Natural-language tuning of theme roles or component tokens (`"warmer button"`, `"deeper accent for primary"`). |
+
+**Skills:**
+
+- **`components`** — markdown-as-source TSX/SCSS templates with embedded accessibility patterns. 16 component references plus a `catalog` index and a shared `foundation` doc.
+- **`styles`** — OKLCH theme generation, role catalogue, palette algorithm, brand presets, WCAG 2.2 AA validation.
+- **`component-form`** — pilot per-component skill that auto-triggers on natural-language form requests (e.g. *"Create a signup form with email and password"*) and vendors form dependencies via `/kit-add`.
+- **`setup`** — cross-domain init skill backing `/setup`.
+- **`style-tune`** — pilot per-feel skill backing `/style-tune`.
+
+### acss-utilities
+
+| Command | Purpose |
+|---|---|
+| [`/utility-add`](./plugins/acss-utilities/commands/utility-add.md) | Copy the prebuilt `utilities.css` (and `token-bridge.css`) into a target project. Family filtering supported. |
+| [`/utility-list [family]`](./plugins/acss-utilities/commands/utility-list.md) | List utility families and their classes. |
+| [`/utility-bridge [--theme=<file>]`](./plugins/acss-utilities/commands/utility-bridge.md) | Regenerate `token-bridge.css` against the active `acss-kit` theme — emits both `:root` and `[data-theme="dark"]` blocks. |
+| [`/utility-tune <description>`](./plugins/acss-utilities/commands/utility-tune.md) | Adjust `utilities.tokens.json` (spacing baseline, breakpoints, family enables) from natural language and regenerate. |
+
+**Skill:**
+
+- **`utilities`** — generation, listing, tuning, and bridging of atomic utility classes with hyphen-prefix responsive variants (`sm-hide`, `md-p-6`, `lg-flex-row`).
+
+## Repository layout
+
+```text
+agentic-acss-plugins/
+├── .claude-plugin/marketplace.json   # marketplace manifest
+├── plugins/
+│   ├── acss-kit/
+│   │   ├── .claude-plugin/plugin.json     # version source of truth
+│   │   ├── commands/*.md                  # 8 slash commands
+│   │   ├── skills/{components,styles,component-form,setup,style-tune}/SKILL.md
+│   │   ├── scripts/                       # Python 3 stdlib (palette, validate, detect_target, …)
+│   │   ├── assets/                        # ui.tsx foundation, brand template, theme schema
+│   │   └── docs/                          # architecture, recipes, troubleshooting, tutorial
+│   └── acss-utilities/
+│       ├── .claude-plugin/plugin.json
+│       ├── commands/*.md                  # 4 utility-* commands
+│       ├── skills/utilities/SKILL.md
+│       ├── scripts/                       # generator + validator + classname migration
+│       └── docs/                          # developer guide
+├── tests/                              # tests/run.sh structural validation, tests/e2e.sh deeper check
+├── docs/                               # cross-plugin documentation
+├── .claude/                            # project-level rules, hooks, skills (maintainer tooling)
+├── CLAUDE.md                           # repo guidance for Claude Code
+├── AGENTS.md                           # agent definitions
+├── CONTRIBUTING.md                     # contributor workflow
+└── GUIDE.md                            # end-user guide (overlaps with this README)
 ```
 
 ## Migration
@@ -29,29 +116,47 @@ If you installed `acss-utilities` 0.1.0, the 0.2.0 release switched responsive v
 
 ## Testing locally
 
-`tests/run.sh` from the repo root is the default automated check — structural validation in ~30 seconds, no browser. One-time setup: `npm --prefix tests ci && pip3 install --user tinycss2`.
+`tests/run.sh` is the default automated check — structural validation in ~30 seconds, no browser. One-time setup: `npm --prefix tests ci && pip3 install --user tinycss2`.
 
 ```sh
 tests/run.sh
 ```
 
-For render-sensitive changes, `tests/e2e.sh` runs the deeper opt-in check (~30s after first install) — extracts components from reference docs, type-checks them with `tsc --noEmit`, compiles SCSS, validates theme contrast, and runs jsdom + axe-core a11y on rendered output.
+For render-sensitive changes, `tests/e2e.sh` runs the deeper opt-in check — extracts components from reference docs, type-checks them with `tsc --noEmit`, compiles SCSS, validates theme contrast, and runs jsdom + axe-core a11y on rendered output.
 
-For end-to-end slash-command verification, `tests/setup.sh` writes a minimal verification fixture at `tests/sandbox/` (gitignored) — `package.json` + `tsconfig.json`, no Vite, no app shell:
+For end-to-end slash-command verification, `tests/setup.sh` writes a minimal verification fixture at `tests/sandbox/` (gitignored):
 
 ```sh
 tests/setup.sh
 cd tests/sandbox && claude
 ```
 
+To test a local plugin install without publishing:
+
+```sh
+claude --plugin-dir ./plugins/acss-kit
+```
+
 See [`tests/README.md`](./tests/README.md) for the full workflow, the `--reset` flag, escape hatches, and troubleshooting.
+
+## Documentation map
+
+| Doc | Audience | Covers |
+|---|---|---|
+| [`GUIDE.md`](./GUIDE.md) | End users | Step-by-step install + command walkthrough |
+| [`CONTRIBUTING.md`](./CONTRIBUTING.md) | Contributors | Branching model, fpkit sibling-clone workflow, review process |
+| [`CLAUDE.md`](./CLAUDE.md) | Claude Code sessions | Repo-level guidance — plugin layout, version-bump rules, pre-submit checklist |
+| [`AGENTS.md`](./AGENTS.md) | Maintainers | Project agent definitions |
+| [`plugins/acss-kit/README.md`](./plugins/acss-kit/README.md) | acss-kit users | Full plugin behavior, command catalog, skills overview |
+| [`plugins/acss-kit/docs/`](./plugins/acss-kit/docs/) | acss-kit contributors | Architecture, recipes, troubleshooting, tutorial |
+| [`plugins/acss-utilities/README.md`](./plugins/acss-utilities/README.md) | acss-utilities users | Utility-class behavior, bridge file, families |
+| [`plugins/acss-utilities/docs/`](./plugins/acss-utilities/docs/) | acss-utilities contributors | Developer guide, recipes, architecture |
+| [`tests/README.md`](./tests/README.md) | All | Local test workflow, sandbox fixtures, reset/troubleshooting |
 
 ## Relationship to the main fpkit repo
 
-Plugin development references the live fpkit source at [`shawn-sandy/acss`](https://github.com/shawn-sandy/acss). Contributors should keep both repos available side-by-side — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the workflow.
-
-SKILL.md files and reference docs in the plugin link to specific fpkit source files via full GitHub URLs, so plugin authors can click through without a local clone.
+Plugin development references the live fpkit source at [`shawn-sandy/acss`](https://github.com/shawn-sandy/acss). SKILL.md files and reference docs link to specific fpkit source files via full GitHub URLs, so plugin users can click through without a local clone. Contributors should keep both repos available side-by-side — see [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the workflow.
 
 ## License
 
-MIT
+MIT — see [`LICENSE`](./LICENSE).
