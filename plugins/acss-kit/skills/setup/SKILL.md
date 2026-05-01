@@ -226,7 +226,7 @@ Resolve the chosen path to `<projectRoot>/<chosen>`. Re-read its `imports` map (
 
 ### 7.5c — Append the import block (idempotent)
 
-Compute the relative path from the chosen entry file's directory to `<projectRoot>/src/styles/theme/`. Build the desired import block:
+Compute the relative path from the chosen entry file's directory to `<projectRoot>/src/styles/`. Build the desired import block:
 
 ```scss
 /* acss-kit theme — managed by /setup */
@@ -272,7 +272,7 @@ Created:
   - .acss-target.json
   - src/styles/theme/light.css
   - src/styles/theme/dark.css
-  - src/styles/index.scss   (theme imports wired in)
+  - <chosen cssEntryFile>   (theme imports wired in)
 
 Kept (already present):
   - sass in devDependencies
