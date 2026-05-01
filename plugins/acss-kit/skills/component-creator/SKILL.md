@@ -110,9 +110,10 @@ If the description names no size, omit the `size` prop (Button defaults to `md`)
 | `pill`, `rounded`, `round`, `capsule` | `pill` |
 | `outline`, `outlined`, `bordered`, `ghost` | `outline` |
 | `text`, `link-style`, `flat` | `text` |
-| `icon`, `icon-only` | `icon` |
 
 If the description names no style, omit the `variant` prop.
+
+> **Note — `variant: "icon"` is intentionally excluded from creator-mode v0.1.** The `Button` reference doc supports it, but icon-only buttons need a resolved icon glyph (not a Lucide-style placeholder) and a meaningful `aria-label`. Generating an icon-less icon button produces a broken control. When the description says "icon button", halt with the v0.2 placeholder from A1 and point the user at `IconButton` once it lands.
 
 **`block`** (boolean):
 
@@ -138,7 +139,7 @@ Preserve the user's casing for explicit quoted strings; sentence-case derived ph
 Halt with `AskUserQuestion` whenever:
 - `color` is unresolved AND the description doesn't say "neutral" / "default".
 - A synonym maps to two different axes (e.g. *"compact"* could be size `sm` or could mean `block: false`). Disambiguate before generating.
-- The description includes `variant: icon` but no `aria-label` content. Icon buttons require an accessible name; ask for it.
+- Two synonyms collide within an axis (e.g. *"large compact button"* — pick one; never silently keep the last-seen).
 
 ---
 
@@ -287,6 +288,163 @@ Refine: try "make it larger", "swap to secondary", "add full width",
 ```
 
 The "Refine" line keeps the conversation primed — subsequent natural-language tweaks re-enter Step A with the previous spec as the starting point. Refinement context lives in-memory only for v0.1; nothing is persisted.
+
+---
+
+## Step G — Refinement turns
+
+After a successful generation, the skill holds the resolved spec in conversation memory. The next user turn is treated as a **refinement** rather than a new request when **both** of the following are true:
+
+1. The turn does not name a different component (no "card", "alert", etc.).
+2. The turn reads as a delta on the existing button (imperative tweak verbs: "make it…", "swap…", "change…", "add…", "remove…", "drop the…", or single-axis adjectives: "larger", "secondary", "outline").
+
+If either fails, treat the turn as a fresh Step A entry.
+
+### G1. Delta vocabulary
+
+Map common refinement phrasings to a single-axis change. The synonym tables in A2 are reused — the only new vocabulary is the comparative / removal language.
+
+| Phrase | Effect |
+|--------|--------|
+| `make it larger`, `bigger`, `bump the size` | `size` → next step up (`md` → `lg` → `xl` → `2xl`); halt at the ceiling rather than wrap |
+| `make it smaller`, `smaller` | `size` → next step down (`md` → `sm` → `xs`); halt at the floor |
+| `swap to <color>`, `change the color to <color>`, `make it <color>` | `color` → resolved value from A2 |
+| `make it <variant>` (e.g. `pill`, `outline`, `text`) | `variant` → resolved value from A2 |
+| `add full width`, `make it full-width`, `stretch it` | `block: true` |
+| `drop the full width`, `not full-width anymore` | `block: false` |
+| `disable it`, `mark it disabled` | `disabled: true` |
+| `enable it`, `not disabled`, `re-enable it` | `disabled: false` |
+| `change the text to "<X>"`, `say "<X>"` instead | `children` → `<X>` |
+| `clear the <axis>`, `remove the <axis>`, `drop the <axis>` | unset the named axis (so the prop is omitted on regeneration) |
+
+Anything outside this vocabulary that isn't a clean restatement should round-trip through `AskUserQuestion` rather than being guessed at.
+
+### G2. Regeneration
+
+A refinement turn re-runs Steps A4 (ambiguity check on the merged spec) → D (compose JSX) → F (summary). Steps B and C are skipped because the dependency was already vendored on the first pass.
+
+In **file mode**, the skill rewrites the same `src/components/<Name>.tsx` produced by the original turn. If the user-renamed the file or moved it, ask before overwriting — never search-and-replace blindly.
+
+In **snippet mode**, print a fresh snippet. Do not ask the user to "diff" the previous output; emit the full new JSX so it's still copy-paste ready.
+
+### G3. Summary on refinement
+
+The Step F summary on a refinement turn lists only the **changed** axes plus the unchanged spec for context:
+
+```
+Refined AddToCartButton:
+  size: md → lg            ← changed
+  color=primary  variant=pill  children="Add to cart"   (unchanged)
+```
+
+This makes the conversational diff legible without forcing the user to scroll.
+
+### G4. Resetting the context
+
+The user can drop the refinement context by:
+- Naming a different component (handed off to a fresh Step A).
+- Saying *"start over"*, *"reset"*, or *"forget that"* — the in-memory spec is cleared and the next turn is treated as a fresh prompt.
+- Closing the session — refinement state is in-memory only.
+
+---
+
+## Step H — Validation matrix
+
+Run these checks **after** Step A and **before** Step D writes anything. Each row is either a hard halt (bug-out before generation) or a confirmation prompt (`AskUserQuestion`). The skill should not silently accept any of them.
+
+| Combination | Action |
+|-------------|--------|
+| `variant="icon"` requested | Halt — out of v0.1 scope (see A2 note). Direct user to v0.2 / `IconButton`. |
+| `variant="text"` + `block: true` | Confirm — text buttons stretched to full width usually look like a heading; ask "did you mean `outline` or `pill` instead?" |
+| `size="xs"` or `size="sm"` + no surrounding-density justification | Confirm — these sizes can fall below the WCAG 2.5.8 44 px target. Note the trade-off in the question. |
+| `disabled: true` + no other props | Confirm — a disabled button with default everything is almost always a leftover from a refinement; ask whether the user wants a styled disabled button or just the disabled state. |
+| `children` is empty / whitespace-only after A3 | Halt — never write a button with no accessible name. |
+| `children` length > 60 chars | Confirm — long button labels are usually a sign the user wants a `Link` or a `<Banner>` callout instead. Offer `Link` (v0.2) as an alternative. |
+| Two `color` synonyms in one description (e.g. "primary danger button") | Halt — reject as conflicting. Ask the user which they meant. |
+| `block: true` + `variant="text"` + `disabled: true` | Halt — three soft signals collapse into "this is not really a button". Ask the user to describe what they actually want shown. |
+
+When halting, print the offending combination and the rule that triggered it. When confirming, frame the question with the user's resolved spec and the safer alternative as the suggested option.
+
+---
+
+## Step I — Worked examples
+
+Each example shows the user's turn, the parser's resolved spec, and the emitted snippet (snippet mode, default). These double as parser test fixtures — if a future change to A2 / G1 breaks one of these, the skill regressed.
+
+### Example 1 — first generation
+
+> **User:** "Create a primary pill button that says 'Add to cart'."
+
+Resolved spec:
+- `color: primary` (from "primary")
+- `variant: pill` (from "pill")
+- `children: "Add to cart"` (quoted)
+- everything else omitted
+
+Output:
+
+```tsx
+import Button from './fpkit/button/button'
+import './fpkit/button/button.scss'
+
+<Button type="button" color="primary" variant="pill">
+  Add to cart
+</Button>
+```
+
+### Example 2 — refinement
+
+> **User (next turn):** "Make it larger and swap to secondary."
+
+Merged spec:
+- `color: primary` → `secondary`
+- `size: (omitted)` → `lg` (default `md` → next step `lg`)
+- `variant: pill` (unchanged)
+- `children: "Add to cart"` (unchanged)
+
+Output:
+
+```tsx
+<Button type="button" color="secondary" size="lg" variant="pill">
+  Add to cart
+</Button>
+```
+
+### Example 3 — halt on conflict
+
+> **User:** "Build me a primary danger button labeled Save."
+
+Resolved spec triggers Step H row 7 (two `color` synonyms). The skill halts via `AskUserQuestion`:
+
+> "I see both 'primary' and 'danger' in the description. They map to different `color` props (`primary` vs. `danger`). Which did you mean?"
+
+Nothing is written; the next user turn re-enters Step A with the clarified colour.
+
+### Example 4 — confirm on accessibility risk
+
+> **User:** "Make me a tiny outline button labeled X."
+
+Resolved spec:
+- `size: xs`, `variant: outline`, `children: "X"`
+
+Step H row 3 fires (size below 44 px target). The skill asks:
+
+> "An `xs` button can fall below the WCAG 2.5.8 44 px target size. Use `xs` only if it sits inside a dense toolbar with surrounding spacing. Keep `xs`, switch to `sm`, or default to `md`?"
+
+Generation continues only after the user confirms.
+
+---
+
+## Anti-patterns
+
+Things creator mode should **never** do:
+
+1. **Silently default `color`** — the user almost certainly has a specific intent ("a button" without colour usually means *neutral*, but the visual difference between primary and outline-no-colour is large enough that the wrong default is worse than asking).
+2. **Generate `variant: icon` without an icon** — there's no icon resolution in v0.1; emitting `<Button variant="icon">X</Button>` ships a broken accessible name.
+3. **Bake the description into a comment** — no `// User asked for: …` lines. The reference docs are the source of truth; the user's prompt is conversation context, not provenance.
+4. **Refine a spec the user dropped** — once Step G4 fires, the in-memory spec is gone. Don't carry colour from three turns ago into a fresh Step A.
+5. **Write to disk on a confirm** — Step H confirmations must round-trip through the user before any file is written. Snippet mode can wait too — easier to re-emit than to retract.
+6. **Hard-code the components path** — always run `detect_target.py` (Step B) and use the resolved `componentsDir`. Different projects place `fpkit/` in different roots.
 
 ---
 
