@@ -4,12 +4,13 @@ A Claude Code plugin for building accessible React applications with the [fpkit/
 
 ## What you get
 
-Two top-level skills, one cross-domain setup skill, and two pilot skills:
+Two top-level skills, one cross-domain setup skill, and three pilot skills:
 
 - **`components`** — accessible React components from markdown specs. `/kit-add <component>` walks the dependency tree and writes self-contained TSX + SCSS into your project.
 - **`styles`** — CSS theme generation. `/theme-create`, `/theme-brand`, `/theme-update`, `/theme-extract` for OKLCH palettes with WCAG 2.2 AA validation.
 - **`setup`** — cross-domain first-run skill backing `/setup`. Runs the sass check, copies `ui.tsx`, and seeds light/dark theme. Idempotent.
 - **`component-form`** — pilot per-component skill that auto-triggers on phrases like "create a signup form", "add a contact form".
+- **`component-creator`** — pilot creator-mode skill that auto-triggers on phrases like "create a primary pill button that says 'Add to cart'", "make me a large outline button labeled Sign in". `/kit-create` is the explicit fallback. Parses color / size / variant / block / disabled / children from natural language and emits a paste-ready TSX snippet or a standalone component file. v0.1 is scoped to Button only.
 - **`style-tune`** — pilot per-feel skill that auto-triggers on phrases like "warmer button", "softer card", "tone down the primary", "more spacious cards", "more elevated dialog". `/style-tune` is the explicit fallback. Routes between theme-role and component-SCSS edits with atomic WCAG pre-validation.
 
 ## Why
