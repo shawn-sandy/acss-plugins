@@ -21,31 +21,31 @@ One-time first-run bootstrap. Run once after installing the plugin so subsequent
 
 ### What happens step by step
 
-These steps correspond to Steps 1–8 in [`skills/setup/SKILL.md`](../skills/setup/SKILL.md).
+Step labels below match the canonical sequence in [`skills/setup/SKILL.md`](../skills/setup/SKILL.md) (Steps 1–8, with Step 7.5 between Steps 7 and 8).
 
-1. **Verify React + TypeScript project.** Runs `scripts/detect_target.py`; halts if no `package.json` with `react` is found or if `tsconfig.json` is missing.
-2. **Detect React version.** Warns if React 19+ is detected (the bundled `ui.tsx` may need the `ElementInstance<C>` adaptation).
-3. **Detect package manager.** Runs `scripts/detect_package_manager.py` and captures `installCommand` for the next step.
-4. **Print sass install command.** Checks `devDependencies` for `sass` / `sass-embedded`. If missing, prints the exact `<pm> add -D sass` command and halts (no side effects). If `node-sass` only is present, warns and continues.
-5. **Determine target directory.** Reads `.acss-target.json` if it exists; otherwise prompts (default `src/components/fpkit/`) and writes the file.
-6. **Copy `ui.tsx`.** Reads `assets/foundation/ui.tsx` from the plugin and writes it verbatim to `<componentsDir>/ui.tsx`. Skipped if the destination already exists.
-7. **Seed starter theme** *(skipped under `--no-theme`)*. Prompts for a seed hex color (default `#4f46e5`), runs `scripts/generate_palette.py | scripts/tokens_to_css.py`, then `scripts/validate_theme.py` for WCAG 2.2 AA contrast. Writes `src/styles/theme/light.css` and `dark.css`.
-8. **Wire theme imports** *(Step 7.5; skipped under `--no-theme`)*. Runs `scripts/detect_css_entry.py` to locate candidate CSS/SCSS entry files. Branches:
-   - **One candidate** — uses it without prompting.
-   - **Multiple candidates** — `AskUserQuestion` lists each path with a hint about which `light.css` / `dark.css` / `token-bridge.css` / `utilities.css` imports it already carries; the user picks one. "Other" accepts a free-text path.
-   - **No candidate** — `AskUserQuestion` asks for a path (default `src/styles/index.scss`); the file is created if missing.
+- **Step 1 — Verify React + TypeScript project.** Runs `scripts/detect_target.py`; halts if no `package.json` with `react` is found or if `tsconfig.json` is missing.
+- **Step 2 — Detect React version.** Warns if React 19+ is detected (the bundled `ui.tsx` may need the `ElementInstance<C>` adaptation).
+- **Step 3 — Detect package manager.** Runs `scripts/detect_package_manager.py` and captures `installCommand` for the next step.
+- **Step 4 — Print sass install command.** Checks `devDependencies` for `sass` / `sass-embedded`. If missing, prints the exact `<pm> add -D sass` command and halts (no side effects). If `node-sass` only is present, warns and continues.
+- **Step 5 — Determine target directory.** Reads `.acss-target.json` if it exists; otherwise prompts (default `src/components/fpkit/`) and writes the file.
+- **Step 6 — Copy `ui.tsx`.** Reads `assets/foundation/ui.tsx` from the plugin and writes it verbatim to `<componentsDir>/ui.tsx`. Skipped if the destination already exists.
+- **Step 7 — Seed starter theme** *(skipped under `--no-theme`)*. Prompts for a seed hex color (default `#4f46e5`), runs `scripts/generate_palette.py | scripts/tokens_to_css.py`, then `scripts/validate_theme.py` for WCAG 2.2 AA contrast. Writes `src/styles/theme/light.css` and `dark.css`.
+- **Step 7.5 — Wire theme imports** *(skipped under `--no-theme`)*. Runs `scripts/detect_css_entry.py` to locate candidate CSS/SCSS entry files. Branches:
+  - **One candidate** — uses it without prompting.
+  - **Multiple candidates** — `AskUserQuestion` lists each path with a hint about which `light.css` / `dark.css` / `token-bridge.css` / `utilities.css` imports it already carries; the user picks one. "Other" accepts a free-text path.
+  - **No candidate** — `AskUserQuestion` asks for a path (default `src/styles/index.scss`); the file is created if missing.
 
-   Then idempotently appends an `@import` block at the top of the chosen file (after any `@charset` / leading comment / existing `@use` lines):
+  Then idempotently appends an `@import` block at the top of the chosen file (after any `@charset` / leading comment / existing `@use` lines):
 
-   ```scss
-   /* acss-kit theme — managed by /setup */
-   @import "<rel>/theme/light.css";
-   @import "<rel>/theme/dark.css";
-   /* token-bridge.css + utilities.css load here once /utility-* runs */
-   ```
+  ```scss
+  /* acss-kit theme — managed by /setup */
+  @import "<rel>/theme/light.css";
+  @import "<rel>/theme/dark.css";
+  /* token-bridge.css + utilities.css load here once /utility-* runs */
+  ```
 
-   Lines whose basename is already present in the file are skipped, so re-runs never duplicate. The chosen file is persisted at `stack.cssEntryFile` in `.acss-target.json` so `verify_integration.py` accepts theme imports living in SCSS rather than `main.tsx`.
-9. **Print summary.** Tabulates `Created` vs `Kept` artifacts. If Step 4 halted, instead prints the install command and exits cleanly.
+  Lines whose basename is already present in the file are skipped, so re-runs never duplicate. The chosen file is persisted at `stack.cssEntryFile` in `.acss-target.json` so `verify_integration.py` accepts theme imports (including `token-bridge.css` and `utilities.css` once `/utility-*` has run) living in SCSS rather than `main.tsx`.
+- **Step 8 — Print summary.** Tabulates `Created` vs `Kept` artifacts. If Step 4 halted, instead prints the install command and exits cleanly.
 
 ### Examples
 

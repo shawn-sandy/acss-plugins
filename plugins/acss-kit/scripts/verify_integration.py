@@ -183,17 +183,33 @@ def verify(root: Path) -> dict:
     entry_dir = entrypoint_path.parent
 
     css_entry_text = ""
+    css_entry_missing = False
     if css_entry_rel:
         css_entry_path = root / css_entry_rel
         if css_entry_path.is_file():
             css_entry_text = css_entry_path.read_text(encoding="utf-8", errors="ignore")
+        else:
+            css_entry_missing = True
+            reasons.append(
+                f"stack.cssEntryFile points at {css_entry_rel} but that file does not exist — "
+                f"re-run /setup or remove the stale cssEntryFile entry from .acss-target.json."
+            )
+
+    def find_in_any(basename: str) -> Optional[tuple[str, int]]:
+        """Return (file_label, line_number) of the first import line referencing
+        basename, preferring the TSX entrypoint over the CSS/SCSS entry. None
+        if neither file imports it."""
+        line = find_import_line(entry_text, basename)
+        if line is not None:
+            return (entrypoint_rel, line)
+        if css_entry_text:
+            line = find_import_line(css_entry_text, basename)
+            if line is not None:
+                return (css_entry_rel, line)
+        return None
 
     def imported_anywhere(basename: str) -> bool:
-        if find_import_line(entry_text, basename) is not None:
-            return True
-        if css_entry_text and find_import_line(css_entry_text, basename) is not None:
-            return True
-        return False
+        return find_in_any(basename) is not None
 
     def import_spec_for(artifact_path: Path) -> str:
         rel = os.path.relpath(artifact_path, entry_dir).replace(os.sep, "/")
@@ -203,37 +219,45 @@ def verify(root: Path) -> dict:
 
     bridge_path = root / utilities_dir / "token-bridge.css"
     utilities_path = root / utilities_dir / "utilities.css"
-    bridge_line: Optional[int] = None
-    utilities_line: Optional[int] = None
+    bridge_hit: Optional[tuple[str, int]] = None
+    utilities_hit: Optional[tuple[str, int]] = None
+
+    in_files = entrypoint_rel
+    if css_entry_rel and not css_entry_missing:
+        in_files = f"{entrypoint_rel} or {css_entry_rel}"
 
     if bridge_path.is_file():
-        bridge_line = find_import_line(entry_text, "token-bridge.css")
-        imported = bridge_line is not None
+        bridge_hit = find_in_any("token-bridge.css")
+        imported = bridge_hit is not None
         checks.append({"artifact": "token-bridge.css", "imported": imported})
         if not imported:
             reasons.append(
                 f"token-bridge.css written to {utilities_dir}/ but not imported in "
-                f"{entrypoint_rel} — add: import '{import_spec_for(bridge_path)}';"
+                f"{in_files} — add: import '{import_spec_for(bridge_path)}';"
             )
 
     if utilities_path.is_file():
-        utilities_line = find_import_line(entry_text, "utilities.css")
-        imported = utilities_line is not None
+        utilities_hit = find_in_any("utilities.css")
+        imported = utilities_hit is not None
         checks.append({"artifact": "utilities.css", "imported": imported})
         if not imported:
             reasons.append(
                 f"utilities.css written to {utilities_dir}/ but not imported in "
-                f"{entrypoint_rel} — add: import '{import_spec_for(utilities_path)}';"
+                f"{in_files} — add: import '{import_spec_for(utilities_path)}';"
             )
 
+    # The bridge-before-utilities ordering check only makes sense when both
+    # imports live in the same file. Cross-file ordering is determined by how
+    # the TSX entrypoint sequences its imports, which is out of scope here.
     if (
-        bridge_line is not None
-        and utilities_line is not None
-        and utilities_line < bridge_line
+        bridge_hit is not None
+        and utilities_hit is not None
+        and bridge_hit[0] == utilities_hit[0]
+        and utilities_hit[1] < bridge_hit[1]
     ):
         reasons.append(
-            "utilities.css is imported before token-bridge.css — the bridge must load first or "
-            "utility classes will reference undefined CSS variables."
+            f"utilities.css is imported before token-bridge.css in {bridge_hit[0]} — the bridge "
+            "must load first or utility classes will reference undefined CSS variables."
         )
 
     theme_files = []
@@ -252,9 +276,6 @@ def verify(root: Path) -> dict:
         checks.append({"artifact": "theme css", "imported": any_imported})
         if not any_imported:
             names = ", ".join(sorted({name for name, _ in theme_files}))
-            in_files = entrypoint_rel
-            if css_entry_rel:
-                in_files = f"{entrypoint_rel} or {css_entry_rel}"
             reasons.append(
                 f"Theme files present ({names}) but no theme CSS imported in {in_files}."
             )
@@ -413,6 +434,87 @@ def self_test() -> int:
         },
         expect_ok=False,
         expect_reason_substr="ui.tsx is vendored",
+    )
+    run(
+        "bridge imported via SCSS cssEntryFile counts as wired",
+        {
+            "package.json": pkg,
+            ".acss-target.json": json.dumps({
+                "componentsDir": "src/components/fpkit",
+                "utilitiesDir": "src/styles",
+                "stack": {
+                    "entrypointFile": "src/main.tsx",
+                    "cssEntryFile": "src/styles/index.scss",
+                },
+            }),
+            "src/main.tsx": "import './styles/index.scss';\n",
+            "src/styles/index.scss": "@import \"./token-bridge.css\";\n",
+            "src/styles/token-bridge.css": ":root{}",
+        },
+        expect_ok=True,
+    )
+    run(
+        "ordering check fires inside cssEntryFile when bridge follows utilities there",
+        {
+            "package.json": pkg,
+            ".acss-target.json": json.dumps({
+                "componentsDir": "src/components/fpkit",
+                "utilitiesDir": "src/styles",
+                "stack": {
+                    "entrypointFile": "src/main.tsx",
+                    "cssEntryFile": "src/styles/index.scss",
+                },
+            }),
+            "src/main.tsx": "import './styles/index.scss';\n",
+            "src/styles/index.scss": (
+                "@import \"./utilities.css\";\n"
+                "@import \"./token-bridge.css\";\n"
+            ),
+            "src/styles/token-bridge.css": ":root{}",
+            "src/styles/utilities.css": ".m-1{}",
+        },
+        expect_ok=False,
+        expect_reason_substr="bridge must load first",
+    )
+    run(
+        "split: bridge in TSX, utilities in cssEntryFile → no ordering reason",
+        {
+            "package.json": pkg,
+            ".acss-target.json": json.dumps({
+                "componentsDir": "src/components/fpkit",
+                "utilitiesDir": "src/styles",
+                "stack": {
+                    "entrypointFile": "src/main.tsx",
+                    "cssEntryFile": "src/styles/index.scss",
+                },
+            }),
+            "src/main.tsx": (
+                "import './styles/token-bridge.css';\n"
+                "import './styles/index.scss';\n"
+            ),
+            "src/styles/index.scss": "@import \"./utilities.css\";\n",
+            "src/styles/token-bridge.css": ":root{}",
+            "src/styles/utilities.css": ".m-1{}",
+        },
+        expect_ok=True,
+    )
+    run(
+        "cssEntryFile configured but missing → explicit reason",
+        {
+            "package.json": pkg,
+            ".acss-target.json": json.dumps({
+                "componentsDir": "src/components/fpkit",
+                "utilitiesDir": "src/styles",
+                "stack": {
+                    "entrypointFile": "src/main.tsx",
+                    "cssEntryFile": "src/styles/index.scss",
+                },
+            }),
+            "src/main.tsx": "import './styles/token-bridge.css';\n",
+            "src/styles/token-bridge.css": ":root{}",
+        },
+        expect_ok=False,
+        expect_reason_substr="stack.cssEntryFile points at src/styles/index.scss but that file does not exist",
     )
     run(
         "theme imported via SCSS cssEntryFile counts as wired",
