@@ -1,6 +1,6 @@
 ---
 name: component-creator
-description: Use when the user describes a UI element in natural language and wants it generated — "create a primary pill button that says Add to cart", "make me a soft warning alert titled 'Heads up' with body 'Your card expires next month'", "build a card with a heading 'Plan' and a primary button labelled Upgrade", "design a small filled outline link". Triggers include "create a <component>", "make me a <component>", "build a <component>", "design a <component>", "generate a <component>", "scaffold a <component>" — for any component with a dedicated reference doc under `references/components/<name>.md`.
+description: Use when the user describes a UI element in natural language and wants it generated — "create a primary pill button that says Add to cart", "make me a soft warning alert titled 'Heads up' with body 'Your card expires next month'", "build a card with a heading 'Plan' and a primary button labelled Upgrade", "design a small filled outline link". Triggers include "create a <component>", "make me a <component>", "build a <component>", "design a <component>", "generate a <component>", "scaffold a <component>". Dispatches against the reference-doc directory `references/components/*.md`; supports any component with a dedicated reference doc.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 metadata:
   version: "0.1.0"
@@ -15,15 +15,15 @@ Generate a self-contained, accessible React snippet (or component file) from a n
 
 ## Pilot status
 
-This is the second per-component skill in `acss-kit` (after `component-form`). It is pilot-status because the **parser → reference-doc → generator** pipeline is the part that needs validation in real-world usage; the breadth of components is a function of how many reference docs exist (currently 16 user-facing components in `references/components/catalog.md`), not of how many tables this skill hard-codes.
+This is the second per-component skill in `acss-kit` (after `component-form`). It is pilot-status because the **parser → reference-doc → generator** pipeline is the part that needs validation in real-world usage; the breadth of components is a function of how many reference docs exist under `references/components/`, not of how many tables this skill hard-codes.
 
 The skill does not maintain a per-component synonym table. The reference doc's Props Interface block is the source of truth; the skill resolves user phrases against it at runtime. Two global tables (colour and size words) collapse common synonyms onto whatever colour-like / size-like prop the matched component declares — see Step A3.
 
-If a description names something that's not in `catalog.md`, the skill halts and says so rather than guessing.
+If a description names a component without a dedicated reference doc, the skill halts and says so rather than guessing.
 
 ### Components without a dedicated reference doc
 
-The runtime parser (Step A2) reads three blocks the canonical embedded-markdown shape declares: `## Generation Contract`, `## Props Interface`, `## Usage Examples`. Components that exist only as **inline catalog entries** in `catalog.md` (currently `Badge`) use a shorter shape (`**Generation Contract:**`, `**Key Props:**`, `**Usage:**`) that the parser cannot consume reliably.
+The runtime parser (Step A2) reads three blocks the canonical embedded-markdown shape declares: `## Generation Contract`, `## Props Interface`, `## Usage Examples`. Components that exist only as **inline catalog entries** in `catalog.md` (currently Badge, Tag, Heading, Text/Paragraph, Details, and Progress) use a shorter shape (`**Generation Contract:**`, `**Key Props:**`, `**Usage:**`) that the parser cannot consume reliably.
 
 For v0.1, creator mode supports only components with a dedicated `references/components/<name>.md` file. The components currently living only as inline catalog entries — and therefore **not** supported by v0.1 — are: **Badge, Tag, Heading, Text/Paragraph, Details, Progress**. (This list is not part of the dispatch table; A1 doesn't include them, so a description matching one of these names falls through to the "no mapping found" halt.)
 
@@ -70,7 +70,7 @@ Both modes converge on the same internal contract — `{ component, props, conte
 
 ### A1. Component dispatch
 
-Resolve the description's component noun against `references/components/catalog.md`. The catalog's verification table lists every component the kit ships, with a link to its dedicated reference doc.
+Resolve the description's component noun against the reference-doc directory `references/components/*.md`. Every file in that directory (other than `catalog.md` itself, `foundation.md`, and the legacy `form.md`) is a candidate; the file stem is the component's lowercase name. `catalog.md` is supplemental — it carries the verification status table and inline entries for components that haven't been promoted to dedicated docs yet — but it is **not** the dispatch source. This means the dispatch table below stays in sync as long as a `<name>.md` file exists, even before its catalog entry lands.
 
 Recognised noun-to-component mappings (collapse synonyms before lookup):
 
@@ -211,7 +211,7 @@ Some required props are not "content" but state — they bind the rendered compo
 Two rules:
 
 1. The carve-out applies only to props whose **name** matches the table above. Any other required prop (`alt` on Img, `labelFor` on Field, `href` on Link, `title` on a slot-bearing component) follows the halt-on-unresolved rule from A5.
-2. When a state-control prop has a matching `on*` callback (e.g. `open` + `onDismiss?`, `checked` + `onChange?`) and the callback exists in the Props Interface, emit a no-op `() => {}` placeholder alongside the demo default and add a paired summary line. This is a paste-readiness recommendation, not a typing requirement — most of the matching callbacks (`onDismiss?`, `onChange?`) are declared optional in the reference docs, so a TypeScript build would succeed without one. The no-op exists so the rendered demo behaves predictably (e.g. clicking Alert's dismiss button doesn't throw because the handler is undefined).
+2. When a state-control prop has a matching `on*` callback (e.g. `open` + `onDismiss?`, `checked` + `onChange?`) and the callback exists in the Props Interface, emit a no-op `() => {}` placeholder alongside the demo default and add a paired summary line. This is purely a wire-up hint — the matching callbacks are optional in the reference docs and the components already optional-chain them (Alert's internal `setTimeout(() => { setShouldRender(false); onDismiss?.() }, 300)` won't throw when undefined), so omitting the no-op is safe. The placeholder exists so the user immediately sees where to plug in state-update logic. If your project's lint config flags empty arrow functions (`@typescript-eslint/no-empty-function` etc.), drop the no-op and rely on the summary's TODO line instead.
 3. Note that **Dialog is not in this set**: the Dialog reference doc uses `dialogRef: React.RefObject<HTMLDialogElement>` plus `openOnMount?: boolean` for its open/close pattern, not a `open` boolean. Treat its required `dialogRef` as a regular required prop that halts via A5; the user must supply or accept a stub `useRef<HTMLDialogElement>(null)` line in the surrounding code.
 
 #### A3.6. Component-declared safe defaults
@@ -627,13 +627,14 @@ Things creator mode should **never** do:
 
 | Version | Scope | Notes |
 |---------|-------|-------|
-| 0.1.0 | Any single-element or compound component in `references/components/catalog.md` | This release. The parser is reference-doc-driven. |
+| 0.1.0 | Any single-element or compound component with a dedicated `references/components/<name>.md` doc | This release. The parser is reference-doc-driven; dispatch resolves against the directory, not the catalog table. |
 | 0.2.0 | `## Generation Notes — Creator Mode` block on every reference doc | Each reference doc declares its own H2 invariants (size minimums, required slots) instead of the skill carrying a per-component table. |
 | 0.3.0 | Multi-component compositions in one prompt | "Card with a primary button inside" → root + nested generation in a single Step A pass. |
 | 0.4.0 | Project-convention awareness | Read the user's existing `src/components/` for naming + casing conventions; match them. |
 
 ## Reference documents
 
-- `references/components/catalog.md` — the dispatch table for A1
+- `references/components/*.md` — the dispatch source for A1 (one file per supported component)
+- `references/components/catalog.md` — supplemental: verification status table and inline entries for components not yet promoted
 - Every reference doc under `references/components/*.md` — Props Interface and Usage Examples drive the parser
 - `skills/component-form/SKILL.md` — sister skill; precedent for the auto-trigger and Step B detector flow

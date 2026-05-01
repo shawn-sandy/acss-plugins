@@ -209,13 +209,13 @@ The skill (`component-creator`) auto-triggers on phrases like *"create a primary
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `<description>` | Yes | A natural-language description naming a component in [`references/components/catalog.md`](../skills/components/references/components/catalog.md) and any combination of colour / size / variant / boolean / slot content. Quoted strings are content. |
+| `<description>` | Yes | A natural-language description naming a component that has a dedicated reference doc under [`references/components/<name>.md`](../skills/components/references/components/) and any combination of colour / size / variant / boolean / slot content. Quoted strings are content. |
 
 ### What happens step by step
 
 The full workflow lives in [`skills/component-creator/SKILL.md`](../skills/component-creator/SKILL.md) — see SKILL.md for the canonical Step A–I lettering. Quick view (phase names; not lettered to avoid drift):
 
-- **Parse.** Dispatch the component noun against `catalog.md`; load the matched reference doc; resolve phrases against its Props Interface using two global synonym tables (colour family, size family) plus per-prop union literals.
+- **Parse.** Dispatch the component noun against the `references/components/*.md` directory (catalog.md is supplemental); load the matched reference doc; resolve phrases against its Props Interface using two global synonym tables (colour family, size family) plus per-prop union literals.
 - **Resolve target & vendor.** Run `scripts/detect_target.py` to read `componentsDir` and learn whether the project has been initialized (`source: "generated"` vs `"none"`). When `source: "none"` or any of the matched component's vendored files are missing, run `/kit-add <component> [...dependencies]` to bootstrap, then re-run `detect_target.py` to confirm `source: "generated"` before proceeding. (SKILL.md Steps B + B4.)
 - **Choose output mode.** Snippet (default — paste-ready import + JSX in a fenced TSX block) or file mode (writes `src/components/<Name>.tsx`).
 - **Validate.** Generic rules (empty slots, > 80-char content, two-axis conflicts, missing required props excluding the A3.5 / A3.6 carve-outs) plus any `## Generation Notes — Creator Mode` rules the matched reference doc declares (v0.2).

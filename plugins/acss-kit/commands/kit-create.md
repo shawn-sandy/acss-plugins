@@ -31,7 +31,7 @@ When this command is invoked, follow the workflow documented in the `component-c
 
 ### Quick reference
 
-1. **Dispatch** — match the component noun against `references/components/catalog.md`; halt if no match.
+1. **Dispatch** — match the component noun against the reference-doc directory `references/components/*.md` (catalog.md is supplemental, not the dispatch source); halt if no `<name>.md` exists.
 2. **Parse** — load the matched reference doc, read its Props Interface, and resolve the user's phrases against the prop set (global colour/size synonyms + per-component union literals).
 3. **Resolve target** — `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py` to locate `componentsDir`.
 4. **Vendor** — run `/kit-add <component> [...dependencies]` if any of them aren't yet present.
