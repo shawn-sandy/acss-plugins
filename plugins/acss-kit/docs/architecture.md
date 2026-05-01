@@ -91,15 +91,27 @@ The logic lives entirely in `SKILL.md`. Do not duplicate generation logic inside
 
 ## .acss-target.json — target directory contract
 
-`.acss-target.json` at the project root tells the SKILL where to write generated components. It contains at minimum:
+`.acss-target.json` at the project root tells the SKILL where to write generated components, and (since 0.5.0) what the user's build stack looks like so integration advice is correct for the framework. The full shape:
 
 ```json
 {
-  "componentsDir": "src/components/fpkit"
+  "componentsDir": "src/components/fpkit",
+  "utilitiesDir": "src/styles",
+  "stack": {
+    "framework": "vite",
+    "frameworkVersion": "5.4.0",
+    "bundler": "vite",
+    "cssPipeline": ["sass"],
+    "tsconfig": true,
+    "entrypointFile": "src/main.tsx",
+    "detectedAt": "2026-05-01T00:00:00Z"
+  }
 }
 ```
 
-The SKILL reads the file during Step A3 and writes it if absent (via `scripts/detect_target.py`). Commit it to git so subsequent `/kit-add` runs use the same path.
+`componentsDir` and `utilitiesDir` are optional — the detectors fall back to `src/components/fpkit` and `src/styles` and refuse stale entries that point at deleted directories. The `stack` block is also optional; downstream scripts (`verify_integration.py`) emit a reason pointing back to `detect_stack.py` when it is absent.
+
+The SKILL reads the file during Step A3 and writes it if absent (`scripts/detect_target.py`), then refines it during Step A3.1 (`scripts/detect_stack.py`). Step G runs `scripts/verify_integration.py` to confirm the entrypoint actually imports the generated artifacts. Commit `.acss-target.json` to git so subsequent `/kit-add` and `/theme-create` runs reuse the same configuration.
 
 ## Version bump checklist
 

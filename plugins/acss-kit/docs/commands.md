@@ -29,7 +29,8 @@ These steps correspond to Steps A–F in [`SKILL.md`](../skills/components/SKILL
 1. Reads `package.json` to confirm this is a React + TypeScript project.
 2. Checks `devDependencies` for `sass` or `sass-embedded`. Aborts with an install hint if neither is found.
 3. Reads `.acss-target.json` from the project root. If the file does not exist, asks: "Where should components be generated? (default: `src/components/fpkit/`)" and writes the file.
-4. Copies `assets/foundation/ui.tsx` to `<target>/ui.tsx` if that file does not already exist.
+4. Runs `scripts/detect_stack.py` to classify framework (vite/next/remix/astro/cra), bundler, CSS pipeline, and entrypoint file. Persists the result into `.acss-target.json` under a `stack` key so later runs skip re-detection.
+5. Copies `assets/foundation/ui.tsx` to `<target>/ui.tsx` if that file does not already exist.
 
 **Step B — Generation workflow**
 
@@ -49,6 +50,10 @@ Claude applies the constraints from [`references/`](../skills/components/referen
 **Step F — Summary**
 
 Prints created and skipped files, plus an import and JSX usage snippet.
+
+**Step G — Verify integration**
+
+Runs `scripts/verify_integration.py`. Reads the `stack.entrypointFile` recorded during Step A's first-run, then checks the entrypoint actually imports `<componentsDir>/ui.tsx`, the token bridge, utilities CSS, and theme CSS (whichever are present on disk). Missing imports are printed as a numbered fix-up list — the plugin never auto-edits the entrypoint.
 
 ### Examples
 

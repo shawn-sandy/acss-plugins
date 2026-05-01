@@ -15,6 +15,8 @@
 #   6. Known-bad self-tests: confirm the validators catch their own
 #      contract violations.
 #   7. detect_package_manager.py --self-test.
+#   7a. detect_stack.py --self-test (framework + cssPipeline + entrypoint).
+#   7b. verify_integration.py --self-test (entrypoint wiring checks).
 #   8. acss-utilities validator over plugins/acss-utilities/assets/
 #      (selector grammar, var() fallbacks, bridge dark-mode parity,
 #      bundle-size budget).
@@ -157,6 +159,26 @@ if python3 "$REPO_ROOT/plugins/acss-kit/scripts/detect_package_manager.py" --sel
 else
   red "detect_package_manager self-test FAILED:"
   cat "$DPM_LOG"
+  exit 1
+fi
+
+section "7a. detect_stack.py --self-test"
+DS_LOG="$TMP_ROOT/detect-stack.log"
+if python3 "$REPO_ROOT/plugins/acss-kit/scripts/detect_stack.py" --self-test >"$DS_LOG"; then
+  green "detect_stack self-test OK"
+else
+  red "detect_stack self-test FAILED:"
+  cat "$DS_LOG"
+  exit 1
+fi
+
+section "7b. verify_integration.py --self-test"
+VI_LOG="$TMP_ROOT/verify-integration.log"
+if python3 "$REPO_ROOT/plugins/acss-kit/scripts/verify_integration.py" --self-test >"$VI_LOG"; then
+  green "verify_integration self-test OK"
+else
+  red "verify_integration self-test FAILED:"
+  cat "$VI_LOG"
   exit 1
 fi
 

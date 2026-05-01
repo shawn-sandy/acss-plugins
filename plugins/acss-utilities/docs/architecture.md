@@ -98,16 +98,23 @@ This was wired up in commit `2af654e` after a Copilot review noted the field was
 
 ## `.acss-target.json` schema (utilities-relevant fields)
 
-The detector reads the same `.acss-target.json` that `acss-kit` uses, with one added field:
+The detector reads the same `.acss-target.json` that `acss-kit` uses. Two scoped fields plus a shared `stack` block (populated by `acss-kit/scripts/detect_stack.py` from 0.5.0 onward):
 
 ```json
 {
   "componentsDir": "src/components/fpkit",   // acss-kit's
-  "utilitiesDir": "src/styles"               // acss-utilities'
+  "utilitiesDir": "src/styles",              // acss-utilities'
+  "stack": {                                 // shared — populated by detect_stack.py
+    "framework": "vite",
+    "cssPipeline": ["sass", "tailwind"],
+    "entrypointFile": "src/main.tsx"
+  }
 }
 ```
 
-Both fields are optional. The detector requires that `(projectRoot / utilitiesDir)` exists on disk before honoring it — a stale entry pointing at a deleted directory falls through to the default. The same fail-safe lives in `acss-kit/scripts/detect_target.py` for `componentsDir`.
+`componentsDir` and `utilitiesDir` are optional. The detector requires that `(projectRoot / utilitiesDir)` exists on disk before honoring it — a stale entry pointing at a deleted directory falls through to the default. The same fail-safe lives in `acss-kit/scripts/detect_target.py` for `componentsDir`.
+
+The `stack` block is also optional. `/utility-add` invokes `acss-kit/scripts/detect_stack.py` if the acss-kit plugin is installed alongside acss-utilities, persists the result, and runs `acss-kit/scripts/verify_integration.py` after writing `token-bridge.css` and `utilities.css` to confirm the entrypoint imports both (and that the bridge import precedes the utilities import). When acss-kit is not installed, both steps are skipped with a warning.
 
 ## Hooks the plugin opts into
 
