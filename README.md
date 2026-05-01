@@ -6,7 +6,7 @@ A Claude Code plugin marketplace for building accessible React applications with
 
 | Plugin | Purpose |
 |---|---|
-| [`acss-kit`](./plugins/acss-kit) | Generate accessible React components and CSS themes for fpkit/acss projects. Run `/setup` to bootstrap a project (sass check, `ui.tsx` copy, starter theme), then `/kit-add` for components and `/theme-create` (or `/style-tune`) for themes. Three skills: **components** (markdown-as-source TSX/SCSS generation), **styles** (OKLCH theme generation with WCAG 2.2 AA validation), and the **component-form** pilot. |
+| [`acss-kit`](./plugins/acss-kit) | Generate accessible React components and CSS themes for fpkit/acss projects. Run `/setup` to bootstrap a project (sass check, `ui.tsx` copy, starter theme), then `/kit-add` for components and `/theme-create` or `/style-tune` for theme and component-style work. Skills: **setup** (project bootstrap), **components** (markdown-as-source TSX/SCSS generation), **styles** (OKLCH theme generation and component SCSS tuning with WCAG 2.2 AA validation), plus the **style-tune** and **component-form** pilots. |
 | [`acss-utilities`](./plugins/acss-utilities) | Tailwind-style atomic CSS utility classes (`.bg-primary`, `.mt-4`, `.sm-hide`) for fpkit/acss projects. Hyphen-prefix responsive variants — no CSS escaping needed. Pairs with `acss-kit` via a token-bridge so utility colors resolve against the same OKLCH roles. Run `/utility-add` to drop the bundle into your project; `/utility-list`, `/utility-tune`, and `/utility-bridge` round out the workflow. |
 
 The two plugins are decoupled — install one, both, or use `acss-utilities` standalone with a hand-written theme.
