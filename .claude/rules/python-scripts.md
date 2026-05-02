@@ -24,7 +24,7 @@ Current scripts in `plugins/acss-utilities/scripts/`:
 - `detect_utility_target.py` — detects the target React project + drop directory for `utilities.css`. Mirrors `acss-kit/scripts/detect_target.py`'s ancestor-walk and reads the same `.acss-target.json` (with an added `utilitiesDir` field)
 - `generate_utilities.py` — reads `utilities.tokens.json` and emits per-family CSS partials + a concatenated `utilities.css`. Generator/validator contract; either streams the bundle to stdout or writes to a directory via `--out-dir`
 - `validate_utilities.py` — validates utility CSS files: kebab-case selectors, `var()` fallbacks, no duplicate selectors, responsive parity across breakpoints, bundle-size budget, and `token-bridge.css` `:root` ↔ `[data-theme="dark"]` parity. Generator/validator contract (data + reasons array on stdout, exit 0/1/2)
-- `migrate_classnames.py` — rewrites 0.1.x colon-form utility classes (`sm:hide`) to 0.2.0 hyphen form (`sm-hide`) across source files. Default dry-run prints unified diff; `--write` applies in place. Generator/validator contract (exit 0 = no changes, 1 = dry-run pending, 2 = usage/IO)
+- `migrate_classnames.py` — rewrites 0.1.x colon-form utility classes (`sm:hide`) to 0.2.0 hyphen form (`sm-hide`) across source files. Default dry-run prints unified diff; `--write` applies in place. Generator/validator contract: exit 0 = success (no changes needed, or changes applied via `--write`); exit 1 = dry-run with changes pending (`--write` to apply); exit 2 = usage / IO error
 
 ## Detector contract (machine-callable, structured)
 
