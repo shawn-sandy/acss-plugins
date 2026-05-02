@@ -32,14 +32,16 @@ plugins/acss-kit/
 ├── CHANGELOG.md                   # version history
 ├── commands/*.md                  # slash command definitions (YAML front-matter)
 ├── skills/components/SKILL.md     # components skill (markdown-as-source TSX/SCSS)
-├── skills/components/references/  # component reference docs (18 components)
+├── skills/components/references/  # component reference docs (see references/catalog.md)
 ├── skills/styles/SKILL.md         # styles skill (OKLCH theme generation)
 ├── skills/styles/references/      # role catalogue, palette algorithm, theme schema
 ├── skills/component-form/SKILL.md # form pilot — auto-triggers on natural language
-├── scripts/                       # Python 3 stdlib scripts (detect_target, palette, validate, etc.)
+├── scripts/                       # Python 3 stdlib scripts (see .claude/rules/python-scripts.md for inventory)
 ├── assets/                        # foundation/ui.tsx, brand template, internal schema
 └── docs/                          # developer guides (architecture, recipes, troubleshooting, tutorial)
 ```
+
+`plugins/acss-utilities/` mirrors the same shape (`.claude-plugin/`, `commands/`, `skills/`, `scripts/`, `assets/`, `docs/`) — four `/utility-*` commands plus `detect_utility_target.py`, `generate_utilities.py`, `migrate_classnames.py`, and `validate_utilities.py`. See [`plugins/acss-utilities/docs/README.md`](plugins/acss-utilities/docs/README.md) for the developer guide.
 
 ### Command file front-matter
 
