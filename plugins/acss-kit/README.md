@@ -117,6 +117,19 @@ Generate one or more components into your project.
 8. **Summary** — displays created/skipped files and an import/usage snippet.
 9. **Verify integration** — runs `scripts/verify_integration.py` against the recorded `stack.entrypointFile`. Missing imports are surfaced as a numbered fix-up list; the plugin never auto-edits the entrypoint.
 
+### `/kit-create <description>`
+
+Creator mode — generate any acss-kit component from a natural-language description. The underlying `component-creator` skill also auto-triggers on the same phrasing without the slash command.
+
+```text
+/kit-create primary pill button that says "Add to cart"
+/kit-create soft warning alert titled "Heads up" with body "Your card expires next month"
+/kit-create card with a heading "Plan" and content "Premium tier with all features"
+/kit-create small outline icon-button with aria-label "Close"
+```
+
+Loads the matched component's reference doc at runtime, parses its `## Props Interface`, resolves the user's phrases against the declared prop set, and emits a paste-ready TSX snippet (default) or a standalone component file. Works with any component that has a dedicated `references/components/<name>.md` doc — Button, Alert, Card, Dialog, Link, Input, Field, Checkbox, IconButton, Img, Icon, List, Table, Popover, Nav. Refinement turns ("make it larger", "swap to secondary", "change the title to 'Save'") merge into the in-memory spec and re-emit. Full reference in [`docs/commands.md`](docs/commands.md#kit-create).
+
 ### Auto-trigger: form generation
 
 The `component-form` skill auto-triggers when you ask for a form in plain English:
@@ -315,10 +328,12 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
     setup.md                               # /setup  ← start here after install
     kit-list.md                            # /kit-list
     kit-add.md                             # /kit-add
+    kit-create.md                          # /kit-create  (creator mode)
     theme-create.md                        # /theme-create
     theme-brand.md                         # /theme-brand
     theme-update.md                        # /theme-update
     theme-extract.md                       # /theme-extract
+    style-tune.md                          # /style-tune
   scripts/
     detect_target.py                       # Manages .acss-target.json
     detect_package_manager.py             # Detects pnpm/yarn/bun/npm from lockfile
@@ -347,6 +362,8 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
         theme-schema.md                    # Internal JSON schema reference
     component-form/
       SKILL.md                             # Form pilot — auto-triggers on natural language
+    component-creator/
+      SKILL.md                             # Creator-mode pilot — backs /kit-create; auto-triggers on "create a <component>" phrasing
     style-tune/
       SKILL.md                             # Style-feel pilot — auto-triggers on adjective + component
       references/
@@ -361,7 +378,7 @@ For end-to-end smoke testing — confirming `/kit-add <component>` actually writ
 Detailed guides are in [`docs/`](docs/):
 
 - [concepts.md](docs/concepts.md) — mental model: UI base, data-\* variants, CSS-var fallbacks, aria-disabled, generation flow
-- [commands.md](docs/commands.md) — full `/kit-add` and `/kit-list` reference
+- [commands.md](docs/commands.md) — full reference for every slash command (`/setup`, `/kit-list`, `/kit-add`, `/kit-create`, `/style-tune`, `/theme-create`, `/theme-brand`, `/theme-update`, `/theme-extract`)
 - [recipes.md](docs/recipes.md) — step-by-step walkthroughs for common tasks
 - [troubleshooting.md](docs/troubleshooting.md) — concrete failure modes and fixes
 - [architecture.md](docs/architecture.md) — contributor guide: adding components, version-bump checklist
