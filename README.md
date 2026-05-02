@@ -51,7 +51,7 @@ Then bootstrap and add your first component + theme:
 | [`/setup`](./plugins/acss-kit/commands/setup.md) | Bootstrap a project — package-manager detection, sass install hint, `.acss-target.json`, `ui.tsx` copy, optional starter theme. |
 | [`/kit-list [component]`](./plugins/acss-kit/commands/kit-list.md) | List available component references or inspect one in detail. |
 | [`/kit-add <component> ...`](./plugins/acss-kit/commands/kit-add.md) | Generate accessible React components using local imports only. No `@fpkit/acss` package. |
-| [`/kit-create <description>`](./plugins/acss-kit/commands/kit-create.md) | Creator mode — generate a paste-ready TSX snippet (or standalone component file) from a natural-language description (`"primary pill button that says 'Add to cart'"`). Auto-triggers on the same phrasing. |
+| [`/kit-create <description>`](./plugins/acss-kit/commands/kit-create.md) | Explicit command path into creator mode — generate a paste-ready TSX snippet (or standalone component file) from a natural-language description (`"primary pill button that says 'Add to cart'"`). The underlying `component-creator` skill also auto-triggers on the same phrasing without the slash command. |
 | [`/theme-create <hex> [--mode=light\|dark\|both]`](./plugins/acss-kit/commands/theme-create.md) | Generate semantic CSS theme files from a seed color and validate required WCAG contrast pairs. |
 | [`/theme-brand <name> [--from=<hex>]`](./plugins/acss-kit/commands/theme-brand.md) | Scaffold a `brand-<name>.css` preset that layers over light/dark. |
 | [`/theme-update <file> <--color-role=#hex> ...`](./plugins/acss-kit/commands/theme-update.md) | Edit role values in an existing theme file and re-validate contrast. |
