@@ -73,7 +73,7 @@ Before committing any plugin change:
 
 **Project-level skills** (`.claude/skills/`): `add-command`, `changelog-entry`, `component-author`, `component-update`, `plugin-health`, `release-check`, `release-plugin`, `style-author`, `style-update`, `test-component`, `validate-plugin`, `verify-plugins`. Use these for plugin maintenance tasks instead of manual steps.
 
-**Rules** (`.claude/rules/`): `scss-conventions.md` (active, fires on SCSS/CSS edits), `python-scripts.md` (active, fires on `plugins/acss-kit/scripts/**`), `command-authoring.md` (active, fires on `plugins/*/commands/*.md`), `fpkit-references.md` (active, fires on reference docs). See `.claude/rules/README.md` for the full status table.
+**Rules** (`.claude/rules/`): `scss-conventions.md` (active, fires on SCSS/CSS edits), `python-scripts.md` (active, fires on `plugins/*/scripts/**`), `command-authoring.md` (active, fires on `plugins/*/commands/*.md`), `fpkit-references.md` (active, fires on reference docs). See `.claude/rules/README.md` for the full status table.
 
 **Hooks** (`.claude/settings.json`): PostToolUse validates JSON syntax, `plugin.json` required fields, command front-matter, and SKILL.md front-matter on every Write/Edit. PreToolUse blocks commits/pushes to `main`.
 
