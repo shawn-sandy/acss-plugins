@@ -10,7 +10,7 @@ A Claude Code **plugin marketplace** for building accessible React applications 
 
 | Plugin | Version | What it ships |
 |---|---|---|
-| [`acss-kit`](./plugins/acss-kit) | 0.7.0 | Accessible React components and OKLCH CSS themes. Three skills (`components`, `styles`, plus the `component-form` pilot) and 8 slash commands covering setup, component generation, theme creation, brand presets, image/Figma extraction, and natural-language style tuning. |
+| [`acss-kit`](./plugins/acss-kit) | 0.7.0 | Accessible React components and OKLCH CSS themes. Two top-level skills (`components`, `styles`), a cross-domain `setup` skill, and three pilot skills (`component-form`, `component-creator`, `style-tune`); 9 slash commands covering setup, component generation, natural-language creator mode, theme creation, brand presets, image/Figma extraction, and natural-language style tuning. |
 | [`acss-utilities`](./plugins/acss-utilities) | 0.4.0 | Tailwind-style atomic CSS utility classes (`.bg-primary`, `.mt-4`, `.sm-hide`) generated from a token source-of-truth. Hyphen-prefix responsive variants — no CSS escaping. Pairs with `acss-kit` via a token-bridge so utility colors resolve against the same OKLCH roles. |
 
 The two plugins are **decoupled** — install one, both, or use `acss-utilities` standalone with a hand-written theme.
@@ -51,6 +51,7 @@ Then bootstrap and add your first component + theme:
 | [`/setup`](./plugins/acss-kit/commands/setup.md) | Bootstrap a project — package-manager detection, sass install hint, `.acss-target.json`, `ui.tsx` copy, optional starter theme. |
 | [`/kit-list [component]`](./plugins/acss-kit/commands/kit-list.md) | List available component references or inspect one in detail. |
 | [`/kit-add <component> ...`](./plugins/acss-kit/commands/kit-add.md) | Generate accessible React components using local imports only. No `@fpkit/acss` package. |
+| [`/kit-create <description>`](./plugins/acss-kit/commands/kit-create.md) | Creator mode — generate a paste-ready TSX snippet (or standalone component file) from a natural-language description (`"primary pill button that says 'Add to cart'"`). Auto-triggers on the same phrasing. |
 | [`/theme-create <hex> [--mode=light\|dark\|both]`](./plugins/acss-kit/commands/theme-create.md) | Generate semantic CSS theme files from a seed color and validate required WCAG contrast pairs. |
 | [`/theme-brand <name> [--from=<hex>]`](./plugins/acss-kit/commands/theme-brand.md) | Scaffold a `brand-<name>.css` preset that layers over light/dark. |
 | [`/theme-update <file> <--color-role=#hex> ...`](./plugins/acss-kit/commands/theme-update.md) | Edit role values in an existing theme file and re-validate contrast. |
@@ -62,6 +63,7 @@ Then bootstrap and add your first component + theme:
 - **`components`** — markdown-as-source TSX/SCSS templates with embedded accessibility patterns. 16 component references plus a `catalog` index and a shared `foundation` doc.
 - **`styles`** — OKLCH theme generation, role catalogue, palette algorithm, brand presets, WCAG 2.2 AA validation.
 - **`component-form`** — pilot per-component skill that auto-triggers on natural-language form requests (e.g. *"Create a signup form with email and password"*) and vendors form dependencies via `/kit-add`.
+- **`component-creator`** — pilot creator-mode skill backing `/kit-create`. Auto-triggers on phrases like *"create a primary pill button that says 'Add to cart'"* / *"make me a soft warning alert titled 'Heads up'"*. Loads the matched component's reference doc at runtime, parses its Props Interface, resolves user phrases against the declared prop set, and emits a paste-ready TSX snippet (or a standalone component file). Works with any component that has a dedicated `references/components/<name>.md` doc.
 - **`setup`** — cross-domain init skill backing `/setup`.
 - **`style-tune`** — pilot per-feel skill backing `/style-tune`.
 
@@ -86,8 +88,8 @@ agentic-acss-plugins/
 ├── plugins/
 │   ├── acss-kit/
 │   │   ├── .claude-plugin/plugin.json     # version source of truth
-│   │   ├── commands/*.md                  # 8 slash commands
-│   │   ├── skills/{components,styles,component-form,setup,style-tune}/SKILL.md
+│   │   ├── commands/*.md                  # 9 slash commands
+│   │   ├── skills/{components,styles,component-form,component-creator,setup,style-tune}/SKILL.md
 │   │   ├── scripts/                       # Python 3 stdlib (palette, validate, detect_target, …)
 │   │   ├── assets/                        # ui.tsx foundation, brand template, theme schema
 │   │   └── docs/                          # architecture, recipes, troubleshooting, tutorial

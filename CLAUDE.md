@@ -10,7 +10,7 @@ A Claude Code **plugin marketplace** — not a Node.js or Python package. There 
 
 The repo contains two plugins:
 
-- `plugins/acss-kit` — accessible React components and CSS themes for fpkit/acss projects. Two top-level skills (`components`, `styles`) plus the `component-form` pilot skill.
+- `plugins/acss-kit` — accessible React components and CSS themes for fpkit/acss projects. Two top-level skills (`components`, `styles`), a cross-domain `setup` skill, and three pilot skills (`component-form`, `component-creator`, `style-tune`).
 - `plugins/acss-utilities` — Tailwind-style atomic CSS utility classes paired with `acss-kit`'s OKLCH theme tokens via a bridge file. Generator + validator + four `/utility-*` commands. See [`plugins/acss-utilities/docs/`](plugins/acss-utilities/docs/README.md) for the developer guide.
 
 Install from a Claude Code session:
@@ -33,7 +33,10 @@ plugins/acss-kit/
 ├── skills/components/references/  # component reference docs (see references/components/catalog.md)
 ├── skills/styles/SKILL.md         # styles skill (OKLCH theme generation)
 ├── skills/styles/references/      # role catalogue, palette algorithm, theme schema
-├── skills/component-form/SKILL.md # form pilot — auto-triggers on natural language
+├── skills/component-form/SKILL.md     # form pilot — auto-triggers on natural language
+├── skills/component-creator/SKILL.md  # creator-mode pilot — auto-triggers on "create a <component>" phrasing
+├── skills/style-tune/SKILL.md         # style-feel pilot — backs /style-tune
+├── skills/setup/SKILL.md              # cross-domain bootstrap — backs /setup
 ├── scripts/                       # Python 3 stdlib scripts (see .claude/rules/python-scripts.md for inventory)
 ├── assets/                        # foundation/ui.tsx, brand template, internal schema
 └── docs/                          # developer guides (architecture, recipes, troubleshooting, tutorial)
@@ -91,7 +94,7 @@ Claude Code on the web sessions develop on `claude/<slug>` branches assigned per
 
 | Plugin | Commands |
 |---|---|
-| `acss-kit` | `/kit-add`, `/kit-list`, `/setup`, `/style-tune`, `/theme-brand`, `/theme-create`, `/theme-extract`, `/theme-update` |
+| `acss-kit` | `/kit-add`, `/kit-create`, `/kit-list`, `/setup`, `/style-tune`, `/theme-brand`, `/theme-create`, `/theme-extract`, `/theme-update` |
 | `acss-utilities` | `/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune` |
 
 Each command's body is in `plugins/<plugin>/commands/<name>.md`; logic lives in the corresponding SKILL.md.
