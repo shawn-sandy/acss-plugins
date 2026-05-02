@@ -5,7 +5,7 @@ Advisory text auto-loaded into Claude's context whenever it touches a file match
 | Rule | Triggers on | Status |
 |---|---|---|
 | [`scss-conventions.md`](scss-conventions.md) | `**/*.scss`, `**/*.css` | Active — variable naming pattern, `var()` fallbacks, `[aria-disabled="true"]` for disabled state. |
-| [`python-scripts.md`](python-scripts.md) | `plugins/*/scripts/**` | Active — stdlib-only Python 3 contract (detector vs. generator/validator), current 6-script inventory. |
+| [`python-scripts.md`](python-scripts.md) | `plugins/*/scripts/**` | Active — stdlib-only Python 3 contract (detector vs. generator/validator), current multi-plugin script inventory (see rule doc). |
 | [`command-authoring.md`](command-authoring.md) | `plugins/*/commands/*.md` | Active — front-matter shape, delegate-to-SKILL.md rule. |
 | [`fpkit-references.md`](fpkit-references.md) | `plugins/*/skills/*/references/**` | Active — full GitHub URL requirement, local verification setup. |
 
