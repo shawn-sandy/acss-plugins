@@ -32,7 +32,7 @@ plugins/acss-kit/
 ├── CHANGELOG.md                   # version history
 ├── commands/*.md                  # slash command definitions (YAML front-matter)
 ├── skills/components/SKILL.md     # components skill (markdown-as-source TSX/SCSS)
-├── skills/components/references/  # component reference docs (see references/catalog.md)
+├── skills/components/references/  # component reference docs (see references/components/catalog.md)
 ├── skills/styles/SKILL.md         # styles skill (OKLCH theme generation)
 ├── skills/styles/references/      # role catalogue, palette algorithm, theme schema
 ├── skills/component-form/SKILL.md # form pilot — auto-triggers on natural language
