@@ -89,15 +89,28 @@ Before committing any plugin change:
 
 ## Git workflow
 
-Feature branches + PR. Branch from `main`, open a PR, merge when ready. No direct commits to `main` for plugin changes.
+Feature branches + PR. Branch from `main`, open a PR, merge when ready. No direct commits to `main` for plugin changes (a PreToolUse hook blocks them).
+
+Claude Code on the web sessions develop on `claude/<slug>` branches assigned per session — push there, not to a hand-named feature branch.
 
 `.claude/worktrees/` is Claude Code session scratch — ignored by git.
 
 `CLAUDE.local.md` (not committed) — use for machine-local or personal overrides.
 
+## Slash commands shipped by the plugins
+
+| Plugin | Commands |
+|---|---|
+| `acss-kit` | `/kit-add`, `/kit-list`, `/setup`, `/style-tune`, `/theme-brand`, `/theme-create`, `/theme-extract`, `/theme-update` |
+| `acss-utilities` | `/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune` |
+
+Each command's body is in `plugins/<plugin>/commands/<name>.md`; logic lives in the corresponding SKILL.md.
+
 ## Testing locally
 
 The default check is `tests/run.sh` from the repo root — automated structural validation in ~30 seconds. It extracts and syntax-checks every component reference, validates the SCSS contract, runs WCAG contrast on theme files, and replicates the manifest checks. One-time install: `npm --prefix tests ci` and `pip3 install --user tinycss2`.
+
+`tests/run.sh` and `tests/e2e.sh` orchestrate the helpers in `tests/` (`validate_components.{mjs,py}`, `validate_manifest.py`, `run_axe.mjs`, `lib/`) — call those entry scripts, not the helpers directly.
 
 For end-to-end smoke testing of slash commands (rendering output, exercising `/kit-add` and `/theme-create`), `tests/setup.sh` writes a minimal verification fixture at `tests/sandbox/` (gitignored) — `package.json` + `tsconfig.json` + ambient SCSS module declaration, no Vite, no app shell. For render-sensitive changes, `tests/e2e.sh` runs the deeper opt-in check (extracts components, runs `tsc --noEmit`, compiles SCSS, runs jsdom + axe-core a11y on rendered HTML, ~30s after `npm --prefix tests ci`). See [`tests/README.md`](./tests/README.md) for the full workflow.
 
