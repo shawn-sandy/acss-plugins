@@ -64,16 +64,6 @@ These run before Claude executes a Bash command. They can block dangerous operat
 | Behaviour | If the command is `git commit` or `git push` (any form that targets `main`), and the current branch is `main`, **exits 2 to block** with `[main-guard] BLOCKED: direct commit/push to main is not allowed. Use a feature branch.` |
 | Why | Project policy is feature-branch + PR; this stops accidental direct commits to `main`. Includes both `git push origin main`-style and naked `git push` while on `main`. |
 
-### 6. Spec/kit-builder parity hook
-
-| Field | Value |
-|---|---|
-| Matcher | `Bash` |
-| Status message | `Checking spec/kit-builder parity...` |
-| Behaviour | On `git commit`, looks for staged files matching `acss-component-specs.*specs/`, then runs `python3 plugins/acss-component-specs/scripts/check_kitbuilder_parity.py` for each. |
-| Why | Originally enforced parity between the `acss-component-specs` plugin's specs and the `acss-kit-builder` plugin's references. |
-| **Status** | **Drift — never fires.** Both `acss-component-specs` and `acss-kit-builder` were consolidated into `acss-kit` at v0.3.0. Neither directory exists; the matcher condition is never true. Either delete this hook or rewrite it for the new structure. |
-
 ## Adding a new hook
 
 1. Open `.claude/settings.json` and add an entry under `hooks.PostToolUse` or `hooks.PreToolUse`.

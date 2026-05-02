@@ -11,7 +11,12 @@ node_modules/
 
 # Claude Code
 .claude/worktrees/
+.claude/plans/
 CLAUDE.local.md
+
+# Stray scratch dirs (created when shell expansion of ~ leaks into a path)
+~/
+~
 
 # Local plugin testing
 tests/sandbox/

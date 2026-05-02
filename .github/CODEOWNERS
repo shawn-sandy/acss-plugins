@@ -1,0 +1,21 @@
+# Code owners — auto-requested for review on PRs that touch matching paths.
+# Format: <path-glob> <@user-or-team> ...
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
+
+# Default owner for everything not matched below
+*                       @shawn-sandy
+
+# Plugin sources
+/plugins/               @shawn-sandy
+
+# Maintainer tooling and CI
+/.claude/                @shawn-sandy
+/.github/                @shawn-sandy
+/tests/                  @shawn-sandy
+
+# Top-level docs and policy files
+/README.md               @shawn-sandy
+/CONTRIBUTING.md         @shawn-sandy
+/CLAUDE.md               @shawn-sandy
+/AGENTS.md               @shawn-sandy
+/LICENSE                 @shawn-sandy
