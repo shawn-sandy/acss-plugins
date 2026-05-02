@@ -23,7 +23,7 @@ Current scripts in `plugins/acss-utilities/scripts/`:
 
 - `detect_utility_target.py` — detects the target React project + drop directory for `utilities.css`. Mirrors `acss-kit/scripts/detect_target.py`'s ancestor-walk and reads the same `.acss-target.json` (with an added `utilitiesDir` field)
 - `generate_utilities.py` — reads `utilities.tokens.json` and emits per-family CSS partials + a concatenated `utilities.css`. Generator/validator contract; either streams the bundle to stdout or writes to a directory via `--out-dir`
-- `validate_utilities.py` — validates utility CSS files: kebab-case selectors, `var()` fallbacks, no duplicate selectors, responsive parity across breakpoints, bundle-size budget, and `token-bridge.css` `:root` ↔ `[data-theme="dark"]` parity. Generator/validator contract (data + reasons array on stdout, exit 0/1/2)
+- `validate_utilities.py` — validates utility CSS files: kebab-case selectors, `var()` fallbacks, no duplicate selectors, responsive parity across breakpoints, bundle-size budget, and `token-bridge.css` `:root` ↔ `[data-theme="dark"]` parity. Detector contract (JSON `{ok, reasons}` to stdout, exit 0/1/2)
 - `migrate_classnames.py` — rewrites 0.1.x colon-form utility classes (`sm:hide`) to 0.2.0 hyphen form (`sm-hide`) across source files. Default dry-run prints unified diff; `--write` applies in place. Generator/validator contract: exit 0 = success (no changes needed, or changes applied via `--write`); exit 1 = dry-run with changes pending (`--write` to apply); exit 2 = usage / IO error
 
 ## Detector contract (machine-callable, structured)
@@ -34,7 +34,7 @@ For scripts whose output is parsed by slash commands or skills.
 - Exit 0 on success, 1 on logical failure (e.g. nothing detected)
 - Always include a `"reasons"` array in the JSON — empty `[]` on success, populated on failure
 
-Detectors: `detect_target.py`, `detect_package_manager.py`, `detect_stack.py`, `detect_css_entry.py`, `verify_integration.py`, `detect_utility_target.py`.
+Detectors: `detect_target.py`, `detect_package_manager.py`, `detect_stack.py`, `detect_css_entry.py`, `verify_integration.py`, `detect_utility_target.py`, `validate_utilities.py`.
 
 ## Generator / validator contract (pipeline-friendly, human-readable)
 
@@ -44,7 +44,7 @@ For scripts that emit data or human-readable validation results.
 - Errors on stderr
 - Exit 0 on success, 1 on logical failure, 2 on usage / IO errors
 
-Generators / validators: `generate_palette.py`, `oklch_shift.py`, `tokens_to_css.py`, `css_to_tokens.py`, `validate_theme.py`, `generate_utilities.py`, `validate_utilities.py`, `migrate_classnames.py`.
+Generators / validators: `generate_palette.py`, `oklch_shift.py`, `tokens_to_css.py`, `css_to_tokens.py`, `validate_theme.py`, `generate_utilities.py`, `migrate_classnames.py`.
 
 `oklch_shift.py` follows this contract — it transforms an input hex into a shifted hex and emits structured JSON. It exits 0 whenever a usable hex was produced (even when chroma or lightness was clamped to stay in sRGB gamut — `clamped: true` and a populated `reasons` array surface the warning), reserves exit 1 for hard failures where no hex can be produced, and exits 2 on usage / IO errors.
 

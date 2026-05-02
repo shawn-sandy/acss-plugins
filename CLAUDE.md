@@ -89,7 +89,7 @@ Before committing any plugin change:
 
 ## Git workflow
 
-Feature branches + PR. Branch from `main`, open a PR, merge when ready. No direct commits to `main` for plugin changes (a PreToolUse hook blocks them).
+Feature branches + PR. Branch from `main`, open a PR, merge when ready. A PreToolUse hook blocks all direct commits and pushes to `main` regardless of what changed.
 
 Claude Code on the web sessions develop on `claude/<slug>` branches assigned per session — push there, not to a hand-named feature branch.
 
