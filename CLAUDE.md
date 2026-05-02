@@ -23,8 +23,6 @@ Install from a Claude Code session:
 
 ## Plugin structure
 
-The plugin follows this layout:
-
 ```text
 plugins/acss-kit/
 ├── .claude-plugin/plugin.json     # manifest — authoritative version source
@@ -43,17 +41,9 @@ plugins/acss-kit/
 
 `plugins/acss-utilities/` mirrors the same shape (`.claude-plugin/`, `commands/`, `skills/`, `scripts/`, `assets/`, `docs/`) — four `/utility-*` commands plus `detect_utility_target.py`, `generate_utilities.py`, `migrate_classnames.py`, and `validate_utilities.py`. See [`plugins/acss-utilities/docs/README.md`](plugins/acss-utilities/docs/README.md) for the developer guide.
 
-### Command file front-matter
+### Command authoring conventions
 
-```yaml
----
-description: <one-line description>
-argument-hint: [--option] [--force]
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
----
-```
-
-Body delegates to the master SKILL.md, never re-implements logic inline.
+See `.claude/rules/command-authoring.md` (auto-loads when editing `plugins/*/commands/*.md`).
 
 ### SKILL.md front-matter
 
@@ -81,9 +71,9 @@ Before committing any plugin change:
 
 ## Maintainer tooling
 
-**Project-level skills** (`.claude/skills/`): `add-command`, `component-author`, `component-update`, `plugin-health`, `release-check`, `release-plugin`, `style-author`, `style-update`, `validate-plugin`, `verify-plugins`. Use these for plugin maintenance tasks instead of manual steps.
+**Project-level skills** (`.claude/skills/`): `add-command`, `changelog-entry`, `component-author`, `component-update`, `plugin-health`, `release-check`, `release-plugin`, `style-author`, `style-update`, `test-component`, `validate-plugin`, `verify-plugins`. Use these for plugin maintenance tasks instead of manual steps.
 
-**Rules** (`.claude/rules/`): `scss-conventions.md` (active, fires on SCSS/CSS edits), `python-scripts.md` (active, fires on `plugins/acss-kit/scripts/**`). See `.claude/rules/README.md` for the full status table.
+**Rules** (`.claude/rules/`): `scss-conventions.md` (active, fires on SCSS/CSS edits), `python-scripts.md` (active, fires on `plugins/acss-kit/scripts/**`), `command-authoring.md` (active, fires on `plugins/*/commands/*.md`), `fpkit-references.md` (active, fires on reference docs). See `.claude/rules/README.md` for the full status table.
 
 **Hooks** (`.claude/settings.json`): PostToolUse validates JSON syntax, `plugin.json` required fields, command front-matter, and SKILL.md front-matter on every Write/Edit. PreToolUse blocks commits/pushes to `main`.
 
@@ -127,5 +117,3 @@ When adding a new script: use the detector contract if a slash command parses th
 ## fpkit/acss cross-references
 
 All references to fpkit source in SKILL.md and reference docs must use full GitHub URLs (e.g. `https://github.com/shawn-sandy/acss/blob/main/...`). This allows plugin users and contributors to click through without a local clone.
-
-For contributors editing reference docs: keep `shawn-sandy/acss` cloned as a sibling directory for local verification — see `CONTRIBUTING.md`.
