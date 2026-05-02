@@ -46,7 +46,7 @@ The `.claude/` directory at the repo root holds project-local Claude Code defini
 
 ## Version bumps
 
-See [the version-bumps section in `CLAUDE.md`](./CLAUDE.md#version-bumps) for the authoritative rules. In short: bump the version in `<plugin>/.claude-plugin/plugin.json`, do **not** add a `version` field to `marketplace.json`.
+See [the version-bumps section in `CLAUDE.md`](./CLAUDE.md#version-bumps) for the authoritative rules. In short: bump the version in `plugins/<plugin>/.claude-plugin/plugin.json`, do **not** add a `version` field to `marketplace.json`.
 
 ## One-time setup
 

@@ -4,7 +4,13 @@ This project adopts the [Contributor Covenant](https://www.contributor-covenant.
 
 ## Reporting
 
-If you experience or witness behavior that violates this code, please report it privately to the project maintainer via [GitHub's private vulnerability reporting form](https://github.com/shawn-sandy/agentic-acss-plugins/security/advisories/new) (which routes to the maintainer) or by opening a [GitHub issue](https://github.com/shawn-sandy/agentic-acss-plugins/issues) and marking it confidential if the matter is not sensitive. Reports will be reviewed promptly.
+If you experience or witness behavior that violates this code, please contact the project maintainer privately. The maintainer is [@shawn-sandy](https://github.com/shawn-sandy) — public contact details are listed on their GitHub profile.
+
+For non-sensitive concerns about community conduct in a specific issue or pull request thread, you can also use GitHub's built-in [report content flow](https://docs.github.com/en/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam) on the offending comment, which notifies the repository maintainers without making the report public.
+
+Do **not** use the [security advisory form](https://github.com/shawn-sandy/agentic-acss-plugins/security/advisories/new) for code-of-conduct matters — that channel is reserved for security vulnerabilities (see [`SECURITY.md`](./SECURITY.md)).
+
+Reports will be reviewed promptly.
 
 ## Scope
 

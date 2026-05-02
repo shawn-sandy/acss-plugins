@@ -10,8 +10,8 @@ A Claude Code **plugin marketplace** for building accessible React applications 
 
 | Plugin | Version | What it ships |
 |---|---|---|
-| [`acss-kit`](./plugins/acss-kit) | 0.4.1 | Accessible React components and OKLCH CSS themes. Three skills (`components`, `styles`, plus the `component-form` pilot) and 8 slash commands covering setup, component generation, theme creation, brand presets, image/Figma extraction, and natural-language style tuning. |
-| [`acss-utilities`](./plugins/acss-utilities) | 0.2.0 | Tailwind-style atomic CSS utility classes (`.bg-primary`, `.mt-4`, `.sm-hide`) generated from a token source-of-truth. Hyphen-prefix responsive variants — no CSS escaping. Pairs with `acss-kit` via a token-bridge so utility colors resolve against the same OKLCH roles. |
+| [`acss-kit`](./plugins/acss-kit) | 0.7.0 | Accessible React components and OKLCH CSS themes. Three skills (`components`, `styles`, plus the `component-form` pilot) and 8 slash commands covering setup, component generation, theme creation, brand presets, image/Figma extraction, and natural-language style tuning. |
+| [`acss-utilities`](./plugins/acss-utilities) | 0.4.0 | Tailwind-style atomic CSS utility classes (`.bg-primary`, `.mt-4`, `.sm-hide`) generated from a token source-of-truth. Hyphen-prefix responsive variants — no CSS escaping. Pairs with `acss-kit` via a token-bridge so utility colors resolve against the same OKLCH roles. |
 
 The two plugins are **decoupled** — install one, both, or use `acss-utilities` standalone with a hand-written theme.
 
