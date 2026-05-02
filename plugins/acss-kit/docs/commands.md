@@ -191,6 +191,61 @@ Nothing is written to disk.
 
 ---
 
+## /kit-create
+
+Generate any acss-kit component from a natural-language description (creator mode). Loads the matched component's reference doc at runtime, parses its Props Interface, and resolves the user's phrases against the declared prop set. Snippet output by default; standalone component file on opt-in.
+
+The skill (`component-creator`) auto-triggers on phrases like *"create a primary pill button that says 'Add to cart'"*, *"make me a soft warning alert titled 'Heads up'"*, *"build a card with a heading 'Plan'"*. `/kit-create` is the explicit fallback when you want to invoke creator mode by name.
+
+**Signature**
+
+```text
+/kit-create <description>
+```
+
+**Tools used:** `Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion`
+
+**Arguments**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<description>` | Yes | A natural-language description naming a component that has a dedicated reference doc under [`references/components/<name>.md`](../skills/components/references/components/) and any combination of colour / size / variant / boolean / slot content. Quoted strings are content. |
+
+### What happens step by step
+
+The full workflow lives in [`skills/component-creator/SKILL.md`](../skills/component-creator/SKILL.md) — see SKILL.md for the canonical Step A–I lettering. Quick view (phase names; not lettered to avoid drift):
+
+- **Parse.** Dispatch the component noun against the `references/components/*.md` directory (catalog.md is supplemental); load the matched reference doc; resolve phrases against its Props Interface using two global synonym tables (colour family, size family) plus per-prop union literals.
+- **Resolve target & vendor.** Run `scripts/detect_target.py` to read `componentsDir` and learn whether the project has been initialized (`source: "generated"` vs `"none"`). When `source: "none"` or any of the matched component's vendored files are missing, run `/kit-add <component> [...dependencies]` to bootstrap, then re-run `detect_target.py` to confirm `source: "generated"` before proceeding. (SKILL.md Steps B + B4.)
+- **Choose output mode.** Snippet (default — paste-ready import + JSX in a fenced TSX block) or file mode (writes `src/components/<Name>.tsx`).
+- **Validate.** Generic rules (empty slots, > 80-char content, two-axis conflicts, missing required props excluding the A3.5 / A3.6 carve-outs) plus any `## Generation Notes — Creator Mode` rules the matched reference doc declares (v0.2).
+- **Generate.** Single-element components emit a flat JSX block; compound components (Card, Table, List) emit dotted children only when the description named the slot. Snippet imports are computed relative to `stack.entrypointFile`; file mode writes `src/components/<Name>.tsx`.
+- **Accessibility.** Delegated to the matched reference doc's `## Accessibility` section; the skill enforces only that generation doesn't strip those guarantees.
+- **Refinement turns.** Imperative follow-ups ("make it larger", "swap to secondary", "change the title to '<X>'") merge into the in-memory spec and re-emit. Saying *"start over"* clears the spec.
+
+### Carve-outs
+
+Two carve-outs from the no-silent-defaults rule:
+
+- **A3.5 — state-control props** (`open`, `expanded`, `visible`, `checked`): emit a demo default and a paired summary TODO so the snippet renders something. Their `on*` callback siblings get a no-op `() => {}` placeholder.
+- **A3.6 — component-declared safe defaults** (currently Button's `type="button"`): emit unconditionally; no halt, no summary note.
+
+### Examples
+
+```text
+/kit-create primary pill button that says "Add to cart"
+/kit-create soft warning alert titled "Heads up" with body "Your card expires next month"
+/kit-create card with a heading "Plan" and content "Premium tier with all features"
+/kit-create small outline icon-button with aria-label "Close"
+```
+
+### Out of scope for v0.1
+
+- **Multi-component compositions in one prompt** ("a card with a switch and a slider") — generate the outer component, then refine to add inner components one at a time. Multi-component prompts land in v0.3.
+- **Form-shaped descriptions** ("signup form with email and password") — handled by the `component-form` skill instead.
+
+---
+
 ## /style-tune
 
 Adjust the visual feel of acss-kit components or theme roles using natural language. Routes between theme-role edits (delegated to `/theme-update` with WCAG pre-validation) and component SCSS token edits.

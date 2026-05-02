@@ -4,12 +4,13 @@ A Claude Code plugin for building accessible React applications with the [fpkit/
 
 ## What you get
 
-Two top-level skills, one cross-domain setup skill, and two pilot skills:
+Two top-level skills, one cross-domain setup skill, and three pilot skills:
 
 - **`components`** — accessible React components from markdown specs. `/kit-add <component>` walks the dependency tree and writes self-contained TSX + SCSS into your project.
 - **`styles`** — CSS theme generation. `/theme-create`, `/theme-brand`, `/theme-update`, `/theme-extract` for OKLCH palettes with WCAG 2.2 AA validation.
 - **`setup`** — cross-domain first-run skill backing `/setup`. Runs the sass check, copies `ui.tsx`, and seeds light/dark theme. Idempotent.
 - **`component-form`** — pilot per-component skill that auto-triggers on phrases like "create a signup form", "add a contact form".
+- **`component-creator`** — pilot creator-mode skill that auto-triggers on phrases like "create a primary pill button that says 'Add to cart'", "make me a soft warning alert titled 'Heads up'", "build a card with a heading 'Plan'". `/kit-create` is the explicit fallback. Loads the matched component's reference doc at runtime, resolves the user's phrases against its Props Interface (colour/size synonyms map onto whichever colour-family / size-family prop the component declares), and emits a paste-ready TSX snippet or a standalone component file. Works with any component that has a dedicated `references/components/<name>.md` reference doc (Button, Alert, Card, Dialog, Link, Input, Field, Checkbox, IconButton, Img, Icon, List, Table, Popover, Nav); components that exist only as inline `catalog.md` entries (Badge, Tag, Heading, Text/Paragraph, Details, Progress) are deferred to v0.2.
 - **`style-tune`** — pilot per-feel skill that auto-triggers on phrases like "warmer button", "softer card", "tone down the primary", "more spacious cards", "more elevated dialog". `/style-tune` is the explicit fallback. Routes between theme-role and component-SCSS edits with atomic WCAG pre-validation.
 
 ## Why
