@@ -84,7 +84,7 @@ The logic lives entirely in `SKILL.md`. Do not duplicate generation logic inside
 5. **Update `catalog.md` if the component is a simple leaf.** Simple components (no state, no deps, one `.tsx` + one `.scss`) belong in `catalog.md` rather than a dedicated file, to keep the file count manageable.
 
 6. **All fpkit source references must use full GitHub URLs pinned to a tag or commit SHA** — never repo-relative paths and never `blob/main`. For example:
-   ```
+   ```text
    https://github.com/shawn-sandy/acss/blob/v6.5.0/packages/fpkit/src/components/button/btn.tsx
    ```
    See `.claude/rules/fpkit-references.md` for the full policy.
