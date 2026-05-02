@@ -4,6 +4,8 @@ All notable changes to the `acss-utilities` plugin are documented here. Format f
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-02
+
 ### Added
 
 - **`/utility-add` workflow now classifies the user's build stack and verifies entrypoint wiring.** Step 2 invokes the cross-plugin `acss-kit/scripts/detect_stack.py` to populate `.acss-target.json` with framework, bundler, CSS pipeline, and entrypoint file. Step 9 invokes `acss-kit/scripts/verify_integration.py` after the import snippet is printed; missing `token-bridge.css` / `utilities.css` imports — and out-of-order imports where utilities precedes the bridge — are surfaced as a numbered fix-up list. Both scripts are skipped with a warning when acss-kit is not installed alongside acss-utilities. No auto-edits; the developer keeps ownership of the entrypoint.

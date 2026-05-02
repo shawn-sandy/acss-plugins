@@ -19,13 +19,13 @@ Per-family upstream sources (when applicable):
 
 | Family | Upstream file |
 |---|---|
-| `color-bg` | [`packages/fpkit/src/sass/utilities/_color-bg.scss`](https://github.com/shawn-sandy/acss/blob/main/packages/fpkit/src/sass/utilities/_color-bg.scss) |
-| `color-text` | [`packages/fpkit/src/sass/utilities/_color-text.scss`](https://github.com/shawn-sandy/acss/blob/main/packages/fpkit/src/sass/utilities/_color-text.scss) |
-| `color-border` | [`packages/fpkit/src/sass/utilities/_color-border.scss`](https://github.com/shawn-sandy/acss/blob/main/packages/fpkit/src/sass/utilities/_color-border.scss) |
-| `display` | [`packages/fpkit/src/sass/utilities/_display.scss`](https://github.com/shawn-sandy/acss/blob/main/packages/fpkit/src/sass/utilities/_display.scss) |
-| `flex` (sibling) | [`packages/fpkit/src/sass/_layout.scss`](https://github.com/shawn-sandy/acss/blob/main/packages/fpkit/src/sass/_layout.scss) |
-| `grid` (sibling) | [`packages/fpkit/src/sass/_grid.scss`](https://github.com/shawn-sandy/acss/blob/main/packages/fpkit/src/sass/_grid.scss) |
-| `type` (sibling) | [`packages/fpkit/src/sass/_type.scss`](https://github.com/shawn-sandy/acss/blob/main/packages/fpkit/src/sass/_type.scss) |
+| `color-bg` | [`packages/fpkit/src/sass/utilities/_color-bg.scss`](https://github.com/shawn-sandy/acss/blob/v6.5.0/packages/fpkit/src/sass/utilities/_color-bg.scss) |
+| `color-text` | [`packages/fpkit/src/sass/utilities/_color-text.scss`](https://github.com/shawn-sandy/acss/blob/v6.5.0/packages/fpkit/src/sass/utilities/_color-text.scss) |
+| `color-border` | [`packages/fpkit/src/sass/utilities/_color-border.scss`](https://github.com/shawn-sandy/acss/blob/v6.5.0/packages/fpkit/src/sass/utilities/_color-border.scss) |
+| `display` | [`packages/fpkit/src/sass/utilities/_display.scss`](https://github.com/shawn-sandy/acss/blob/v6.5.0/packages/fpkit/src/sass/utilities/_display.scss) |
+| `flex` (sibling) | [`packages/fpkit/src/sass/_layout.scss`](https://github.com/shawn-sandy/acss/blob/v6.5.0/packages/fpkit/src/sass/_layout.scss) |
+| `grid` (sibling) | [`packages/fpkit/src/sass/_grid.scss`](https://github.com/shawn-sandy/acss/blob/v6.5.0/packages/fpkit/src/sass/_grid.scss) |
+| `type` (sibling) | [`packages/fpkit/src/sass/_type.scss`](https://github.com/shawn-sandy/acss/blob/v6.5.0/packages/fpkit/src/sass/_type.scss) |
 
 ## What this plugin extends beyond fpkit
 

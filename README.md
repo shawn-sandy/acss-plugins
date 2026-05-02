@@ -102,8 +102,7 @@ agentic-acss-plugins/
 ├── .claude/                            # project-level rules, hooks, skills (maintainer tooling)
 ├── CLAUDE.md                           # repo guidance for Claude Code
 ├── AGENTS.md                           # agent definitions
-├── CONTRIBUTING.md                     # contributor workflow
-└── GUIDE.md                            # end-user guide (overlaps with this README)
+└── CONTRIBUTING.md                     # contributor workflow
 ```
 
 ## Migration
@@ -143,7 +142,6 @@ See [`tests/README.md`](./tests/README.md) for the full workflow, the `--reset` 
 
 | Doc | Audience | Covers |
 |---|---|---|
-| [`GUIDE.md`](./GUIDE.md) | End users | Step-by-step install + command walkthrough |
 | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | Contributors | Branching model, fpkit sibling-clone workflow, review process |
 | [`CLAUDE.md`](./CLAUDE.md) | Claude Code sessions | Repo-level guidance — plugin layout, version-bump rules, pre-submit checklist |
 | [`AGENTS.md`](./AGENTS.md) | Maintainers | Project agent definitions |

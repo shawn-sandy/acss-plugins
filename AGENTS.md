@@ -99,6 +99,6 @@ See `plugins/acss-kit/scripts/` for the current script list and individual docst
 
 ## fpkit/acss cross-references
 
-All references to fpkit source in SKILL.md and reference docs must use full GitHub URLs (e.g. `https://github.com/shawn-sandy/acss/blob/main/...`). This allows plugin users and contributors to click through without a local clone.
+All references to fpkit source in SKILL.md and reference docs must use full GitHub URLs pinned to a tag or commit SHA — never `blob/main` (e.g. `https://github.com/shawn-sandy/acss/blob/v6.5.0/...`). This allows plugin users and contributors to click through without a local clone, and freezes the link target so future fpkit refactors do not silently break the docs. See `.claude/rules/fpkit-references.md` for the full policy.
 
 For contributors editing reference docs: keep `shawn-sandy/acss` cloned as a sibling directory for local verification — see `CONTRIBUTING.md`.

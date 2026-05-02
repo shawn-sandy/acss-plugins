@@ -4,6 +4,8 @@ All notable changes to the `acss-kit` plugin are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-05-02
+
 ### Added
 
 - **`scripts/detect_css_entry.py`** — new detector that locates candidate CSS / SCSS entry files (e.g. `src/styles/index.scss`, `src/index.css`, `app/globals.css`) and reports which `light.css`, `dark.css`, `token-bridge.css`, and `utilities.css` imports each candidate already carries. Detector contract; stdlib only; includes `--self-test`. Used by `/setup` Step 7.5 to wire generated theme imports into the project's main stylesheet without editing the TSX entrypoint.

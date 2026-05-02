@@ -1,6 +1,6 @@
 # Maintainer tooling
 
-Project-local Claude Code definitions for working on the `acss-kit` plugin. Contributors use these to scaffold new artifacts, audit existing ones, and gate releases. End-user docs for the plugin itself live at [GUIDE.md](../GUIDE.md), the [root README](../README.md), and [plugins/acss-kit/README.md](../plugins/acss-kit/README.md).
+Project-local Claude Code definitions for working on the `acss-kit` plugin. Contributors use these to scaffold new artifacts, audit existing ones, and gate releases. End-user docs for the plugin itself live at the [root README](../README.md) and [plugins/acss-kit/README.md](../plugins/acss-kit/README.md).
 
 ## I want to...
 
@@ -59,4 +59,4 @@ Project-local Claude Code definitions for working on the `acss-kit` plugin. Cont
 
 - [CONTRIBUTING.md](../CONTRIBUTING.md) — sibling-clone workflow, pre-PR checklist
 - [AGENTS.md](../AGENTS.md) — coding-agent guidance for working in this repo
-- [GUIDE.md](../GUIDE.md) — end-user guide for the `acss-kit` plugin
+- [Root README](../README.md) — marketplace overview, install, and command index for `acss-kit` and `acss-utilities`
