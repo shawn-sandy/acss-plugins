@@ -116,4 +116,4 @@ When adding a new script: use the detector contract if a slash command parses th
 
 ## fpkit/acss cross-references
 
-All references to fpkit source in SKILL.md and reference docs must use full GitHub URLs (e.g. `https://github.com/shawn-sandy/acss/blob/main/...`). This allows plugin users and contributors to click through without a local clone.
+All references to fpkit source in SKILL.md and reference docs must use full GitHub URLs pinned to a tag or commit SHA — never `blob/main` (e.g. `https://github.com/shawn-sandy/acss/blob/<tag-or-sha>/...`). This allows plugin users and contributors to click through without a local clone.

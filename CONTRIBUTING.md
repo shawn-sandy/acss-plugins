@@ -12,7 +12,7 @@ Plugin work often needs to reference the fpkit source — either to check what's
 └── agentic-acss-plugins/       # this repo
 ```
 
-The plugins do not assume this layout at runtime. All references to fpkit source in `SKILL.md` files and generated-code comments use full GitHub URLs (e.g. `https://github.com/shawn-sandy/acss/blob/main/packages/fpkit/src/index.ts`) so plugin users need only this repo to be installed.
+The plugins do not assume this layout at runtime. All references to fpkit source in `SKILL.md` files and generated-code comments use full GitHub URLs pinned to a tag or commit SHA — never `blob/main` (e.g. `https://github.com/shawn-sandy/acss/blob/<tag-or-sha>/packages/fpkit/src/index.ts`) so plugin users need only this repo to be installed.
 
 The sibling layout is for **contributors** editing plugin skill docs: open the fpkit source locally, verify the current exports, then update the plugin reference docs to match.
 
