@@ -6,7 +6,9 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
 
 # /kit-sync
 
-Vendor every shipped acss-kit component, the `ui.tsx` foundation, and a starter OKLCH theme into your project in a single command. Records every file's normalized sha256 in `.acss-kit/manifest.json` so `/kit-update` can later re-copy unmodified files without clobbering your edits.
+Vendor every component listed in `references/components/catalog.md`, the `ui.tsx` foundation, and a starter OKLCH theme into your project in a single command. Records every file's normalized sha256 in `.acss-kit/manifest.json` so `/kit-update` can later re-copy unmodified files without clobbering your edits.
+
+`Form` is **not** vendored by `/kit-sync` — it lives behind the `component-form` skill and is generated on-demand from a natural-language prompt. Run `/setup` plus a form-shaped prompt (e.g. "create a signup form with email and password") to bootstrap it.
 
 ## Usage
 
