@@ -1,7 +1,7 @@
 {
   "name": "acss-kit",
   "description": "Generate accessible React components and CSS themes for fpkit/acss projects. Markdown-as-source component templates plus OKLCH theme generation with WCAG 2.2 AA validation.",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "author": {
     "name": "Shawn Sandy",
     "url": "https://github.com/shawn-sandy/acss"

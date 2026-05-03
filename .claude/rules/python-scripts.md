@@ -18,6 +18,10 @@ Current scripts in `plugins/acss-kit/scripts/`:
 - `css_to_tokens.py` — converts CSS custom properties to palette JSON
 - `tokens_to_css.py` — converts palette JSON to CSS custom property files
 - `validate_theme.py` — checks theme CSS files for WCAG 2.2 AA contrast on semantic role pairs
+- `hash_file.py` — hashes a file or stdin content with sha256 after the kit-sync normalization rules (LF endings, strip trailing whitespace per line, single trailing newline). Used by `/kit-sync` to record manifest entries and by `/kit-update` to compare on-disk content. Generator/validator contract
+- `manifest_read.py` — reads `.acss-kit/manifest.json` from a project root and emits its contents as JSON. Detector contract
+- `manifest_write.py` — atomically merges a stdin JSON payload into `.acss-kit/manifest.json` (write-temp + rename). Preserves entries not mentioned in the payload; accepts `removePaths` for pruning. Generator/validator contract
+- `diff_status.py` — drift detector for `/kit-update`: compares each file recorded in the manifest against its current normalized sha256 and classifies it as `clean`, `modified`, or `missing`. Detector contract; includes `--self-test` that exercises the full hash → write → read → diff round-trip plus the CRLF-vs-LF normalization invariant
 
 Current scripts in `plugins/acss-utilities/scripts/`:
 
@@ -34,7 +38,7 @@ For scripts whose output is parsed by slash commands or skills.
 - Exit 0 on success, 1 on logical failure (e.g. nothing detected)
 - Always include a `"reasons"` array in the JSON — empty `[]` on success, populated on failure
 
-Detectors: `detect_target.py`, `detect_package_manager.py`, `detect_stack.py`, `detect_css_entry.py`, `verify_integration.py`, `detect_utility_target.py`, `validate_utilities.py`.
+Detectors: `detect_target.py`, `detect_package_manager.py`, `detect_stack.py`, `detect_css_entry.py`, `verify_integration.py`, `manifest_read.py`, `diff_status.py`, `detect_utility_target.py`, `validate_utilities.py`.
 
 ## Generator / validator contract (pipeline-friendly, human-readable)
 
@@ -44,7 +48,7 @@ For scripts that emit data or human-readable validation results.
 - Errors on stderr
 - Exit 0 on success, 1 on logical failure, 2 on usage / IO errors
 
-Generators / validators: `generate_palette.py`, `oklch_shift.py`, `tokens_to_css.py`, `css_to_tokens.py`, `validate_theme.py`, `generate_utilities.py`, `migrate_classnames.py`.
+Generators / validators: `generate_palette.py`, `oklch_shift.py`, `tokens_to_css.py`, `css_to_tokens.py`, `validate_theme.py`, `hash_file.py`, `manifest_write.py`, `generate_utilities.py`, `migrate_classnames.py`.
 
 `oklch_shift.py` follows this contract — it transforms an input hex into a shifted hex and emits structured JSON. It exits 0 whenever a usable hex was produced (even when chroma or lightness was clamped to stay in sRGB gamut — `clamped: true` and a populated `reasons` array surface the warning), reserves exit 1 for hard failures where no hex can be produced, and exits 2 on usage / IO errors.
 
