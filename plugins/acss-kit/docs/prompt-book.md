@@ -223,6 +223,38 @@ custom property each one references.
 
 ---
 
+## 14. Bulk-install every component plus a starter theme
+
+**When to use:** You want every shipped acss-kit component, the `ui.tsx` foundation, and an OKLCH-validated starter theme written into your project in one shot — instead of running `/kit-add` per component.
+
+**Prompt:**
+
+```text
+Bulk-install every acss-kit component into my project, with a starter
+theme seeded from [#4f46e5]. Track everything in .acss-kit/manifest.json
+so I can re-sync safely later.
+```
+
+**What you get:** Every catalog component + `ui.tsx` + `light.css` / `dark.css` written via the same generators `/kit-add` and `/theme-create` use, plus `<projectRoot>/.acss-kit/manifest.json` recording the normalized sha256 of each file. Re-runs route every file through the drift check — modified files are skipped, clean files overwritten. Backed by `/kit-sync`. (The `Form` component lives behind the `component-form` skill and is not vendored by `/kit-sync` — use the form-skill prompt above to generate forms on demand.)
+
+---
+
+## 15. Safely re-copy unmodified components after a plugin upgrade
+
+**When to use:** You upgraded `acss-kit` and want the new component / foundation versions, but only for files you haven't customised. Your edits should be preserved.
+
+**Prompt:**
+
+```text
+Re-sync every acss-kit component I haven't touched since the last
+/kit-sync run. Skip anything I've modified and show me a report of
+what got updated, skipped, and recreated.
+```
+
+**What you get:** A diff report (clean / modified / missing per file), then in-place overwrites of clean and missing files. Modified files are skipped by default; pass `--force` to overwrite them after writing a `.bak` backup. Backed by `/kit-update`.
+
+---
+
 ## Composing prompts
 
 You can chain multiple goals in one message. Claude Code will invoke the matching commands in sequence.
