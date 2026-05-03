@@ -180,16 +180,20 @@ def _self_test() -> int:
             if rc != 1:
                 failures.append(f"manifest_write accepted {label} (rc={rc}, expected 1)")
 
-        # Non-dict entry inside files[] should be skipped, not crash
+        # Non-dict entry inside files[] must cause a hard fail — silent partial
+        # success would leave the file written to disk but untracked in the
+        # manifest, breaking the safe-update guarantee.
         good_with_bad_entry = _json.dumps({
             "projectRoot": str(root),
             "files": ["not-a-dict", {"path": "x.txt", "sha256": sha, "kind": "component"}],
         })
         rc, out_w, _ = _run(["python3", str(here / "manifest_write.py")], stdin=good_with_bad_entry)
-        if rc != 0:
-            failures.append(f"manifest_write rejected payload with one bad entry (rc={rc}, expected 0)")
-        elif _json.loads(out_w).get("filesSkipped", 0) < 1:
-            failures.append("manifest_write should report filesSkipped >= 1 for non-dict entry")
+        if rc != 1:
+            failures.append(f"manifest_write should fail loudly on non-dict entry (rc={rc}, expected 1)")
+        else:
+            err_out = _json.loads(out_w)
+            if err_out.get("ok") is not False or not err_out.get("reasons"):
+                failures.append("manifest_write fail output missing ok=false or reasons")
 
         # 10. manifest_read must reject a manifest with non-object 'files'
         bad_manifest = root / ".acss-kit" / "manifest.json"
@@ -229,7 +233,7 @@ def _self_test() -> int:
                             f"diff_status traversal entry missing escape error: {entry}"
                         )
 
-        # 12. manifest_write must reject non-string path/sha/kind types
+        # 12. manifest_write must fail loudly on non-string path/sha/kind types
         bad_types_payload = _json.dumps({
             "projectRoot": str(root),
             "files": [
@@ -239,10 +243,84 @@ def _self_test() -> int:
             ],
         })
         rc, out_bt, _ = _run(["python3", str(here / "manifest_write.py")], stdin=bad_types_payload)
-        if rc != 0:
-            failures.append(f"manifest_write rejected payload with bad-type entries (rc={rc}, expected 0)")
-        elif _json.loads(out_bt).get("filesSkipped", 0) < 3:
-            failures.append("manifest_write should skip all 3 bad-type entries")
+        if rc != 1:
+            failures.append(f"manifest_write should fail loudly on bad-type entries (rc={rc}, expected 1)")
+
+        # 13. manifest_write must reject non-string projectRoot (e.g., int)
+        rc, out_pr, _ = _run(
+            ["python3", str(here / "manifest_write.py")],
+            stdin=_json.dumps({"projectRoot": 123, "files": []}),
+        )
+        if rc != 1:
+            failures.append(f"manifest_write accepted non-string projectRoot (rc={rc}, expected 1)")
+
+        # 14. manifest_write must reject path-traversal entries at write time
+        traversal_payload = _json.dumps({
+            "projectRoot": str(root),
+            "files": [
+                {"path": "../../etc/passwd", "sha256": "abc", "kind": "component"},
+            ],
+        })
+        rc, out_tw, _ = _run(["python3", str(here / "manifest_write.py")], stdin=traversal_payload)
+        if rc != 1:
+            failures.append(f"manifest_write should reject path-traversal at write (rc={rc}, expected 1)")
+
+        # 15. manifest_read must signal schemaMismatch=True (and exists=True) for stale schema.
+        # Critical: workflows branch on schemaMismatch to halt instead of fresh-installing.
+        sm_manifest = {"schemaVersion": 999, "files": {}}
+        bad_manifest.write_text(_json.dumps(sm_manifest), encoding="utf-8")
+        rc, out_sm, _ = _run(["python3", str(here / "manifest_read.py"), str(root)])
+        if rc != 1:
+            failures.append(f"manifest_read schemaMismatch should exit 1 (rc={rc})")
+        else:
+            sm = _json.loads(out_sm)
+            if not sm.get("schemaMismatch") or not sm.get("exists"):
+                failures.append(
+                    f"manifest_read should set schemaMismatch=True and exists=True for stale schema, got {sm}"
+                )
+
+        # 16. diff_status OSError path must preserve component field (kit-update filters on it)
+        # Set up a manifest with a tracked component, then make the file unreadable.
+        # On systems where root can read everything, skip the assertion gracefully.
+        comp_target = root / "src" / "fpkit"
+        comp_target.mkdir(parents=True, exist_ok=True)
+        comp_file = comp_target / "alert.tsx"
+        comp_file.write_text("export const Alert = () => null\n", encoding="utf-8")
+        comp_sha = _json.loads(_run(
+            ["python3", str(here / "hash_file.py"), "--path", str(comp_file)]
+        )[1])["sha256"]
+        comp_manifest = {
+            "schemaVersion": 1,
+            "files": {
+                "src/fpkit/alert.tsx": {
+                    "source": "ref:components/alert.md#tsx-template",
+                    "sha256": comp_sha,
+                    "kind": "component",
+                    "component": "alert",
+                },
+            },
+        }
+        bad_manifest.write_text(_json.dumps(comp_manifest), encoding="utf-8")
+        # Force a read failure by chmod 0 (best effort — silently skip on root)
+        import os as _os
+        try:
+            _os.chmod(comp_file, 0)
+            rc, out_oe, _ = _run(["python3", str(here / "diff_status.py"), str(root)])
+            res = _json.loads(out_oe)
+            mod_entries = res.get("modified", [])
+            # Either it crashed (then test framework caught earlier) or it
+            # produced an entry with the component field preserved.
+            if mod_entries and "component" not in mod_entries[0]:
+                # Only treat as failure when actually ran into OSError path.
+                if mod_entries[0].get("error"):
+                    failures.append(
+                        f"diff_status OSError path dropped 'component' field: {mod_entries[0]}"
+                    )
+        finally:
+            try:
+                _os.chmod(comp_file, 0o644)
+            except OSError:
+                pass
 
     if failures:
         print("diff_status self-test FAILED:")
@@ -356,6 +434,7 @@ def main() -> int:
                 "currentSha": "",
                 "expectedSha": expected,
                 "error": str(e),
+                **({"component": component} if component else {}),
             })
             continue
 

@@ -117,8 +117,10 @@ def main() -> int:
         ])
 
     project_root = payload.get("projectRoot")
-    if not project_root:
-        return _fail(["manifest_write: payload missing 'projectRoot'"])
+    if not isinstance(project_root, str) or not project_root.strip():
+        return _fail([
+            f"manifest_write: payload 'projectRoot' must be a non-empty string, got {type(project_root).__name__}"
+        ])
 
     root = Path(project_root).resolve()
     manifest_path = root / MANIFEST_REL
@@ -141,7 +143,7 @@ def main() -> int:
     skipped: list[str] = []
     for entry in payload_files:
         if not isinstance(entry, dict):
-            skipped.append(repr(entry))
+            skipped.append(f"non-object entry: {entry!r}")
             continue
         rel = entry.get("path")
         sha = entry.get("sha256")
@@ -151,7 +153,15 @@ def main() -> int:
             and isinstance(sha, str) and sha
             and isinstance(kind, str) and kind
         ):
-            skipped.append(repr(entry))
+            skipped.append(f"missing or non-string path/sha256/kind: {entry!r}")
+            continue
+        # Reject paths that escape projectRoot at write time. Persisting them
+        # would poison the manifest — diff_status.py would later flag them
+        # forever as 'modified' since the project can never own those paths.
+        try:
+            (root / rel).resolve().relative_to(root)
+        except (ValueError, OSError):
+            skipped.append(f"path escapes projectRoot: {rel!r}")
             continue
         files[rel] = {
             "source": entry.get("source", ""),
@@ -162,6 +172,16 @@ def main() -> int:
         if entry.get("component"):
             files[rel]["component"] = entry["component"]
         written += 1
+
+    # Fail loudly on any skipped entries — silent partial success would
+    # defeat the safe-update guarantee. The caller must fix the payload
+    # before /kit-sync is allowed to proceed.
+    if skipped:
+        return _fail([
+            "manifest_write: refusing to write — payload contained "
+            f"{len(skipped)} invalid entry/entries:",
+            *[f"  - {s}" for s in skipped],
+        ])
 
     removed = 0
     remove_paths = payload.get("removePaths", []) or []
@@ -189,19 +209,12 @@ def main() -> int:
     except OSError as e:
         return _fail([f"manifest_write: {e}"], code=2)
 
-    reasons: list[str] = []
-    if skipped:
-        reasons.append(
-            f"Skipped {len(skipped)} payload entry/entries missing required fields (path, sha256, kind)."
-        )
-
     print(json.dumps({
         "ok": True,
         "path": str(manifest_path),
         "filesWritten": written,
         "filesRemoved": removed,
-        "filesSkipped": len(skipped),
-        "reasons": reasons,
+        "reasons": [],
     }, indent=2))
     return 0
 

@@ -198,12 +198,17 @@ Triggered by `/kit-update [<component>...]` and by natural-language phrasing lik
 
 ### Step U1 — Read the manifest
 
-Run `manifest_read.py <projectRoot>`. If `exists: false`, halt with:
+Run `manifest_read.py <projectRoot>`. Three terminating cases:
 
-```text
-No .acss-kit/manifest.json found. Run /kit-sync first to bulk-install
-the kit and start tracking generated files.
-```
+- **`exists: false`** — manifest missing or malformed. Halt with:
+
+  ```text
+  No .acss-kit/manifest.json found. Run /kit-sync first to bulk-install
+  the kit and start tracking generated files.
+  ```
+
+- **`schemaMismatch: true`** — manifest is on disk but written by a different schemaVersion. Halt with the `reasons[]` from the script — do **not** fall through to a fresh-install path, since that would bypass drift protection on every tracked file.
+- Otherwise — proceed to Step U2.
 
 ### Step U2 — Compute drift
 
