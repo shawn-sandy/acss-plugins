@@ -100,32 +100,32 @@ def _atomic_write(path: Path, content: str) -> None:
         raise
 
 
+def _fail(reasons: list[str], code: int = 1) -> int:
+    print(json.dumps({"ok": False, "reasons": reasons}, indent=2))
+    return code
+
+
 def main() -> int:
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError as e:
-        print(f"manifest_write: invalid JSON on stdin: {e}", file=sys.stderr)
-        return 1
+        return _fail([f"manifest_write: invalid JSON on stdin: {e}"])
 
     if not isinstance(payload, dict):
-        print(
-            f"manifest_write: payload must be a JSON object, got {type(payload).__name__}",
-            file=sys.stderr,
-        )
-        return 1
+        return _fail([
+            f"manifest_write: payload must be a JSON object, got {type(payload).__name__}"
+        ])
 
     project_root = payload.get("projectRoot")
     if not project_root:
-        print("manifest_write: payload missing 'projectRoot'", file=sys.stderr)
-        return 1
+        return _fail(["manifest_write: payload missing 'projectRoot'"])
 
     root = Path(project_root).resolve()
     manifest_path = root / MANIFEST_REL
     try:
         existing = _read_existing(manifest_path)
     except _ExistingUnreadable as e:
-        print(f"manifest_write: {e}", file=sys.stderr)
-        return 1
+        return _fail([f"manifest_write: {e}"])
 
     files = existing.get("files", {})
     if not isinstance(files, dict):
@@ -133,11 +133,9 @@ def main() -> int:
 
     payload_files = payload.get("files", []) or []
     if not isinstance(payload_files, list):
-        print(
-            f"manifest_write: 'files' must be a JSON array, got {type(payload_files).__name__}",
-            file=sys.stderr,
-        )
-        return 1
+        return _fail([
+            f"manifest_write: 'files' must be a JSON array, got {type(payload_files).__name__}"
+        ])
 
     written = 0
     skipped: list[str] = []
@@ -148,7 +146,11 @@ def main() -> int:
         rel = entry.get("path")
         sha = entry.get("sha256")
         kind = entry.get("kind")
-        if not (rel and sha and kind):
+        if not (
+            isinstance(rel, str) and rel
+            and isinstance(sha, str) and sha
+            and isinstance(kind, str) and kind
+        ):
             skipped.append(repr(entry))
             continue
         files[rel] = {
@@ -164,11 +166,9 @@ def main() -> int:
     removed = 0
     remove_paths = payload.get("removePaths", []) or []
     if not isinstance(remove_paths, list):
-        print(
-            f"manifest_write: 'removePaths' must be a JSON array, got {type(remove_paths).__name__}",
-            file=sys.stderr,
-        )
-        return 1
+        return _fail([
+            f"manifest_write: 'removePaths' must be a JSON array, got {type(remove_paths).__name__}"
+        ])
     for rel in remove_paths:
         if isinstance(rel, str) and rel in files:
             del files[rel]
@@ -187,8 +187,7 @@ def main() -> int:
     try:
         _atomic_write(manifest_path, json.dumps(out, indent=2) + "\n")
     except OSError as e:
-        print(f"manifest_write: {e}", file=sys.stderr)
-        return 2
+        return _fail([f"manifest_write: {e}"], code=2)
 
     reasons: list[str] = []
     if skipped:

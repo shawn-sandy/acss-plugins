@@ -203,6 +203,47 @@ def _self_test() -> int:
         if rc != 1:
             failures.append(f"diff_status accepted non-object 'files' (rc={rc}, expected 1)")
 
+        # 11. Path-traversal guard — manifest entries with absolute or .. paths
+        # must be classified as escaping the project root, never read off-tree.
+        traversal_manifest = {
+            "schemaVersion": 1,
+            "pluginVersion": "0.0.0-test",
+            "files": {
+                "../../etc/passwd": {"source": "x", "sha256": "deadbeef", "kind": "component"},
+                "/etc/passwd": {"source": "x", "sha256": "deadbeef", "kind": "component"},
+            },
+        }
+        bad_manifest.write_text(_json.dumps(traversal_manifest), encoding="utf-8")
+        rc, out_t, _ = _run(["python3", str(here / "diff_status.py"), str(root)])
+        if rc != 0:
+            failures.append(f"diff_status traversal case rc={rc}, expected 0")
+        else:
+            t = _json.loads(out_t)
+            modified_paths = {m.get("path") for m in t.get("modified", [])}
+            if "../../etc/passwd" not in modified_paths or "/etc/passwd" not in modified_paths:
+                failures.append(f"diff_status did not flag traversal entries: {modified_paths}")
+            for entry in t.get("modified", []):
+                if entry.get("path") in {"../../etc/passwd", "/etc/passwd"}:
+                    if entry.get("error") != "Path escapes project root.":
+                        failures.append(
+                            f"diff_status traversal entry missing escape error: {entry}"
+                        )
+
+        # 12. manifest_write must reject non-string path/sha/kind types
+        bad_types_payload = _json.dumps({
+            "projectRoot": str(root),
+            "files": [
+                {"path": ["x"], "sha256": "abc", "kind": "component"},
+                {"path": "x", "sha256": 123, "kind": "component"},
+                {"path": "x", "sha256": "abc", "kind": {"k": "v"}},
+            ],
+        })
+        rc, out_bt, _ = _run(["python3", str(here / "manifest_write.py")], stdin=bad_types_payload)
+        if rc != 0:
+            failures.append(f"manifest_write rejected payload with bad-type entries (rc={rc}, expected 0)")
+        elif _json.loads(out_bt).get("filesSkipped", 0) < 3:
+            failures.append("manifest_write should skip all 3 bad-type entries")
+
     if failures:
         print("diff_status self-test FAILED:")
         for f in failures:
@@ -279,10 +320,28 @@ def main() -> int:
     for rel, entry in files.items():
         if not isinstance(entry, dict):
             continue
-        abs_path = start / rel
         kind = entry.get("kind", "")
         component = entry.get("component")
         expected = entry.get("sha256", "")
+
+        # Defensive: reject manifest entries that escape projectRoot via absolute
+        # path or .. traversal. A drift check should never read files the user
+        # didn't ask /kit-sync to write.
+        if not isinstance(rel, str) or not rel:
+            continue
+        try:
+            abs_path = (start / rel).resolve()
+            abs_path.relative_to(start)
+        except (ValueError, OSError):
+            modified.append({
+                "path": rel,
+                "kind": kind,
+                "currentSha": "",
+                "expectedSha": expected,
+                "error": "Path escapes project root.",
+                **({"component": component} if component else {}),
+            })
+            continue
 
         if not abs_path.is_file():
             missing.append({"path": rel, "kind": kind, **({"component": component} if component else {})})
