@@ -261,7 +261,7 @@ Bulk-install **every** shipped acss-kit component, the `ui.tsx` foundation, and 
 **Flags**
 
 - `--target=<dir>` — override component directory (default: `.acss-target.json` `componentsDir`, fallback `src/components/fpkit`).
-- `--styles-dir=<dir>` — override styles directory (default: `src/styles`).
+- `--styles-dir=<dir>` — override styles directory (default: `.acss-target.json` `stylesDir`, fallback `src/styles`).
 - `--seed=<hex>` — seed color for theme generation (default: prompt).
 - `--skip-styles` — components-only sync; do not seed theme.
 - `--dry-run` — print the plan tree without writing files or manifest.
