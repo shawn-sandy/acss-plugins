@@ -12,7 +12,7 @@ Pair with `/kit-sync` (which writes the manifest in the first place).
 
 ## Usage
 
-```
+```text
 /kit-update                      # update every tracked file that's still clean
 /kit-update button alert         # restrict to specific components
 /kit-update --check              # report drift only — no writes
@@ -25,19 +25,13 @@ When this command is invoked, follow the **Safe-update workflow** in the `kit-sy
 
 ### Quick reference
 
-1. **Read manifest** — `manifest_read.py`. If missing, halt with a "run /kit-sync first" message.
-2. **Compute drift** — `diff_status.py` returns `clean[]`, `modified[]`, `missing[]` based on normalized sha256 comparison.
-3. **Filter** — if positional component args were passed, intersect each list with the requested set.
-4. **Report** — show counts + list of modified files (your changes preserved) and missing files (will recreate). `--check` stops here.
-5. **Regenerate** — for `clean` and `missing`: re-run the same generation logic `/kit-sync` uses, hash, write, update manifest entry.
-6. **Skip or force** — `modified` files are skipped by default. `--force` writes `<file>.bak` then overwrites and updates the hash.
-7. **Rewrite manifest** — `manifest_write.py` with merged payload. Untouched (skipped) entries keep their previous sha — no churn.
-8. **Summary** — updated / skipped / recreated counts.
+1. Read manifest
+2. Compute drift
+3. Filter
+4. Report
+5. Regenerate
+6. Skip or force
+7. Rewrite manifest
+8. Summary
 
-### Drift detection
-
-A file is "clean" when its current normalized sha256 (LF endings, trailing-whitespace stripped, single trailing newline) matches the value recorded by `/kit-sync` in the manifest. Otherwise it's "modified".
-
-### Full workflow
-
-See `${CLAUDE_PLUGIN_ROOT}/skills/kit-sync/SKILL.md` for the complete step-by-step workflow including the manifest schema and the regeneration logic per `kind`.
+See [`SKILL.md`](../skills/kit-sync/SKILL.md) for the full step-by-step workflow, script contracts (`manifest_read.py`, `diff_status.py`, `manifest_write.py`), drift classification rules, and `--check` / `--force` semantics.

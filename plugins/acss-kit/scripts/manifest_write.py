@@ -107,10 +107,17 @@ def main() -> int:
         print(f"manifest_write: invalid JSON on stdin: {e}", file=sys.stderr)
         return 1
 
+    if not isinstance(payload, dict):
+        print(
+            f"manifest_write: payload must be a JSON object, got {type(payload).__name__}",
+            file=sys.stderr,
+        )
+        return 1
+
     project_root = payload.get("projectRoot")
     if not project_root:
         print("manifest_write: payload missing 'projectRoot'", file=sys.stderr)
-        return 2
+        return 1
 
     root = Path(project_root).resolve()
     manifest_path = root / MANIFEST_REL
@@ -124,9 +131,20 @@ def main() -> int:
     if not isinstance(files, dict):
         files = {}
 
+    payload_files = payload.get("files", []) or []
+    if not isinstance(payload_files, list):
+        print(
+            f"manifest_write: 'files' must be a JSON array, got {type(payload_files).__name__}",
+            file=sys.stderr,
+        )
+        return 1
+
     written = 0
     skipped: list[str] = []
-    for entry in payload.get("files", []) or []:
+    for entry in payload_files:
+        if not isinstance(entry, dict):
+            skipped.append(repr(entry))
+            continue
         rel = entry.get("path")
         sha = entry.get("sha256")
         kind = entry.get("kind")
@@ -144,8 +162,15 @@ def main() -> int:
         written += 1
 
     removed = 0
-    for rel in payload.get("removePaths", []) or []:
-        if rel in files:
+    remove_paths = payload.get("removePaths", []) or []
+    if not isinstance(remove_paths, list):
+        print(
+            f"manifest_write: 'removePaths' must be a JSON array, got {type(remove_paths).__name__}",
+            file=sys.stderr,
+        )
+        return 1
+    for rel in remove_paths:
+        if isinstance(rel, str) and rel in files:
             del files[rel]
             removed += 1
 

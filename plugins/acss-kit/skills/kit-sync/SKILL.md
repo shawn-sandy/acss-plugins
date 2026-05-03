@@ -101,7 +101,7 @@ For each in-scope component, walk its Generation Contract `dependencies:` recurs
 
 Display the full plan to the developer:
 
-```
+```text
 /kit-sync plan — bulk install into <projectRoot>:
 
   Foundation:
@@ -168,7 +168,7 @@ Run `verify_integration.py`. Surface any missing-import reasons as a numbered fi
 
 ### Step S10 — Summary
 
-```
+```text
 /kit-sync complete:
 
   Created:  18 files
@@ -200,7 +200,7 @@ Triggered by `/kit-update [<component>...]` and by natural-language phrasing lik
 
 Run `manifest_read.py <projectRoot>`. If `exists: false`, halt with:
 
-```
+```text
 No .acss-kit/manifest.json found. Run /kit-sync first to bulk-install
 the kit and start tracking generated files.
 ```
@@ -213,7 +213,7 @@ If a positional component filter was passed, intersect each list with the reques
 
 ### Step U3 — Show the report
 
-```
+```text
 /kit-update report — <projectRoot>:
 
   Clean (will overwrite):    14 files
@@ -250,7 +250,7 @@ Pipe the merged update payload to `manifest_write.py`. Existing entries that wer
 
 ### Step U6 — Summary
 
-```
+```text
 /kit-update complete:
 
   Updated:  14 files
