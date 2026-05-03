@@ -4,6 +4,12 @@ All notable changes to the `acss-kit` plugin are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-05-03
+
+### Added
+
+- **`/prompt-book` command and bundled prompt book** — a copy-paste catalogue of natural-language prompts mapped to every shipped slash command across `acss-kit` and `acss-utilities`. Run `/prompt-book` to print the full book, or `/prompt-book <section-number>` to print a single section. The book itself lives at `plugins/acss-kit/docs/prompt-book.md`, ships with the plugin install, and is the canonical entry point for new users who want to see what they can ask Claude Code to do without memorising command syntax.
+
 ## [0.7.0] - 2026-05-02
 
 ### Added

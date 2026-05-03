@@ -94,7 +94,7 @@ Claude Code on the web sessions develop on `claude/<slug>` branches assigned per
 
 | Plugin | Commands |
 |---|---|
-| `acss-kit` | `/kit-add`, `/kit-create`, `/kit-list`, `/setup`, `/style-tune`, `/theme-brand`, `/theme-create`, `/theme-extract`, `/theme-update` |
+| `acss-kit` | `/kit-add`, `/kit-create`, `/kit-list`, `/prompt-book`, `/setup`, `/style-tune`, `/theme-brand`, `/theme-create`, `/theme-extract`, `/theme-update` |
 | `acss-utilities` | `/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune` |
 
 Each command's body is in `plugins/<plugin>/commands/<name>.md`; logic lives in the corresponding SKILL.md.
