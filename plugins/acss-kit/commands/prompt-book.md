@@ -8,37 +8,34 @@ allowed-tools: Read
 
 Display the acss-kit + acss-utilities prompt book — a catalogue of copy-paste prompts mapped to every shipped slash command.
 
+Follow the workflow in `${CLAUDE_PLUGIN_ROOT}/skills/prompt-book/SKILL.md`.
+
 ## Usage
 
-```
+```text
 /prompt-book
 /prompt-book <section-number>
 ```
 
 **Examples:**
 
-```
+```text
 /prompt-book
 /prompt-book 5
 ```
 
-## Workflow
+**Arguments:**
 
-### `/prompt-book` (no arguments)
+- `<section-number>` — *optional*. Print only the section whose heading begins with `## <number>.`. Invalid numbers fall back to a table of contents.
 
-1. Read `${CLAUDE_PLUGIN_ROOT}/docs/prompt-book.md`.
-2. Print the file verbatim so the user can copy any prompt directly out of the transcript.
-3. Do not edit, summarise, or paraphrase. The book is the source of truth.
+**Quick steps:**
 
-### `/prompt-book <section-number>`
-
-1. Read `${CLAUDE_PLUGIN_ROOT}/docs/prompt-book.md`.
-2. Locate the section heading that begins with `## <number>.` (e.g. `## 5. Generate a theme from a brand color`).
-3. Print only that section — heading through the next `---` separator.
-4. If the number does not match a section, print the full table of contents (top-level `##` headings) so the user can pick a valid one.
+1. Read prompt-book — load `${CLAUDE_PLUGIN_ROOT}/docs/prompt-book.md`.
+2. Print full book — when no argument is supplied, emit the file verbatim.
+3. Print section by number — when `<section-number>` matches a `## <n>.` heading, emit that section through the next `---` separator.
+4. Show TOC on invalid number — list every `## <n>. <title>` and prompt the user to re-run.
 
 ## Notes
 
 - This command is read-only. It never edits files.
-- The book lives at `plugins/acss-kit/docs/prompt-book.md` in the repo and is bundled with the plugin install — every user gets it automatically.
-- To update the book, edit that file and bump `plugin.json` per the repo's pre-submit checklist.
+- The book is bundled at `plugins/acss-kit/docs/prompt-book.md` and ships with every plugin install. Update it there and bump `plugin.json` per the repo's pre-submit checklist.
