@@ -10,7 +10,7 @@
     {
       "name": "acss-kit",
       "source": "./plugins/acss-kit",
-      "description": "Generate accessible React components and CSS themes for fpkit/acss projects. Run /setup to bootstrap a new project (sass check, ui.tsx copy, starter theme). Then use /kit-add for components, /kit-create for natural-language creator mode (\"primary pill button that says 'Add to cart'\"), and /theme-create for themes. No @fpkit/acss npm package required.",
+      "description": "Generate accessible React components and CSS themes for fpkit/acss projects. Run /setup to bootstrap a new project (sass check, ui.tsx copy, starter theme). Then use /kit-add for components, /kit-create for natural-language creator mode (\"primary pill button that says 'Add to cart'\"), and /theme-create for themes. Run /prompt-book for a copy-paste catalogue of example prompts. No @fpkit/acss npm package required.",
       "category": "development",
       "tags": [
         "fpkit",

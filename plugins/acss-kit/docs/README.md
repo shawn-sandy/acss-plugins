@@ -12,6 +12,7 @@ Developers using the plugin to generate fpkit-style components into their own pr
 | [tutorial.md](tutorial.md) | A guided walkthrough: generate, import, and customize your first component |
 | [concepts.md](concepts.md) | The mental model: UI base component, data-\* variants, CSS-var fallbacks, aria-disabled, generation flow, and the `.acss-target.json` config |
 | [commands.md](commands.md) | Full reference for `/kit-add` and `/kit-list` |
+| [prompt-book.md](prompt-book.md) | Copy-paste catalogue of example prompts for every shipped slash command (also accessible in-session via `/prompt-book`) |
 | [recipes.md](recipes.md) | Step-by-step walkthroughs for the most common tasks |
 | [troubleshooting.md](troubleshooting.md) | Concrete failure modes and how to resolve them |
 
