@@ -170,6 +170,39 @@ def _self_test() -> int:
         if _json.loads(out_n)["sha256"] != local_sha:
             failures.append("normalization: hash_file.py and diff_status.py _normalize() diverged")
 
+        # 9. manifest_write must reject non-object payloads, non-list 'files', and non-dict entries
+        for bad_payload, label in [
+            ("[1, 2, 3]", "list payload"),
+            ('"hello"', "string payload"),
+            ('{"projectRoot": "' + str(root) + '", "files": "not-a-list"}', "non-list files"),
+        ]:
+            rc, _, _ = _run(["python3", str(here / "manifest_write.py")], stdin=bad_payload)
+            if rc != 1:
+                failures.append(f"manifest_write accepted {label} (rc={rc}, expected 1)")
+
+        # Non-dict entry inside files[] should be skipped, not crash
+        good_with_bad_entry = _json.dumps({
+            "projectRoot": str(root),
+            "files": ["not-a-dict", {"path": "x.txt", "sha256": sha, "kind": "component"}],
+        })
+        rc, out_w, _ = _run(["python3", str(here / "manifest_write.py")], stdin=good_with_bad_entry)
+        if rc != 0:
+            failures.append(f"manifest_write rejected payload with one bad entry (rc={rc}, expected 0)")
+        elif _json.loads(out_w).get("filesSkipped", 0) < 1:
+            failures.append("manifest_write should report filesSkipped >= 1 for non-dict entry")
+
+        # 10. manifest_read must reject a manifest with non-object 'files'
+        bad_manifest = root / ".acss-kit" / "manifest.json"
+        bad_manifest.write_text(_json.dumps({"schemaVersion": 1, "files": []}), encoding="utf-8")
+        rc, out_r, _ = _run(["python3", str(here / "manifest_read.py"), str(root)])
+        if rc != 1:
+            failures.append(f"manifest_read accepted non-object 'files' (rc={rc}, expected 1)")
+
+        # And diff_status itself must refuse the same shape gracefully
+        rc, out_d, _ = _run(["python3", str(here / "diff_status.py"), str(root)])
+        if rc != 1:
+            failures.append(f"diff_status accepted non-object 'files' (rc={rc}, expected 1)")
+
     if failures:
         print("diff_status self-test FAILED:")
         for f in failures:
@@ -213,7 +246,31 @@ def main() -> int:
         }, indent=2))
         return 1
 
-    files = manifest.get("files", {}) if isinstance(manifest, dict) else {}
+    if not isinstance(manifest, dict):
+        print(json.dumps({
+            "ok": False,
+            "projectRoot": str(start),
+            "manifestPath": str(manifest_path),
+            "clean": [],
+            "modified": [],
+            "missing": [],
+            "totals": {"clean": 0, "modified": 0, "missing": 0},
+            "reasons": [f"Manifest malformed: top-level must be an object, got {type(manifest).__name__}."],
+        }, indent=2))
+        return 1
+    files = manifest.get("files", {})
+    if not isinstance(files, dict):
+        print(json.dumps({
+            "ok": False,
+            "projectRoot": str(start),
+            "manifestPath": str(manifest_path),
+            "clean": [],
+            "modified": [],
+            "missing": [],
+            "totals": {"clean": 0, "modified": 0, "missing": 0},
+            "reasons": [f"Manifest malformed: 'files' must be an object, got {type(files).__name__}."],
+        }, indent=2))
+        return 1
 
     clean: list[dict] = []
     modified: list[dict] = []

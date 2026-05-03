@@ -81,6 +81,17 @@ def main() -> int:
         }, indent=2))
         return 1
 
+    if not isinstance(data["files"], dict):
+        print(json.dumps({
+            "exists": False,
+            "path": str(manifest_path),
+            "files": {},
+            "reasons": [
+                f"Manifest malformed: 'files' must be an object, got {type(data['files']).__name__}."
+            ],
+        }, indent=2))
+        return 1
+
     schema_version = data.get("schemaVersion", 0)
     schema_mismatch = schema_version != SCHEMA_VERSION
     reasons = (

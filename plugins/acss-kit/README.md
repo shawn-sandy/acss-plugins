@@ -144,7 +144,7 @@ It derives the field list, runs `/kit-add field input button checkbox` if any of
 
 Bulk-install **every** shipped acss-kit component, the `ui.tsx` foundation, and a starter OKLCH theme into your project in one shot. Records each file's normalized sha256 in `<projectRoot>/.acss-kit/manifest.json` so future re-syncs and `/kit-update` runs can detect drift and preserve your edits.
 
-```
+```text
 /kit-sync
 /kit-sync --seed="#4f46e5"
 /kit-sync --skip-styles
@@ -167,7 +167,7 @@ If `.acss-kit/manifest.json` already exists, every file is routed through the `/
 
 Safely re-copy unmodified files after an `acss-kit` plugin upgrade. Reads `.acss-kit/manifest.json`, computes drift via normalized sha256 comparison, and overwrites only files whose on-disk content still matches the recorded hash. Files you've edited are skipped by default and listed in the summary.
 
-```
+```text
 /kit-update                # update every tracked file that's still clean
 /kit-update button alert   # restrict to specific components
 /kit-update --check        # report drift only — no writes
