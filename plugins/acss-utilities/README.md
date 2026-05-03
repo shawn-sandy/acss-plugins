@@ -87,6 +87,8 @@ Regenerate `token-bridge.css` against your active acss-kit theme. Always emits b
 /utility-bridge --theme=apps/web/src/styles/theme/light.css
 ```
 
+> **Looking for prompt examples?** `acss-kit` ships a `/prompt-book` command (and a bundled [prompt book](../acss-kit/docs/prompt-book.md)) that catalogues copy-paste prompts for every slash command in both plugins. Install `acss-kit` and run `/prompt-book`.
+
 ## Utility families (v1)
 
 Mirroring fpkit upstream where present, plus standard atomic-CSS additions (see [ATTRIBUTION.md](./ATTRIBUTION.md) for the upstream-vs-extended split):

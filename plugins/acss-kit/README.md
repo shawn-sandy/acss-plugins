@@ -188,6 +188,19 @@ Adjust visual feel using natural language. Auto-triggers on phrases like "warmer
 
 Theme-layer edits delegate to `/theme-update` after a pre-validation pass; component-layer edits write the targeted `--{component}-*` tokens in place. Paired roles and light/dark mirrors are atomic — either every role applies or none do.
 
+## Help commands
+
+### `/prompt-book [section-number]`
+
+Print a copy-paste catalogue of natural-language prompts for every shipped slash command across `acss-kit` and `acss-utilities`. Useful when you'd rather describe what you want than remember command syntax.
+
+```shell
+/prompt-book
+/prompt-book 5
+```
+
+With no argument it prints the full book. With a section number it prints only that entry. The book is bundled with the plugin at [`docs/prompt-book.md`](docs/prompt-book.md).
+
 ## Available components
 
 | Category | Components | Notes |
