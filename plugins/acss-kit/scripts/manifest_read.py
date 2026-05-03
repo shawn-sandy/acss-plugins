@@ -55,6 +55,7 @@ def main() -> int:
     if not manifest_path.is_file():
         print(json.dumps({
             "exists": False,
+            "schemaMismatch": False,
             "path": str(manifest_path),
             "files": {},
             "reasons": ["Manifest not found. Run /kit-sync first."],
@@ -66,6 +67,7 @@ def main() -> int:
     except (OSError, json.JSONDecodeError) as e:
         print(json.dumps({
             "exists": False,
+            "schemaMismatch": False,
             "path": str(manifest_path),
             "files": {},
             "reasons": [f"Manifest unreadable: {e}"],
@@ -75,6 +77,7 @@ def main() -> int:
     if not isinstance(data, dict) or "files" not in data:
         print(json.dumps({
             "exists": False,
+            "schemaMismatch": False,
             "path": str(manifest_path),
             "files": {},
             "reasons": ["Manifest malformed: missing 'files' object."],
@@ -84,6 +87,7 @@ def main() -> int:
     if not isinstance(data["files"], dict):
         print(json.dumps({
             "exists": False,
+            "schemaMismatch": False,
             "path": str(manifest_path),
             "files": {},
             "reasons": [
@@ -95,13 +99,23 @@ def main() -> int:
     schema_version = data.get("schemaVersion", 0)
     schema_mismatch = schema_version != SCHEMA_VERSION
     reasons = (
-        [f"Manifest schemaVersion {schema_version} != expected {SCHEMA_VERSION}."]
+        [
+            f"Manifest schemaVersion {schema_version} != expected {SCHEMA_VERSION}.",
+            "Refusing to proceed — a stale schema would bypass drift "
+            "protection. Re-run /kit-sync to regenerate the manifest.",
+        ]
         if schema_mismatch
         else []
     )
 
+    # Note: when schemaMismatch is true, exists=true (the file is on disk) but
+    # the script exits 1 and callers must NOT treat the result as a clean
+    # bootstrap state. /kit-sync and /kit-update branch on schemaMismatch
+    # explicitly to halt rather than fall through to the "fresh install"
+    # path, which would overwrite user-edited files.
     out = {
-        "exists": not schema_mismatch,
+        "exists": True,
+        "schemaMismatch": schema_mismatch,
         "path": str(manifest_path),
         "schemaVersion": schema_version,
         "pluginVersion": data.get("pluginVersion", ""),

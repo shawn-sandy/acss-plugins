@@ -246,6 +246,94 @@ Two carve-outs from the no-silent-defaults rule:
 
 ---
 
+## /kit-sync
+
+Bulk-install **every** shipped acss-kit component, the `ui.tsx` foundation, and a starter OKLCH theme into your project in one shot. Records each file's normalized sha256 in `<projectRoot>/.acss-kit/manifest.json` so future re-syncs and `/kit-update` runs can detect drift and preserve your edits.
+
+**Signature**
+
+```text
+/kit-sync [--target=<dir>] [--styles-dir=<dir>] [--seed=<hex>] [--skip-styles] [--dry-run]
+```
+
+**Tools used:** `Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion`
+
+**Flags**
+
+- `--target=<dir>` — override component directory (default: `.acss-target.json` `componentsDir`, fallback `src/components/fpkit`).
+- `--styles-dir=<dir>` — override styles directory (default: `src/styles`).
+- `--seed=<hex>` — seed color for theme generation (default: prompt).
+- `--skip-styles` — components-only sync; do not seed theme.
+- `--dry-run` — print the plan tree without writing files or manifest.
+
+**Examples**
+
+```text
+/kit-sync
+/kit-sync --seed="#4f46e5"
+/kit-sync --skip-styles
+/kit-sync --target=src/ui/fpkit --styles-dir=src/styles
+/kit-sync --dry-run
+```
+
+**Workflow** (full step-by-step in `skills/kit-sync/SKILL.md`)
+
+1. Preflight — `detect_target.py`, `detect_stack.py`, `manifest_read.py` to detect re-sync.
+2. Enumerate every component in `references/components/catalog.md`.
+3. Resolve Generation Contract `dependencies:` recursively.
+4. Plan — show the full tree and wait for confirmation. `--dry-run` stops here.
+5. Generate components bottom-up; hash each before write.
+6. Copy `assets/foundation/ui.tsx`.
+7. Generate theme via `generate_palette.py` + `tokens_to_css.py` (skipped under `--skip-styles`).
+8. Write `.acss-kit/manifest.json` via `manifest_write.py`.
+9. Run `verify_integration.py`; surface any missing-import reasons.
+10. Print summary.
+
+**Re-sync behavior**
+
+If `.acss-kit/manifest.json` already exists, every file is routed through the `/kit-update` drift check before writing — modified files are skipped (preserving your edits), clean files are overwritten. If the manifest's `schemaVersion` doesn't match, the run halts instead of falling through to fresh-install.
+
+---
+
+## /kit-update
+
+Safely re-copy unmodified files after an `acss-kit` plugin upgrade. Reads `.acss-kit/manifest.json`, computes drift via normalized sha256 comparison, and overwrites only files whose on-disk content still matches the recorded hash.
+
+**Signature**
+
+```text
+/kit-update [<component> ...] [--check] [--force]
+```
+
+**Tools used:** `Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion`
+
+**Flags / args**
+
+- `<component>...` — restrict the update to specific components.
+- `--check` — report drift only; do not write.
+- `--force` — overwrite modified files too. Each modified file is backed up to `<file>.bak` before being overwritten.
+
+**Examples**
+
+```text
+/kit-update                # update every tracked file that's still clean
+/kit-update button alert   # restrict to specific components
+/kit-update --check        # report drift only — no writes
+/kit-update --force        # overwrite modified files too (writes <file>.bak first)
+```
+
+**Drift detection**
+
+Files are classified by `diff_status.py`:
+
+- **clean** — current normalized sha256 matches the manifest. `/kit-update` overwrites freely.
+- **modified** — sha256 has drifted. Skipped by default; `--force` writes `<file>.bak` and overwrites.
+- **missing** — manifest entry, no file on disk. Regenerated.
+
+Normalization (LF endings, trailing-whitespace stripped, single trailing newline) applies to both written and on-disk content, so a Prettier run won't trigger spurious "modified" classifications.
+
+---
+
 ## /style-tune
 
 Adjust the visual feel of acss-kit components or theme roles using natural language. Routes between theme-role edits (delegated to `/theme-update` with WCAG pre-validation) and component SCSS token edits.
