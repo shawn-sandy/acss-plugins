@@ -194,6 +194,16 @@ else
   exit 1
 fi
 
+section "7d. kit-sync manifest scripts (hash_file + manifest_write + manifest_read + diff_status)"
+KS_LOG="$TMP_ROOT/kit-sync.log"
+if python3 "$REPO_ROOT/plugins/acss-kit/scripts/diff_status.py" --self-test >"$KS_LOG"; then
+  green "kit-sync manifest self-test OK"
+else
+  red "kit-sync manifest self-test FAILED:"
+  cat "$KS_LOG"
+  exit 1
+fi
+
 # Step 8
 section "8. acss-utilities validator"
 UTIL_DIR="$REPO_ROOT/plugins/acss-utilities/assets"

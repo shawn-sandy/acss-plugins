@@ -138,6 +138,44 @@ The `component-form` skill auto-triggers when you ask for a form in plain Englis
 
 It derives the field list, runs `/kit-add field input button checkbox` if any of those aren't vendored yet, and writes a self-contained accessible form.
 
+## Bulk install & safe updates
+
+### `/kit-sync`
+
+Bulk-install **every** shipped acss-kit component, the `ui.tsx` foundation, and a starter OKLCH theme into your project in one shot. Records each file's normalized sha256 in `<projectRoot>/.acss-kit/manifest.json` so future re-syncs and `/kit-update` runs can detect drift and preserve your edits.
+
+```
+/kit-sync
+/kit-sync --seed="#4f46e5"
+/kit-sync --skip-styles
+/kit-sync --target=src/ui/fpkit --styles-dir=src/styles
+/kit-sync --dry-run
+```
+
+**What happens:**
+
+1. **Preflight** — `detect_target.py` for project root, `detect_stack.py` for sass, `manifest_read.py` to detect re-sync.
+2. **Enumerate + dedupe** — every component in `references/components/catalog.md`, with `dependencies:` resolved recursively.
+3. **Plan** — shows the full file tree (foundation + components + styles + manifest) and waits for confirmation. `--dry-run` stops here.
+4. **Generate** — components written bottom-up; foundation copied verbatim; theme generated from the seed hex (skipped under `--skip-styles`).
+5. **Manifest** — every written file's normalized sha256 is recorded in `.acss-kit/manifest.json`.
+6. **Verify integration** — `verify_integration.py` surfaces any missing imports.
+
+If `.acss-kit/manifest.json` already exists, every file is routed through the `/kit-update` drift check before writing — modified files are skipped, clean files overwritten.
+
+### `/kit-update [<component> ...]`
+
+Safely re-copy unmodified files after an `acss-kit` plugin upgrade. Reads `.acss-kit/manifest.json`, computes drift via normalized sha256 comparison, and overwrites only files whose on-disk content still matches the recorded hash. Files you've edited are skipped by default and listed in the summary.
+
+```
+/kit-update                # update every tracked file that's still clean
+/kit-update button alert   # restrict to specific components
+/kit-update --check        # report drift only — no writes
+/kit-update --force        # overwrite modified files too (writes <file>.bak first)
+```
+
+The drift check uses the same normalization rules (LF endings, trailing-whitespace stripped, single trailing newline) for both written and on-disk content, so a Prettier run won't trigger spurious "modified" classifications.
+
 ## Theme commands
 
 ### `/theme-create <hex-color> [--mode=light|dark|both]`
