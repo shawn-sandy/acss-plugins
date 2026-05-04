@@ -38,7 +38,7 @@ Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_html_target.py <project_root>`
 1. If the script returns `"source": "configured"`, use the reported `componentsHtmlDir`. Skip the prompt.
 2. If the script returns `"source": "none"`, ask:
 
-   ```
+   ```text
    Where should HTML components be generated? (default: components/html)
    ```
 
@@ -89,27 +89,23 @@ If a reference doc is missing `## HTML Template`, fall back gracefully: warn the
 
 Walk dependencies recursively using each dependency's own Generation Contract. Build the full list of files that will be created. Identical to the TSX generator's algorithm — see `${CLAUDE_PLUGIN_ROOT}/skills/components/SKILL.md` Step B3.
 
-Example for Dialog:
+Example for Dialog (which depends on Button only — no IconButton, no Icon — per the current Dialog generation contract):
 
-```
+```text
 dialog.html + dialog.scss + dialog.js
   → button.html + button.scss + button.js
-  → icon-button.html + icon-button.scss + icon-button.js
-    → icon.html (no scss, no js)
 ```
 
 ### B4. Show the dependency tree
 
 Before generating any files, display:
 
-```
+```text
 Generating the following files in components/html/:
 
   New:
     _stateful.js              (foundation helper — vanilla JS)
-    icon.html
     button.html + button.scss + button.js
-    icon-button.html + icon-button.scss + icon-button.js
     dialog.html + dialog.scss + dialog.js
 
   Skipped (already exist):
@@ -181,7 +177,7 @@ The same patterns as the TSX generator — see `${CLAUDE_PLUGIN_ROOT}/skills/com
 
 After all files are generated, show:
 
-```
+```text
 Generated HTML components in components/html/:
 
   Created:

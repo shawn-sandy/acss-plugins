@@ -332,14 +332,22 @@ function wireAlert(alert) {
   let timer = 0;
 
   const start = () => {
+    if (timer) window.clearTimeout(timer);
+    if (remaining <= 0) {
+      dismiss();
+      return;
+    }
     startedAt = Date.now();
-    timer = window.setTimeout(dismiss, remaining);
+    timer = window.setTimeout(() => {
+      timer = 0;
+      dismiss();
+    }, remaining);
   };
   const pause = () => {
     if (!timer) return;
     window.clearTimeout(timer);
     timer = 0;
-    remaining -= Date.now() - startedAt;
+    remaining = Math.max(0, remaining - (Date.now() - startedAt));
   };
 
   start();

@@ -74,7 +74,7 @@ export function init(root = document) {
 }
 ```
 
-The `init` function is idempotent because the user is expected to call it once after pages load. Re-binding on the same elements is acceptable; the browser de-duplicates identical event listeners.
+The `init` function is meant to be called once after the page loads. Note that `addEventListener` only de-duplicates when the **exact same function reference** is passed twice with the same options — newly created closures (which is what every call to `init()` produces here) are treated as distinct listeners and will stack. To keep `init()` safe to call repeatedly (after dynamic insertions, HMR, etc.), guard each element with a sentinel attribute before binding, e.g. `if (dialog.getAttribute('data-acss-dialog-init') === 'true') return; dialog.setAttribute('data-acss-dialog-init', 'true');`. The per-component `init()` modules in this plugin (button.js, card.js, alert.js, dialog.js) all use this pattern.
 
 ---
 

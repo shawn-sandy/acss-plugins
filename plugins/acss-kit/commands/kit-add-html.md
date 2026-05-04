@@ -10,13 +10,13 @@ Generate **static HTML** versions of fpkit-style components for projects that do
 
 ## Usage
 
-```
+```text
 /kit-add-html <component> [component2 ...]
 ```
 
 **Examples:**
 
-```
+```text
 /kit-add-html button
 /kit-add-html card alert
 /kit-add-html dialog
