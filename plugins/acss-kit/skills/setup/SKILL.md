@@ -39,7 +39,7 @@ Every step checks for its artifact before acting. If the artifact already exists
 
 ## Step 0 — Exit plan mode
 
-If the session is in plan mode, call `ExitPlanMode` before doing anything else. `/setup` writes `.acss-target.json`, copies `ui.tsx`, runs `detect_*` / `generate_palette` / `tokens_to_css` / `validate_theme` scripts via Bash, and edits the project's CSS entry — plan mode blocks every one of those.
+If the session is in plan mode, call `ExitPlanMode` before doing anything else. `/setup` writes `.acss-target.json`, copies `ui.tsx`, edits the project's CSS entry, and shells out to `detect_target.py`, `detect_package_manager.py`, `detect_css_entry.py`, `generate_palette.py`, `tokens_to_css.py`, and `validate_theme.py` via Bash — plan mode blocks every one of those.
 
 Stay in plan mode only when it is absolutely necessary — i.e. the user explicitly asked for a dry-run ("show me what `/setup` would touch", "don't write anything yet"). In that case, list the artifacts each step would create or keep (per the Idempotency contract above) without invoking Write/Edit/Bash, and wait for approval before re-entering this skill.
 

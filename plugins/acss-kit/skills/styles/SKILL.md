@@ -18,7 +18,7 @@ Theme generation and management for **fpkit/acss** projects. Routes between four
 
 ## Step 0 — Exit plan mode
 
-Applies to every flow below (`/theme-create`, `/theme-brand`, `/theme-update`, `/theme-extract`). If the session is in plan mode, call `ExitPlanMode` before proceeding — each flow writes CSS files and runs `generate_palette.py` / `tokens_to_css.py` / `validate_theme.py` via Bash, all of which plan mode blocks.
+Applies to every flow below (`/theme-create`, `/theme-brand`, `/theme-update`, `/theme-extract`). If the session is in plan mode, call `ExitPlanMode` before proceeding — the flows write theme CSS (`light.css` / `dark.css` / `brand-*.css`) and shell out to a per-flow subset of `generate_palette.py`, `tokens_to_css.py`, `validate_theme.py`, and `css_to_tokens.py`. Specifically: `/theme-create` and `/theme-extract` exercise the full generate → write → validate pipeline; `/theme-brand` with `--from` runs `generate_palette.py` then writes the brand file and validates, and without `--from` copies `assets/brand-template.css` and validates; `/theme-update` edits CSS in place and validates. Plan mode blocks every one of those `Write`/`Edit`/`Bash` calls.
 
 Stay in plan mode only when it is absolutely necessary — i.e. the user explicitly asked for a preview ("show me the palette first", "don't write the theme yet"). In that case, narrate which roles would be generated, which files would be written, and which validator would run — without invoking Write/Edit/Bash — and wait for approval before re-entering this skill.
 
