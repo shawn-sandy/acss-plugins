@@ -84,9 +84,13 @@ def read_target(root: Path) -> dict:
     target = root / CONFIG_FILENAME
     if target.is_file():
         try:
-            return json.loads(target.read_text(encoding="utf-8"))
+            data = json.loads(target.read_text(encoding="utf-8"))
         except Exception:
             return {}
+        # JSON allows top-level arrays/strings/numbers — anything that isn't a
+        # dict can't be queried with .get(...). Normalize to {} so verify()
+        # can rely on the contract instead of crashing.
+        return data if isinstance(data, dict) else {}
     return {}
 
 
@@ -210,7 +214,14 @@ def verify(root: Path) -> dict:
         if kind == "other":
             continue
 
-        imported = is_referenced(artifact.name, pages)
+        # For Sass artifacts, also accept references to the compiled .css
+        # filename — the SKILL.md flow tells users to run Sass before
+        # linking, so a page that references button.css satisfies the
+        # button.scss artifact's wiring just as well as the .scss name.
+        candidates = [artifact.name]
+        if kind == "style" and artifact.suffix.lower() in (".scss", ".sass"):
+            candidates.append(artifact.with_suffix(".css").name)
+        imported = any(is_referenced(name, pages) for name in candidates)
         checks.append({
             "artifact": artifact.name,
             "kind": kind,
@@ -299,6 +310,18 @@ def self_test() -> int:
     run(
         "componentsHtmlDir as a non-string (list) → falls back to default, no TypeError",
         {CONFIG_FILENAME: json.dumps({"componentsHtmlDir": ["unexpected"]})},
+        expect_ok=False,
+        expect_reason_substr="components/html does not exist",
+    )
+    run(
+        "config JSON is a top-level array (not a dict) → treated as empty, no AttributeError",
+        {CONFIG_FILENAME: "[1, 2, 3]"},
+        expect_ok=False,
+        expect_reason_substr="components/html does not exist",
+    )
+    run(
+        "config JSON is a top-level string → treated as empty, no AttributeError",
+        {CONFIG_FILENAME: '"components/html"'},
         expect_ok=False,
         expect_reason_substr="components/html does not exist",
     )
@@ -420,6 +443,19 @@ def self_test() -> int:
         },
         expect_ok=False,
         expect_reason_substr="compile components/html/button.scss with Sass",
+    )
+    run(
+        "page links the compiled <name>.css → satisfies the <name>.scss artifact",
+        {
+            CONFIG_FILENAME: target,
+            "components/html/button.scss": ".btn{}",
+            "index.html": (
+                "<!doctype html><html><head>"
+                '<link rel="stylesheet" href="components/html/button.css">'
+                "</head></html>"
+            ),
+        },
+        expect_ok=True,
     )
     run(
         "node_modules copy of artifact does not count",
