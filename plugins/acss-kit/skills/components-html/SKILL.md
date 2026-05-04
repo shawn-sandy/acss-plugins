@@ -18,7 +18,7 @@ Emit:
 
 - `<name>.html` — pure HTML markup. Same classes, same `data-*` attributes, same ARIA as the TSX output. The fragment is meant to be pasted into a page or template — no surrounding `<html>`/`<body>`.
 - `<name>.scss` — byte-identical to what `/kit-add` generates. Compile via Sass or rename to `.css` and inline plain CSS.
-- `<name>.js` — only for stateful components (Button, Dialog, Popover, Checkbox, Input, IconButton). Tiny ES module that wires behavior via the shared `_stateful.js` helper.
+- `<name>.js` — for components with runtime behavior. Currently: Button (aria-disabled wrap), Card (interactive-variant keyboard activation), Alert (dismiss + auto-hide + pause-on-hover), Dialog (showModal + backdrop close), Popover, Checkbox, Input, IconButton. Tiny ES module that wires behavior via the shared `_stateful.js` helper where applicable. Stateless components (Img, Link, Icon, List, Table, Field, Nav, plus the non-interactive Card variant) emit no `.js` file.
 
 ## Prerequisites
 
@@ -151,7 +151,9 @@ Rules — same as the TSX skill:
 - Global token references always have a hardcoded fallback.
 - `[aria-disabled="true"]` styles are present on every interactive component.
 
-### C3. JS file (`.js`) — stateful components only
+### C3. JS file (`.js`) — components with runtime behavior
+
+Emitted for: Button (aria-disabled wrap), Card (interactive variant only — keyboard activation + `card:activate` event), Alert (dismiss + auto-hide + pause-on-hover), Dialog (showModal + backdrop close), Popover, Checkbox, Input, IconButton. Stateless markup components (Img, Link, Icon, List, Table, Field, Nav, plain Card) emit no `.js` file.
 
 - Plain ES module — no bundler required.
 - Imports `wireDisabled` from `./_stateful.js` when the component participates in the disabled-state pattern.
@@ -190,8 +192,12 @@ Generated HTML components in components/html/:
 
 How to wire it up:
 
-  1. <link rel="stylesheet" href="components/html/button.scss">
-     (compile with Sass first, or rename .scss → .css if you don't use Sass)
+  1. Compile the SCSS to CSS first — browsers cannot load .scss directly:
+       npx sass components/html/button.scss components/html/button.css
+     Then add to your page <head>:
+       <link rel="stylesheet" href="components/html/button.css">
+     (If you already have a Sass build pipeline, @import the .scss from
+     your existing entrypoint instead.)
   2. <script type="module" src="components/html/button.js"></script>
   3. Paste the markup from button.html into your page or template.
 ```

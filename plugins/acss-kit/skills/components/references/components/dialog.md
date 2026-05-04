@@ -212,6 +212,8 @@ export default Dialog
 
 ## HTML Template
 
+`/kit-add-html dialog` writes the markup below into `dialog.html` — the dialog fragment only, mirroring the TSX component's render output. The opener button is documented separately further down as a usage hint, **not** part of the generated file (the user owns where and how to invoke the dialog).
+
 ```html
 <!-- variant: full dialog (header + body + footer) -->
 <dialog id="dialog-1" class="dialog" aria-labelledby="dialog-1-title">
@@ -242,11 +244,6 @@ export default Dialog
   </div>
 </dialog>
 
-<!-- Trigger that opens the dialog (place anywhere on the page) -->
-<button type="button" class="btn" data-color="primary" data-dialog-open="dialog-1">
-  Open dialog
-</button>
-
 <!-- variant: minimal dialog (no header, no footer) -->
 <dialog id="dialog-2" class="dialog">
   <div class="dialog-body">
@@ -256,6 +253,16 @@ export default Dialog
 ```
 
 The native `<dialog>` element provides focus trap, scrim, and Escape-to-close — no JS required for those. The vanilla-JS module wires open triggers (`[data-dialog-open="<id>"]`), close triggers (`[data-dialog-close]`), and backdrop-click dismissal. The dialog must have an `id` attribute for the open trigger to find it. `aria-labelledby` points at the title's id so screen readers announce the dialog by name (WCAG 4.1.2).
+
+### Trigger usage (not part of `dialog.html`)
+
+To open the dialog from the surrounding page, add a trigger button anywhere — `dialog.js` will wire it up automatically by matching `data-dialog-open` to the dialog's `id`:
+
+```html
+<button type="button" class="btn" data-color="primary" data-dialog-open="dialog-1">
+  Open dialog
+</button>
+```
 
 ## Vanilla JS
 

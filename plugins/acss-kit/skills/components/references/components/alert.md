@@ -313,9 +313,11 @@ function wireAlert(alert) {
   const dismiss = () => {
     alert.classList.add('alert--hidden');
     alert.dispatchEvent(new CustomEvent('alert:dismiss', { bubbles: true }));
-    // Remove from DOM after the CSS transition completes.
+    // Remove from DOM after the CSS opacity transition completes.
+    // Matches --alert-transition's 0.3s default and the React version's
+    // 300ms unmount delay.
     requestAnimationFrame(() => {
-      setTimeout(() => alert.remove(), 200);
+      setTimeout(() => alert.remove(), 300);
     });
   };
 
@@ -472,6 +474,22 @@ The behavior mirrors the React `useAlertBehavior` hook: dismiss-on-click, option
 }
 
 .alert-content { flex: 1; }
+
+// Visually hidden severity prefix announced to assistive tech.
+// Mirrors the React SR_ONLY inline style so generated HTML doesn't
+// render "info: " / "error: " visibly while still surfacing it to
+// screen readers (WCAG 1.3.1 Info and Relationships).
+.alert-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 .alert-title {
   font-size: var(--alert-title-fs, 1rem);

@@ -131,8 +131,8 @@ Generate **static HTML** versions of components for projects that don't use Reac
 **Output for each component:**
 
 - `<componentsHtmlDir>/<name>.html` — fragment markup. Same classes, `data-*` attributes, and ARIA as the React version, so the SCSS works unchanged. Slot placeholders are HTML comments (`<!-- slot: children -->`).
-- `<componentsHtmlDir>/<name>.scss` — byte-identical to `/kit-add`'s SCSS (the framework-agnostic CSS is shared).
-- `<componentsHtmlDir>/<name>.js` — only for stateful components (Button, Dialog, Popover, Checkbox, Input, IconButton). Plain ES module — no bundler required.
+- `<componentsHtmlDir>/<name>.scss` — byte-identical to `/kit-add`'s SCSS (the framework-agnostic CSS is shared). Compile to `.css` with Sass (`npx sass <name>.scss <name>.css`) before referencing it from a `<link>` tag — browsers cannot load `.scss` directly.
+- `<componentsHtmlDir>/<name>.js` — for components with runtime behavior: Button (aria-disabled wrap), Card (interactive variant — keyboard activation + `card:activate` event), Alert (dismiss + auto-hide + pause-on-hover), Dialog (showModal + backdrop close), plus Popover, Checkbox, Input, IconButton once their refs are augmented. Stateless components (Img, Link, Icon, List, Table, Field, Nav, plain Card) emit no `.js`. Plain ES module — no bundler required.
 
 On first run, prompts for the target directory (default `components/html`), persists the choice to `.acss-html-target.json`, and copies the foundation helper `_stateful.js` into the target. After generation, runs `scripts/verify_html_integration.py` and reports any pages missing `<link rel="stylesheet">` / `<script src>` references.
 
