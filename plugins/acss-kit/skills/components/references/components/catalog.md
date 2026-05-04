@@ -31,6 +31,31 @@ Components not yet listed have not been verified against fpkit source under the 
 
 ---
 
+## HTML Output Status
+
+Tracks each component reference doc's static-HTML augmentation. A reference is "Verified" once it carries a `## HTML Template` section (and `## Vanilla JS` for stateful components) so `/kit-add-html` can generate framework-agnostic output. Components not listed here have not been augmented yet — `/kit-add-html` falls back to a warning + a hand-authored markup prompt.
+
+| Component | Reference | Stateful? | HTML Status |
+|-----------|-----------|-----------|-------------|
+| Button | [`button.md`](button.md) | Yes — `wireDisabled` | Verified — `## HTML Template` + `## Vanilla JS` (init wires aria-disabled handling) |
+| Card | [`card.md`](card.md) | Optional (interactive variant only) | Verified — `## HTML Template` + `## Vanilla JS` (init wires keyboard activation for `[data-card="interactive"]`; emits `card:activate` custom event) |
+| Alert | [`alert.md`](alert.md) | Yes — dismiss + auto-hide + pause-on-hover | Verified — `## HTML Template` (5 severity variants) + `## Vanilla JS` (mirrors `useAlertBehavior`) |
+| Dialog | [`dialog.md`](dialog.md) | Yes — open/close/backdrop | Verified — `## HTML Template` + `## Vanilla JS` (uses native `<dialog>` showModal/close; `[data-dialog-open]` / `[data-dialog-close]` triggers) |
+| IconButton | [`icon-button.md`](icon-button.md) | Yes — wraps Button | Not yet — incremental backfill |
+| Img | [`img.md`](img.md) | No | Not yet — incremental backfill |
+| Popover | [`popover.md`](popover.md) | Yes — toggle event | Not yet — incremental backfill |
+| Table | [`table.md`](table.md) | No | Not yet — incremental backfill |
+| Field | [`field.md`](field.md) | No | Not yet — incremental backfill |
+| Input | [`input.md`](input.md) | Yes — validation announcement | Not yet — incremental backfill |
+| Checkbox | [`checkbox.md`](checkbox.md) | Yes — controlled state | Not yet — incremental backfill |
+| Icon | [`icon.md`](icon.md) | No | Not yet — incremental backfill |
+| Link | [`link.md`](link.md) | No | Not yet — incremental backfill |
+| List | [`list.md`](list.md) | No | Not yet — incremental backfill |
+
+The first batch covers Button + Card + Alert + Dialog because they exercise the full surface area of the HTML pipeline: a stateless template (Card non-interactive), a stateful aria-disabled wrap (Button), a stateful behavior hook (Alert), and a native-element-driven stateful component (Dialog). Backfilling the rest is a follow-up `/component-update` pass per component.
+
+---
+
 ## Badge
 
 Status indicator for displaying counts or labels.

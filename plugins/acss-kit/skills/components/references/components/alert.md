@@ -217,6 +217,143 @@ export default Alert
 Alert.displayName = 'Alert'
 ```
 
+## HTML Template
+
+```html
+<!-- variant: info (non-dismissible) -->
+<div class="alert alert--info alert--outlined" role="status" aria-live="polite">
+  <span class="alert-sr-only">info: </span>
+  <span class="alert-icon" aria-hidden="true">
+    <!-- slot: icon (inline SVG; see SEVERITY_ICONS in TSX template) -->
+  </span>
+  <div class="alert-content">
+    <strong class="alert-title"><!-- slot: title --></strong>
+    <div class="alert-message"><!-- slot: message --></div>
+  </div>
+</div>
+
+<!-- variant: success -->
+<div class="alert alert--success alert--outlined" role="status" aria-live="polite">
+  <span class="alert-sr-only">success: </span>
+  <span class="alert-icon" aria-hidden="true"><!-- slot: icon --></span>
+  <div class="alert-content">
+    <div class="alert-message"><!-- slot: message --></div>
+  </div>
+</div>
+
+<!-- variant: warning -->
+<div class="alert alert--warning alert--outlined" role="status" aria-live="polite">
+  <span class="alert-sr-only">warning: </span>
+  <span class="alert-icon" aria-hidden="true"><!-- slot: icon --></span>
+  <div class="alert-content">
+    <div class="alert-message"><!-- slot: message --></div>
+  </div>
+</div>
+
+<!-- variant: error (uses role=alert + aria-live=assertive for urgent announcement) -->
+<div class="alert alert--error alert--outlined" role="alert" aria-live="assertive">
+  <span class="alert-sr-only">error: </span>
+  <span class="alert-icon" aria-hidden="true"><!-- slot: icon --></span>
+  <div class="alert-content">
+    <strong class="alert-title"><!-- slot: title --></strong>
+    <div class="alert-message"><!-- slot: message --></div>
+  </div>
+</div>
+
+<!-- variant: dismissible (with auto-hide; see alert.js) -->
+<div
+  class="alert alert--info alert--outlined"
+  role="status"
+  aria-live="polite"
+  data-alert-dismissible="true"
+  data-alert-auto-hide="5000"
+>
+  <span class="alert-sr-only">info: </span>
+  <span class="alert-icon" aria-hidden="true"><!-- slot: icon --></span>
+  <div class="alert-content">
+    <div class="alert-message"><!-- slot: message --></div>
+  </div>
+  <button type="button" class="alert-dismiss" aria-label="Dismiss alert">×</button>
+</div>
+```
+
+The `.alert-sr-only` span replaces the React `SR_ONLY` inline style — its CSS lives in `alert.scss` (`position: absolute; width: 1px; height: 1px; clip: rect(0,0,0,0); overflow: hidden;`). For severity icons, paste the inline SVG from the **Key Pattern: Severity Icon SVGs** section above into the `<!-- slot: icon -->` placeholder. `data-alert-dismissible` and `data-alert-auto-hide` are read by `alert.js` at runtime.
+
+## Vanilla JS
+
+```js
+// alert.js — wires dismiss + auto-hide + pause-on-hover for alerts.
+// Idempotent: calling init() twice on the same root does not double-bind.
+
+const SENTINEL = 'data-acss-alert-init';
+
+/**
+ * Initialize every .alert under `root`.
+ *
+ * Behavior:
+ *   - [data-alert-dismissible="true"] alerts are hidden when the user clicks
+ *     the .alert-dismiss button. The alert receives the `alert--hidden`
+ *     modifier and is removed from the DOM on the next frame.
+ *   - [data-alert-auto-hide="<ms>"] starts a timer. Hovering or focusing the
+ *     alert pauses it (set [data-alert-pause-on-hover="false"] to opt out).
+ *
+ * @param {ParentNode} [root=document]
+ */
+export function init(root = document) {
+  const alerts = root.querySelectorAll('.alert');
+  for (const alert of alerts) {
+    if (alert.getAttribute(SENTINEL) === 'true') continue;
+    alert.setAttribute(SENTINEL, 'true');
+    wireAlert(alert);
+  }
+}
+
+function wireAlert(alert) {
+  const dismissBtn = alert.querySelector('.alert-dismiss');
+  const dismiss = () => {
+    alert.classList.add('alert--hidden');
+    alert.dispatchEvent(new CustomEvent('alert:dismiss', { bubbles: true }));
+    // Remove from DOM after the CSS transition completes.
+    requestAnimationFrame(() => {
+      setTimeout(() => alert.remove(), 200);
+    });
+  };
+
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', dismiss);
+  }
+
+  const autoHideMs = Number(alert.getAttribute('data-alert-auto-hide')) || 0;
+  if (autoHideMs <= 0) return;
+
+  const pauseOnHover = alert.getAttribute('data-alert-pause-on-hover') !== 'false';
+  let remaining = autoHideMs;
+  let startedAt = 0;
+  let timer = 0;
+
+  const start = () => {
+    startedAt = Date.now();
+    timer = window.setTimeout(dismiss, remaining);
+  };
+  const pause = () => {
+    if (!timer) return;
+    window.clearTimeout(timer);
+    timer = 0;
+    remaining -= Date.now() - startedAt;
+  };
+
+  start();
+  if (pauseOnHover) {
+    alert.addEventListener('mouseenter', pause);
+    alert.addEventListener('mouseleave', start);
+    alert.addEventListener('focusin', pause);
+    alert.addEventListener('focusout', start);
+  }
+}
+```
+
+The behavior mirrors the React `useAlertBehavior` hook: dismiss-on-click, optional auto-hide timer, and pause-on-hover/focus so a user reading the alert isn't interrupted.
+
 ## CSS Variables
 
 ```scss

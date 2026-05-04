@@ -117,6 +117,27 @@ Generate one or more components into your project.
 8. **Summary** — displays created/skipped files and an import/usage snippet.
 9. **Verify integration** — runs `scripts/verify_integration.py` against the recorded `stack.entrypointFile`. Missing imports are surfaced as a numbered fix-up list; the plugin never auto-edits the entrypoint.
 
+### `/kit-add-html <component> [component2 ...]`
+
+Generate **static HTML** versions of components for projects that don't use React — server-rendered apps, static sites, design-system docs, email templates, prototypes. Reads the same component reference docs as `/kit-add`, but emits markup + SCSS + tiny vanilla JS instead of TSX.
+
+```
+/kit-add-html button
+/kit-add-html card alert
+/kit-add-html dialog
+/kit-add-html button card alert dialog
+```
+
+**Output for each component:**
+
+- `<componentsHtmlDir>/<name>.html` — fragment markup. Same classes, `data-*` attributes, and ARIA as the React version, so the SCSS works unchanged. Slot placeholders are HTML comments (`<!-- slot: children -->`).
+- `<componentsHtmlDir>/<name>.scss` — byte-identical to `/kit-add`'s SCSS (the framework-agnostic CSS is shared).
+- `<componentsHtmlDir>/<name>.js` — only for stateful components (Button, Dialog, Popover, Checkbox, Input, IconButton). Plain ES module — no bundler required.
+
+On first run, prompts for the target directory (default `components/html`), persists the choice to `.acss-html-target.json`, and copies the foundation helper `_stateful.js` into the target. After generation, runs `scripts/verify_html_integration.py` and reports any pages missing `<link rel="stylesheet">` / `<script src>` references.
+
+The first batch of reference docs supporting `/kit-add-html` is **Button**, **Card**, **Alert**, and **Dialog**. Remaining components fall through to a "not yet" warning until backfilled — see the `HTML Output Status` table in [`references/components/catalog.md`](skills/components/references/components/catalog.md).
+
 ### `/kit-create <description>`
 
 Creator mode — generate any acss-kit component from a natural-language description. The underlying `component-creator` skill also auto-triggers on the same phrasing without the slash command.

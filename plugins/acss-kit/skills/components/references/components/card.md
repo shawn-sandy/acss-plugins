@@ -175,6 +175,96 @@ export const Card = Object.assign(CardRoot, {
 export default Card
 ```
 
+## HTML Template
+
+```html
+<!-- variant: static card -->
+<div class="card">
+  <h3 class="card-title" id="card-1-title">
+    <!-- slot: title -->
+  </h3>
+  <article class="card-content">
+    <!-- slot: content -->
+  </article>
+  <div class="card-footer">
+    <!-- slot: footer -->
+  </div>
+</div>
+
+<!-- variant: interactive card (clickable) -->
+<div
+  class="card"
+  data-card="interactive"
+  role="button"
+  tabindex="0"
+  aria-labelledby="card-2-title"
+>
+  <h3 class="card-title" id="card-2-title">
+    <!-- slot: title -->
+  </h3>
+  <article class="card-content">
+    <!-- slot: content -->
+  </article>
+</div>
+
+<!-- variant: card without footer -->
+<div class="card">
+  <h3 class="card-title" id="card-3-title">
+    <!-- slot: title -->
+  </h3>
+  <article class="card-content">
+    <!-- slot: content -->
+  </article>
+</div>
+```
+
+A static card is plain markup — no JS required. The interactive variant adds `data-card="interactive"`, `role="button"`, `tabindex="0"`, and `aria-labelledby` so it's reachable by keyboard and announced as a button by assistive tech. Pair the interactive variant with `card.js` to wire keyboard activation.
+
+## Vanilla JS
+
+```js
+// card.js — wires keyboard activation for interactive cards.
+// Static (non-interactive) cards do not need this module.
+// Idempotent: calling init() twice does not double-bind.
+
+const SENTINEL = 'data-acss-card-init';
+
+/**
+ * Wire keyboard Enter/Space activation on every .card[data-card="interactive"]
+ * under `root`. Cards with a [data-href] attribute navigate; otherwise an
+ * 'card:activate' custom event is dispatched so the user can react.
+ *
+ * @param {ParentNode} [root=document]
+ */
+export function init(root = document) {
+  const cards = root.querySelectorAll('.card[data-card="interactive"]');
+  for (const card of cards) {
+    if (card.getAttribute(SENTINEL) === 'true') continue;
+    card.setAttribute(SENTINEL, 'true');
+
+    const activate = (event) => {
+      const href = card.getAttribute('data-href');
+      if (href) {
+        window.location.href = href;
+        return;
+      }
+      card.dispatchEvent(
+        new CustomEvent('card:activate', { bubbles: true, detail: { event } }),
+      );
+    };
+
+    card.addEventListener('click', activate);
+    card.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      activate(event);
+    });
+  }
+}
+```
+
+The custom-event pattern lets the user wire whatever logic they want without modifying the generated module — listen for `card:activate` on a parent element and route to the right handler.
+
 ## CSS Variables
 
 ```scss

@@ -210,6 +210,109 @@ export const Dialog = Object.assign(DialogRoot, {
 export default Dialog
 ```
 
+## HTML Template
+
+```html
+<!-- variant: full dialog (header + body + footer) -->
+<dialog id="dialog-1" class="dialog" aria-labelledby="dialog-1-title">
+  <div class="dialog-header">
+    <div class="dialog-header-content">
+      <h2 id="dialog-1-title" class="dialog-title">
+        <!-- slot: title -->
+      </h2>
+      <p class="dialog-description">
+        <!-- slot: description -->
+      </p>
+    </div>
+    <button
+      type="button"
+      class="btn dialog-close"
+      data-style="icon"
+      aria-label="Close dialog"
+      data-dialog-close
+    >
+      ×
+    </button>
+  </div>
+  <div class="dialog-body">
+    <!-- slot: children -->
+  </div>
+  <div class="dialog-footer">
+    <!-- slot: footer (e.g. confirm/cancel buttons) -->
+  </div>
+</dialog>
+
+<!-- Trigger that opens the dialog (place anywhere on the page) -->
+<button type="button" class="btn" data-color="primary" data-dialog-open="dialog-1">
+  Open dialog
+</button>
+
+<!-- variant: minimal dialog (no header, no footer) -->
+<dialog id="dialog-2" class="dialog">
+  <div class="dialog-body">
+    <!-- slot: children -->
+  </div>
+</dialog>
+```
+
+The native `<dialog>` element provides focus trap, scrim, and Escape-to-close — no JS required for those. The vanilla-JS module wires open triggers (`[data-dialog-open="<id>"]`), close triggers (`[data-dialog-close]`), and backdrop-click dismissal. The dialog must have an `id` attribute for the open trigger to find it. `aria-labelledby` points at the title's id so screen readers announce the dialog by name (WCAG 4.1.2).
+
+## Vanilla JS
+
+```js
+// dialog.js — wires open / close / backdrop-click for static-HTML dialogs.
+// Idempotent: calling init() twice on the same root does not double-bind.
+
+const SENTINEL = 'data-acss-dialog-init';
+
+/**
+ * Initialize every <dialog class="dialog"> under `root`.
+ *
+ * Markup contract:
+ *   - Open trigger: any element with [data-dialog-open="<dialog-id>"]
+ *   - Close trigger: any element inside the dialog with [data-dialog-close]
+ *   - Backdrop click closes the dialog automatically.
+ *
+ * @param {ParentNode} [root=document]
+ */
+export function init(root = document) {
+  const dialogs = root.querySelectorAll('dialog.dialog');
+  for (const dialog of dialogs) {
+    if (dialog.getAttribute(SENTINEL) === 'true') continue;
+    dialog.setAttribute(SENTINEL, 'true');
+    wireDialog(dialog, root);
+  }
+}
+
+function wireDialog(dialog, root) {
+  // Backdrop click — only fires when the click hits the <dialog> itself,
+  // not a descendant. Prevents the dialog from closing while the user is
+  // interacting with its body.
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+
+  // Internal close triggers.
+  for (const btn of dialog.querySelectorAll('[data-dialog-close]')) {
+    btn.addEventListener('click', () => dialog.close());
+  }
+
+  // Document-level open triggers — any [data-dialog-open] pointing at this
+  // dialog's id. Scoped to `root` so init() inside a shadow root or fragment
+  // works correctly.
+  if (!dialog.id) return;
+  const triggerScope = root === document ? document : root;
+  const openTriggers = triggerScope.querySelectorAll(
+    `[data-dialog-open="${CSS.escape(dialog.id)}"]`,
+  );
+  for (const trigger of openTriggers) {
+    trigger.addEventListener('click', () => dialog.showModal());
+  }
+}
+```
+
+`CSS.escape` guards against ids that contain special characters. The module relies on the native `<dialog>` element's behavior — there is no custom focus trap or scrim; the browser provides them.
+
 ## CSS Variables
 
 ```scss
