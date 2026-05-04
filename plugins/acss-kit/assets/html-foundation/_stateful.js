@@ -25,17 +25,7 @@ export function wireDisabled(el, opts = {}) {
 
   const isDisabled = () => el.getAttribute('aria-disabled') === 'true';
 
-  // Native <button> fires a synthetic click after Enter/Space keydown — so
-  // without coordination both handlers would invoke onActivate twice. We
-  // mark a one-shot suppression flag in keydown that the click handler
-  // honours and then clears.
-  let suppressNextClick = false;
-
   const onClick = (event) => {
-    if (suppressNextClick) {
-      suppressNextClick = false;
-      return;
-    }
     if (isDisabled()) {
       event.preventDefault();
       event.stopPropagation();
@@ -51,12 +41,11 @@ export function wireDisabled(el, opts = {}) {
       event.stopPropagation();
       return;
     }
-    if (el.tagName === 'BUTTON') {
-      // Let the browser's synthetic click do the work; suppress the duplicate
-      // call we'd otherwise make from this handler.
-      suppressNextClick = true;
-      return;
-    }
+    // Native <button> dispatches a synthetic click for Enter/Space — let
+    // the click handler run onActivate so it fires exactly once. For
+    // non-button elements (e.g. role="button" divs) no synthetic click is
+    // generated, so activate explicitly here.
+    if (el.tagName === 'BUTTON') return;
     event.preventDefault();
     opts.onActivate?.(event);
   };
