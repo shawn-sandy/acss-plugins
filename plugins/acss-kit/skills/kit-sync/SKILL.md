@@ -71,7 +71,7 @@ Without normalization a Prettier or editor save would flip every file to `modifi
 
 ## Step 0 — Exit plan mode
 
-Applies to both workflows below (`/kit-sync` bulk install and `/kit-update` safe re-copy). If the session is in plan mode, call `ExitPlanMode` before reaching Step S1 or U1 — both flows write component TSX/SCSS, theme CSS, and the manifest at `.acss-kit/manifest.json`, and they shell out to `detect_target.py`, `manifest_read.py`, `manifest_write.py`, `diff_status.py`, and the palette/token scripts. Plan mode blocks all of those.
+Applies to both workflows below (`/kit-sync` bulk install and `/kit-update` safe re-copy). If the session is in plan mode, call `ExitPlanMode` before reaching Step S1 or U1 — both flows write component TSX/SCSS, theme CSS, and the manifest at `.acss-kit/manifest.json`, and they shell out to `detect_target.py`, `detect_stack.py`, `manifest_read.py`, `manifest_write.py`, `diff_status.py`, `hash_file.py`, `generate_palette.py`, `tokens_to_css.py`, `validate_theme.py`, and `verify_integration.py`. Plan mode blocks all of those.
 
 `--dry-run` is **not** a reason to remain in plan mode. The flag suppresses writes inside the workflow, but the workflow still has to run `detect_target.py`, `manifest_read.py`, and `diff_status.py` via Bash to produce the plan tree — and plan mode would block those. Exit plan mode and pass `--dry-run` to skip the writes.
 
