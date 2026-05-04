@@ -24,6 +24,16 @@ The committed `assets/utilities.css` and `assets/utilities/<family>.css` partial
 
 ---
 
+## Step 0 — Exit plan mode
+
+Applies to every flow below (`/utility-add`, `/utility-list`, `/utility-tune`, `/utility-bridge`). If the session is in plan mode, call `ExitPlanMode` before proceeding — `/utility-add`, `/utility-tune`, and `/utility-bridge` all write `utilities.css` / `token-bridge.css` / `utilities.tokens.json` and shell out to `detect_utility_target.py`, `generate_utilities.py`, and `validate_utilities.py`, all of which plan mode blocks.
+
+`/utility-list` is read-only — it would technically run under plan mode — but exit anyway when the user is likely to follow it with `/utility-add` so the next call doesn't re-prompt.
+
+Stay in plan mode only when it is absolutely necessary — i.e. the user explicitly asked for a preview ("show me which families would land", "don't write the bundle yet"). In that case, narrate the file list and bundle size without invoking Write/Edit/Bash, and wait for approval before re-entering this skill.
+
+---
+
 ## `/utility-add [--target=<dir>] [--families=<list>] [--no-bridge]`
 
 **Purpose:** Copy `utilities.css` (and `token-bridge.css` unless `--no-bridge`) into the user's React project.

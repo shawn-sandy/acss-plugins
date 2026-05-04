@@ -40,6 +40,14 @@ Both modes converge on the same internal contract — a list of fields, each wit
 
 ---
 
+## Step 0 — Exit plan mode
+
+If the session is in plan mode, call `ExitPlanMode` before resolving the field list. Step B may delegate to `/kit-add field input checkbox` (which writes TSX/SCSS), Step C writes the form component file, and `detect_target.py` runs via Bash — plan mode would block all of it.
+
+Stay in plan mode only when it is absolutely necessary — i.e. the user explicitly asked for a preview ("show me the field list first", "don't write the form yet"). In that case, narrate the resolved field list and the file that would be generated, then wait for approval before re-entering this skill — do not invoke Write/Edit/Bash from a plan-mode session.
+
+---
+
 ## Step A — Resolve the field list
 
 ### A1. Ambiguity check

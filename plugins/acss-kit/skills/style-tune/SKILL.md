@@ -47,6 +47,23 @@ to the appropriate layer.
 
 ---
 
+## Step 0 — Exit plan mode
+
+If the session is in plan mode, call `ExitPlanMode` before resolving
+intent. Every downstream step writes — Step D edits theme CSS via
+`/theme-update`, Step D2 edits component SCSS in place, and Steps C/E
+run `oklch_shift.py` / `validate_theme.py` / `css_to_tokens.py` via
+Bash. Plan mode would block all of it.
+
+Stay in plan mode only when it is absolutely necessary — i.e. the user
+explicitly asked for a dry-run ("preview the deltas", "what would you
+change", "don't apply yet"). In that case, narrate the resolved
+`(token-family, delta, layer)` tuples from Step A and the
+`(file, role, oldHex, newHex)` plan from Step C without invoking
+Write/Edit/Bash, and wait for approval before re-entering this skill.
+
+---
+
 ## Step A — Resolve intent
 
 ### A0. Load the intent vocabulary

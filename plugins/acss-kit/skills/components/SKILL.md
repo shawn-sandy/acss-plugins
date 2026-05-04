@@ -21,6 +21,14 @@ This skill generates self-contained, production-quality React components from ma
 
 ---
 
+## Step 0 — Exit plan mode
+
+If the session is in plan mode, call `ExitPlanMode` before doing anything else. Every subsequent step writes files (`ui.tsx`, component TSX/SCSS), edits `.acss-target.json`, or runs Python scripts via Bash — plan mode would block all of it.
+
+Stay in plan mode only when it is absolutely necessary — i.e. the user explicitly asked for a dry-run / preview ("show me the plan first", "what would `/kit-add` do", "don't generate yet"). In that case, narrate the dependency tree and file list from Step B4 without invoking Write/Edit/Bash, and wait for approval before re-entering this skill.
+
+---
+
 ## Step A — First-Run Initialization
 
 Run this check at the start of every `/kit-add` invocation.
