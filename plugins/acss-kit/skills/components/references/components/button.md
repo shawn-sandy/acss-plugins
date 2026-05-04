@@ -174,6 +174,75 @@ export default Button
 Button.displayName = 'Button'
 ```
 
+## HTML Template
+
+```html
+<!-- variant: default -->
+<button type="button" class="btn">
+  <!-- slot: children -->
+</button>
+
+<!-- variant: primary -->
+<button type="button" class="btn" data-color="primary">
+  <!-- slot: children -->
+</button>
+
+<!-- variant: large outline -->
+<button type="button" class="btn" data-btn="lg" data-style="outline">
+  <!-- slot: children -->
+</button>
+
+<!-- variant: full-width primary (data-btn="block") -->
+<button type="button" class="btn" data-color="primary" data-btn="block">
+  <!-- slot: children -->
+</button>
+
+<!-- variant: disabled (stays focusable; aria-disabled, not the native attribute) -->
+<button
+  type="button"
+  class="btn is-disabled"
+  data-color="primary"
+  aria-disabled="true"
+>
+  <!-- slot: children -->
+</button>
+
+<!-- variant: icon-only (always include an aria-label) -->
+<button type="button" class="btn" data-style="icon" aria-label="Close">
+  <!-- slot: icon -->
+</button>
+```
+
+The HTML mirrors the TSX output exactly — same root element, same classes, same `data-*` attributes, same ARIA. Slot placeholders (`<!-- slot: children -->`) are HTML comments the user replaces with their content. Disabled buttons carry both `aria-disabled="true"` and the `is-disabled` class so visual + assistive states stay in sync (WCAG 2.1.1).
+
+## Vanilla JS
+
+```js
+// button.js — wires aria-disabled handling for static-HTML buttons.
+// Idempotent: calling init() twice on the same root does not double-bind.
+import { wireDisabled } from './_stateful.js';
+
+const SENTINEL = 'data-acss-btn-init';
+
+/**
+ * Wire every .btn under `root` so that aria-disabled buttons stay focusable
+ * but block click + Enter/Space activation.
+ *
+ * @param {ParentNode} [root=document]
+ * @param {{ onActivate?: (event: Event) => void }} [opts]
+ */
+export function init(root = document, opts = {}) {
+  const buttons = root.querySelectorAll('.btn');
+  for (const el of buttons) {
+    if (el.getAttribute(SENTINEL) === 'true') continue;
+    el.setAttribute(SENTINEL, 'true');
+    wireDisabled(el, opts);
+  }
+}
+```
+
+The `wireDisabled` helper lives in `_stateful.js` (copied once per project at first-run). The sentinel attribute (`data-acss-btn-init`) makes `init()` safe to call after every dynamic insertion.
+
 ## CSS Variables
 
 ```scss
