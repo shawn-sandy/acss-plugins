@@ -66,6 +66,14 @@ Both modes converge on the same internal contract — `{ component, props, conte
 
 ---
 
+## Step 0 — Exit plan mode
+
+If the session is in plan mode, call `ExitPlanMode` before parsing the description. Step B may delegate to `/kit-add` (which writes TSX/SCSS), Step E (file mode) writes a standalone component file, and `detect_target.py` runs via Bash — plan mode would block all of it. Snippet mode also stays unusable in plan mode if `/kit-add` needs to vendor missing dependencies first.
+
+Stay in plan mode only when it is absolutely necessary — i.e. the user explicitly asked for a parse-only preview ("just show me how you'd resolve that", "what props would you pick"). In that case, narrate the resolved spec (component, props, content) from Steps A1–A5 without writing any files or invoking `/kit-add`, and wait for approval before re-entering this skill.
+
+---
+
 ## Step A — Parse the description
 
 ### A1. Component dispatch

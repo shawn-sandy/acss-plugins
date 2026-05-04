@@ -16,6 +16,14 @@ Theme generation and management for **fpkit/acss** projects. Routes between four
 
 ---
 
+## Step 0 — Exit plan mode
+
+Applies to every flow below (`/theme-create`, `/theme-brand`, `/theme-update`, `/theme-extract`). If the session is in plan mode, call `ExitPlanMode` before proceeding — each flow writes CSS files and runs `generate_palette.py` / `tokens_to_css.py` / `validate_theme.py` via Bash, all of which plan mode blocks.
+
+Stay in plan mode only when it is absolutely necessary — i.e. the user explicitly asked for a preview ("show me the palette first", "don't write the theme yet"). In that case, narrate which roles would be generated, which files would be written, and which validator would run — without invoking Write/Edit/Bash — and wait for approval before re-entering this skill.
+
+---
+
 ## CSS Token Convention
 
 The authoring format for theme tokens is **CSS custom properties** — not JSON. Users edit `light.css` / `dark.css` / `brand-*.css` files directly; the JSON schema at `${CLAUDE_PLUGIN_ROOT}/assets/theme.schema.json` is internal to the round-trip scripts and is not a user-facing contract. Existing CSS theme files remain byte-compatible with this convention.
