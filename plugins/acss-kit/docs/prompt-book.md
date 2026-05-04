@@ -49,6 +49,22 @@ Add the [button] and [alert] components to my project using acss-kit.
 
 ---
 
+## 2a. Generate static HTML versions of components (no React)
+
+**When to use:** You want fpkit-style components in a project that doesn't use React — server-rendered apps, static sites, design-system docs, email templates, prototypes.
+
+**Prompt:**
+
+```text
+Add static HTML versions of the [button] and [dialog] components using
+acss-kit — no React, just markup + SCSS + a tiny vanilla-JS file for
+behavior.
+```
+
+**What you get:** `<name>.html` (fragment markup with the same classes / `data-*` attributes / ARIA as the React version), `<name>.scss` (byte-identical to `/kit-add`'s SCSS — compile with Sass before linking), and `<name>.js` for components with runtime behavior (Button, Card-interactive, Alert, Dialog). On first run, prompts for the target directory (default `components/html`) and copies a `_stateful.js` foundation helper. Backed by `/kit-add-html`.
+
+---
+
 ## 3. Generate a component from a description
 
 **When to use:** You know what the UI should look like in plain English but don't want to wire it up by hand.

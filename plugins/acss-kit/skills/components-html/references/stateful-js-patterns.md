@@ -47,9 +47,18 @@ The native `<dialog>` element does the heavy lifting:
 - Backdrop click is wired by comparing `event.target === dialog` (the dialog element receives the click when the user clicks on the scrim).
 
 ```js
-// dialog.js
+// dialog.js — idempotent: each element is guarded by a sentinel attribute
+// so calling init() twice does not stack listeners. (addEventListener only
+// de-duplicates when the exact same function reference is passed; the
+// arrow functions below are fresh closures on every call, so without the
+// sentinel they would compound.)
+const SENTINEL = 'data-acss-dialog-init';
+
 export function init(root = document) {
   for (const dialog of root.querySelectorAll('dialog.dialog')) {
+    if (dialog.getAttribute(SENTINEL) === 'true') continue;
+    dialog.setAttribute(SENTINEL, 'true');
+
     // Open triggers — any [data-dialog-open] pointing at this dialog's id.
     const openTriggers = root.querySelectorAll(
       `[data-dialog-open="${dialog.id}"]`,
@@ -74,7 +83,7 @@ export function init(root = document) {
 }
 ```
 
-The `init` function is meant to be called once after the page loads. Note that `addEventListener` only de-duplicates when the **exact same function reference** is passed twice with the same options — newly created closures (which is what every call to `init()` produces here) are treated as distinct listeners and will stack. To keep `init()` safe to call repeatedly (after dynamic insertions, HMR, etc.), guard each element with a sentinel attribute before binding, e.g. `if (dialog.getAttribute('data-acss-dialog-init') === 'true') return; dialog.setAttribute('data-acss-dialog-init', 'true');`. The per-component `init()` modules in this plugin (button.js, card.js, alert.js, dialog.js) all use this pattern.
+The sentinel attribute (`data-acss-dialog-init`) makes `init()` safe to call after dynamic DOM insertions, HMR refreshes, or page transitions — re-runs short-circuit on already-wired elements. Every per-component `init()` in this plugin (button.js, card.js, alert.js, dialog.js) follows the same pattern.
 
 ---
 

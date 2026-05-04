@@ -64,8 +64,8 @@ DEFAULT_HTML_DIR = "components/html"
 SKIP_DIRS = {"node_modules", "dist", "build", ".git", ".next", ".cache", "out"}
 
 PAGE_EXTENSIONS = (".html", ".htm", ".css", ".scss", ".sass", ".vue", ".svelte",
-                   ".njk", ".liquid", ".erb", ".php", ".jsx", ".tsx", ".astro",
-                   ".md", ".mdx")
+                   ".njk", ".liquid", ".erb", ".php", ".js", ".mjs", ".cjs",
+                   ".jsx", ".ts", ".tsx", ".astro", ".md", ".mdx")
 
 
 def iter_page_files(root: Path):
@@ -90,36 +90,49 @@ def read_target(root: Path) -> dict:
     return {}
 
 
+REFERENCE_TOKENS = (
+    "<link",
+    "<script",
+    "@import",
+    "@use",
+    "@forward",
+    "import",
+    "require(",
+    "url(",
+)
+
+
 def is_referenced(basename: str, pages: list[Path]) -> bool:
     """A simple substring scan — basename must appear inside a known
     reference syntax. We avoid full HTML parsing on purpose; the goal is
-    "did the user wire it up at all?", not strict validation."""
+    "did the user wire it up at all?", not strict validation.
+
+    The scan walks each occurrence of the basename and looks back over a
+    short window of preceding text for one of the reference tokens, so that
+    formatted multi-line tags (`<script\n  src="...dialog.js">`) and tags
+    with the basename on a different physical line than the opener are
+    still recognised."""
     needle = basename
+    # Look back this many characters from each basename hit. Long enough to
+    # cover wrapped <script>/<link> tags and import statements; short enough
+    # that an unrelated `import` elsewhere in the file does not match.
+    window = 256
     for page in pages:
         try:
             text = page.read_text(encoding="utf-8", errors="ignore")
         except Exception:
             continue
-        if needle not in text:
-            continue
-        # Look for any line that both names the artifact and looks like a
-        # reference (link/script/import). This trades precision for resilience
-        # against templating engines and bundler-rewritten paths.
-        for line in text.splitlines():
-            if needle not in line:
-                continue
-            stripped = line.strip().lower()
-            if any(token in stripped for token in (
-                "<link",
-                "<script",
-                "@import",
-                "@use",
-                "@forward",
-                "import",
-                "require(",
-                "url(",
-            )):
+        lower = text.lower()
+        start = 0
+        while True:
+            idx = text.find(needle, start)
+            if idx == -1:
+                break
+            window_start = max(0, idx - window)
+            preceding = lower[window_start:idx]
+            if any(token in preceding for token in REFERENCE_TOKENS):
                 return True
+            start = idx + len(needle)
     return False
 
 
@@ -142,7 +155,24 @@ def verify(root: Path) -> dict:
         if isinstance(raw, str) and raw.strip()
         else DEFAULT_HTML_DIR
     )
-    artifacts_dir = root / components_html_dir
+
+    # Reject absolute paths and any segment containing `..`. Without this
+    # guard a malformed or hostile .acss-html-target.json could redirect the
+    # scan outside the project tree and produce misleading wired-up reports
+    # (or no report at all if the target doesn't exist).
+    configured = Path(components_html_dir)
+    if configured.is_absolute() or ".." in configured.parts:
+        return {
+            "ok": False,
+            "projectRoot": str(root),
+            "componentsHtmlDir": components_html_dir,
+            "checks": [],
+            "reasons": [
+                "componentsHtmlDir must be a project-relative path "
+                "(no leading '/' and no '..' segments).",
+            ],
+        }
+    artifacts_dir = root / configured
 
     if not artifacts_dir.is_dir():
         return {
@@ -189,7 +219,18 @@ def verify(root: Path) -> dict:
         if not imported:
             ref_path = f"{components_html_dir}/{artifact.name}"
             if kind == "style":
-                hint = f'<link rel="stylesheet" href="{ref_path}">'
+                if artifact.suffix.lower() in (".scss", ".sass"):
+                    # Browsers can't load Sass directly. Suggest the compiled
+                    # CSS path or a build-pipeline import that runs Sass.
+                    compiled_path = ref_path.rsplit(".", 1)[0] + ".css"
+                    hint = (
+                        f'compile {ref_path} with Sass and add '
+                        f'<link rel="stylesheet" href="{compiled_path}">, '
+                        f'or @import "{ref_path}" from your existing Sass '
+                        "entrypoint"
+                    )
+                else:
+                    hint = f'<link rel="stylesheet" href="{ref_path}">'
             else:
                 hint = f'<script type="module" src="{ref_path}"></script>'
             reasons.append(
@@ -262,6 +303,18 @@ def self_test() -> int:
         expect_reason_substr="components/html does not exist",
     )
     run(
+        "componentsHtmlDir absolute path is rejected",
+        {CONFIG_FILENAME: json.dumps({"componentsHtmlDir": "/etc/passwd"})},
+        expect_ok=False,
+        expect_reason_substr="must be a project-relative path",
+    )
+    run(
+        "componentsHtmlDir with traversal segment is rejected",
+        {CONFIG_FILENAME: json.dumps({"componentsHtmlDir": "../../escape"})},
+        expect_ok=False,
+        expect_reason_substr="must be a project-relative path",
+    )
+    run(
         "stylesheet linked from index.html → ok",
         {
             CONFIG_FILENAME: target,
@@ -332,6 +385,41 @@ def self_test() -> int:
             "src/styles/main.scss": '@import "../../components/html/button.scss";',
         },
         expect_ok=True,
+    )
+    run(
+        "multi-line <script src=...> across lines counts as wired",
+        {
+            CONFIG_FILENAME: target,
+            "components/html/dialog.js": "export {}",
+            "index.html": (
+                "<!doctype html><html><body>\n"
+                "<script\n"
+                '  type="module"\n'
+                '  src="components/html/dialog.js"\n'
+                "></script>\n"
+                "</body></html>\n"
+            ),
+        },
+        expect_ok=True,
+    )
+    run(
+        "ES-module bootstrap (.js) importing the artifact counts as wired",
+        {
+            CONFIG_FILENAME: target,
+            "components/html/dialog.js": "export {}",
+            "src/main.js": "import './components/html/dialog.js';\n",
+        },
+        expect_ok=True,
+    )
+    run(
+        ".scss fix-up hint mentions Sass compilation, not raw <link href=*.scss>",
+        {
+            CONFIG_FILENAME: target,
+            "components/html/button.scss": ".btn{}",
+            "index.html": "<!doctype html><html></html>",
+        },
+        expect_ok=False,
+        expect_reason_substr="compile components/html/button.scss with Sass",
     )
     run(
         "node_modules copy of artifact does not count",
