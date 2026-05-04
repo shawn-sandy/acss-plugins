@@ -136,7 +136,12 @@ def classify(path: Path) -> str:
 
 def verify(root: Path) -> dict:
     target = read_target(root)
-    components_html_dir = target.get("componentsHtmlDir") or DEFAULT_HTML_DIR
+    raw = target.get("componentsHtmlDir")
+    components_html_dir = (
+        raw.strip()
+        if isinstance(raw, str) and raw.strip()
+        else DEFAULT_HTML_DIR
+    )
     artifacts_dir = root / components_html_dir
 
     if not artifacts_dir.is_dir():
@@ -249,6 +254,12 @@ def self_test() -> int:
         {CONFIG_FILENAME: target},
         expect_ok=False,
         expect_reason_substr="does not exist",
+    )
+    run(
+        "componentsHtmlDir as a non-string (list) → falls back to default, no TypeError",
+        {CONFIG_FILENAME: json.dumps({"componentsHtmlDir": ["unexpected"]})},
+        expect_ok=False,
+        expect_reason_substr="components/html does not exist",
     )
     run(
         "stylesheet linked from index.html → ok",

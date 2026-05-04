@@ -121,7 +121,7 @@ Generate one or more components into your project.
 
 Generate **static HTML** versions of components for projects that don't use React — server-rendered apps, static sites, design-system docs, email templates, prototypes. Reads the same component reference docs as `/kit-add`, but emits markup + SCSS + tiny vanilla JS instead of TSX.
 
-```
+```text
 /kit-add-html button
 /kit-add-html card alert
 /kit-add-html dialog
