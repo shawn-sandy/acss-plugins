@@ -28,13 +28,13 @@ The committed `assets/utilities.css` and `assets/utilities/<family>.css` partial
 
 Applies to every flow below (`/utility-add`, `/utility-list`, `/utility-tune`, `/utility-bridge`). If the session is in plan mode, call `ExitPlanMode` before proceeding — the write-bearing flows each shell out to a different subset of the bundled scripts:
 
-- `/utility-add` runs `detect_utility_target.py`, copies the prebuilt `utilities.css` (and `token-bridge.css` unless `--no-bridge`) into the project, and calls the cross-plugin `detect_stack.py` + `verify_integration.py` from `acss-kit`.
+- `/utility-add` runs `detect_utility_target.py` and copies the prebuilt `utilities.css` (and `token-bridge.css` unless `--no-bridge`) into the project. When `acss-kit` is installed alongside, it also calls the cross-plugin `detect_stack.py` + `verify_integration.py` from `acss-kit`; when `acss-kit` is absent, those two are skipped with a warning.
 - `/utility-bridge` writes `token-bridge.css` and runs `validate_utilities.py`.
 - `/utility-tune` edits `assets/utilities.tokens.json`, regenerates the bundle via `generate_utilities.py`, and validates via `validate_utilities.py`.
 
 Plan mode blocks every one of those `Write`/`Edit`/`Bash` calls.
 
-`/utility-list` is read-only — it would technically run under plan mode — but exit anyway when the user is likely to follow it with `/utility-add` so the next call doesn't re-prompt.
+`/utility-list` is read-only and stays safe under plan mode — no Write/Edit/Bash and no need to exit. Only call `ExitPlanMode` when the user pivots to one of the write-bearing flows above.
 
 Stay in plan mode only when it is absolutely necessary — i.e. the user explicitly asked for a preview ("show me which families would land", "don't write the bundle yet"). In that case, narrate the file list and bundle size without invoking Write/Edit/Bash, and wait for approval before re-entering this skill.
 
