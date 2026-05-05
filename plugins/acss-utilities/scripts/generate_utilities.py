@@ -112,21 +112,24 @@ def emit_spacing(tokens: dict) -> str:
     baseline = spacing["baseline"]
     scale = spacing["scale"]
     props = spacing["properties"]
+    # Directional utilities use CSS logical properties so spacing follows the
+    # writing mode (LTR/RTL, vertical scripts) without changing class names.
+    # The all-sides `m`/`p` and `gap` are already writing-mode-agnostic.
     prop_map = {
-        "m": ("margin",),
-        "mt": ("margin-top",),
-        "mb": ("margin-bottom",),
-        "ml": ("margin-left",),
-        "mr": ("margin-right",),
-        "mx": ("margin-left", "margin-right"),
-        "my": ("margin-top", "margin-bottom"),
-        "p": ("padding",),
-        "pt": ("padding-top",),
-        "pb": ("padding-bottom",),
-        "pl": ("padding-left",),
-        "pr": ("padding-right",),
-        "px": ("padding-left", "padding-right"),
-        "py": ("padding-top", "padding-bottom"),
+        "m":  ("margin",),
+        "mt": ("margin-block-start",),
+        "mb": ("margin-block-end",),
+        "ml": ("margin-inline-start",),
+        "mr": ("margin-inline-end",),
+        "mx": ("margin-inline",),
+        "my": ("margin-block",),
+        "p":  ("padding",),
+        "pt": ("padding-block-start",),
+        "pb": ("padding-block-end",),
+        "pl": ("padding-inline-start",),
+        "pr": ("padding-inline-end",),
+        "px": ("padding-inline",),
+        "py": ("padding-block",),
         "gap": ("gap",),
     }
 

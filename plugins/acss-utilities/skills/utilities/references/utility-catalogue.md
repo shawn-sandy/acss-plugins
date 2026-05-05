@@ -71,14 +71,26 @@ Generated from `tokens.spacing.{baseline, scale, properties}`. Each (property, s
 - **Baseline**: `0.25rem` (so `.m-4 = 1rem`, `.p-8 = 2rem`)
 - **Responsive**: yes — every class has `.sm-`, `.md-`, `.lg-`, `.xl-` variants
 
+Directional utilities emit **CSS logical properties** so spacing follows the document's writing mode (LTR/RTL, vertical scripts) without changes to consumer code. The `t`/`b`/`l`/`r`/`x`/`y` prefixes are kept for familiarity; in the default LTR top-to-bottom mode they map 1:1 to the physical sides.
+
+| Prefix | CSS property emitted | LTR equivalent |
+|---|---|---|
+| `mt` / `pt` | `margin-block-start` / `padding-block-start` | top |
+| `mb` / `pb` | `margin-block-end` / `padding-block-end` | bottom |
+| `ml` / `pl` | `margin-inline-start` / `padding-inline-start` | left |
+| `mr` / `pr` | `margin-inline-end` / `padding-inline-end` | right |
+| `mx` / `px` | `margin-inline` / `padding-inline` | left + right |
+| `my` / `py` | `margin-block` / `padding-block` | top + bottom |
+| `m` / `p` / `gap` | `margin` / `padding` / `gap` (already side-agnostic) | all sides |
+
 Examples:
 
 | Class | Sets |
 |---|---|
 | `.m-0` | `margin: 0` |
 | `.m-4` | `margin: 1rem` |
-| `.mt-2` | `margin-top: 0.5rem` |
-| `.px-6` | `padding-left: 1.5rem; padding-right: 1.5rem` |
+| `.mt-2` | `margin-block-start: 0.5rem` |
+| `.px-6` | `padding-inline: 1.5rem` |
 | `.gap-3` | `gap: 0.75rem` |
 | `.sm-p-4` | wrapped in `@media (width >= 30rem)` |
 
