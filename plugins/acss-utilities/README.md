@@ -99,7 +99,7 @@ Mirroring fpkit upstream where present, plus standard atomic-CSS additions (see 
 | `color-text` | `.text-primary`, `.text-error`, `.text-muted` | no |
 | `color-border` | `.border-primary`, `.border-error`, `.border-muted` | no |
 | `display` | `.hide`, `.show`, `.invisible`, `.sr-only`, `.sr-only-focusable`, `.print-hide` | yes |
-| `spacing` | `.m-4`, `.mt-2`, `.px-6`, `.gap-3` | yes |
+| `spacing` | `.m-4`, `.mt-2`, `.px-6`, `.gap-3` (logical-property-based — RTL/vertical-aware) | yes |
 | `flex` | `.flex`, `.flex-col`, `.justify-center`, `.items-center` | yes |
 | `grid` | `.grid`, `.grid-cols-2`, `.grid-cols-12` | yes |
 | `type` | `.text-xs`, `.text-base`, `.text-lg`, `.font-bold` | no |
@@ -109,6 +109,10 @@ Mirroring fpkit upstream where present, plus standard atomic-CSS additions (see 
 | `z-index` | `.z-10`, `.z-20`, `.z-50`, `.z-auto` | no |
 
 Responsive variants use a plain hyphen prefix — `.sm-hide`, `.md-p-6`, `.lg-flex-row`. No CSS escaping needed in the stylesheet or JSX `className` strings. Breakpoints: `sm: 30rem`, `md: 48rem`, `lg: 62rem`, `xl: 80rem`.
+
+### Logical-property spacing
+
+As of `0.5.0`, directional spacing utilities (`mt`/`mb`/`ml`/`mr`/`mx`/`my` and the `p*` siblings) emit CSS **logical properties** — `margin-block-start`, `margin-inline-end`, `padding-inline`, etc. — instead of physical `margin-top`/`margin-left`/… pairs. Class names are unchanged. In the default LTR top-to-bottom writing mode the rendered layout is identical to earlier versions; in RTL (`dir="rtl"`) or vertical writing modes spacing flips with the inline / block axis automatically. If your project mixes directional classes with `dir="rtl"` or `writing-mode: vertical-*` and previously relied on physical-side semantics, audit those usages — see the [`0.5.0` changelog entry](CHANGELOG.md) for details.
 
 ### Responsive variants
 

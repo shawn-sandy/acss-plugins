@@ -71,7 +71,7 @@ Generated from `tokens.spacing.{baseline, scale, properties}`. Each (property, s
 - **Baseline**: `0.25rem` (so `.m-4 = 1rem`, `.p-8 = 2rem`)
 - **Responsive**: yes — every class has `.sm-`, `.md-`, `.lg-`, `.xl-` variants
 
-Directional utilities emit **CSS logical properties** so spacing follows the document's writing mode (LTR/RTL, vertical scripts) without changes to consumer code. The `t`/`b`/`l`/`r`/`x`/`y` prefixes are kept for familiarity; in the default LTR top-to-bottom mode they map 1:1 to the physical sides.
+Directional utilities emit **CSS logical properties** so spacing follows the document's writing mode (LTR/RTL, vertical scripts). Class names are unchanged from earlier releases — the `t`/`b`/`l`/`r`/`x`/`y` prefixes are kept for familiarity. In the default LTR top-to-bottom mode they map 1:1 to the physical sides, so most consumers see no rendering difference. **In RTL or vertical writing modes the rendered side flips** (e.g. `ml-*` resolves to `margin-inline-start`, which is the right side under `dir="rtl"`); audit any markup that previously relied on physical-side semantics in those contexts.
 
 | Prefix | CSS property emitted | LTR equivalent |
 |---|---|---|
