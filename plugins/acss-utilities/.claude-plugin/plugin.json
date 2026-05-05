@@ -1,7 +1,7 @@
 {
   "name": "acss-utilities",
   "description": "CSS utility-class plugin for fpkit/acss projects. Tailwind-style atomic classes (.bg-primary, .mt-4, .sm-hide) generated from a token source-of-truth, with a token-bridge that aliases acss-kit's OKLCH roles to fpkit-style names.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": {
     "name": "Shawn Sandy",
     "url": "https://github.com/shawn-sandy/acss"

@@ -4,6 +4,14 @@ All notable changes to the `acss-utilities` plugin are documented here. Format f
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-05
+
+### Changed
+
+- **Spacing utilities now emit CSS logical properties.** Class names are unchanged (`mt-4`, `mb-2`, `mx-3`, `my-5`, `pt-1`, `px-6`, …) but the underlying CSS now uses `margin-block-start` / `margin-block-end` / `margin-inline-start` / `margin-inline-end` / `margin-inline` / `margin-block` (and the matching `padding-*` properties) instead of the physical `margin-top` / `margin-bottom` / `margin-left` / `margin-right` pairs. In the default LTR top-to-bottom writing mode the resolved layout is identical; in RTL or vertical writing modes spacing now follows the document's text-flow automatically. The all-sides shorthands `m-*`, `p-*`, and `gap-*` are unchanged — they were already side-agnostic.
+- **`mx-*` / `my-*` / `px-*` / `py-*` are now single-property declarations.** Each emits the `margin-inline` / `margin-block` / `padding-inline` / `padding-block` shorthand instead of the previous two-property pair, shrinking the spacing partial by ~5%.
+- **Updated `utility-catalogue.md` and `naming-convention.md`** with the logical-property mapping table and revised examples (`.mt-2 → margin-block-start: 0.5rem`, `.px-6 → padding-inline: 1.5rem`).
+
 ## [0.4.0] - 2026-05-02
 
 ### Added

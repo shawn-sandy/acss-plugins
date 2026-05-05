@@ -31,7 +31,7 @@ The strings `sm`, `md`, `lg`, `xl`, and `print` are **reserved** as prefix names
 | `color-bg` | `bg-` | `background-color` |
 | `color-text` | `text-` | `color` (when value is a role) |
 | `color-border` | `border-` | `border-color` |
-| `spacing` | `m-/mt-/mb-/ml-/mr-/mx-/my-/p-/pt-/pb-/pl-/pr-/px-/py-/gap-` | `margin*`, `padding*`, `gap` |
+| `spacing` | `m-/mt-/mb-/ml-/mr-/mx-/my-/p-/pt-/pb-/pl-/pr-/px-/py-/gap-` | `margin`/`padding` shorthand, `margin-block(-start/-end)`, `margin-inline(-start/-end)`, `padding-block(-start/-end)`, `padding-inline(-start/-end)`, `gap` (directional utilities use logical properties) |
 | `display` | `hide`, `show`, `invisible`, `sr-only`, `sr-only-focusable`, `print-hide` | `display`, `visibility` |
 | `flex` | `flex`, `flex-*`, `justify-*`, `items-*` | `display`, `flex-*`, `justify-content`, `align-items` |
 | `grid` | `grid`, `grid-cols-*`, `grid-rows-*`, `inline-grid` | `display`, `grid-template-*` |
