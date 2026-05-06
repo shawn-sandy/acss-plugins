@@ -23,6 +23,7 @@ Each skill has a slash command of the same name. Claude can also invoke them aut
 
 | Skill | What it does |
 |---|---|
+| [`/audit-subagents`](audit-subagents/SKILL.md) | Audit subagent definitions in `.claude/agents/` (and `plugins/*/agents/`) against [Claude Code best practices](https://code.claude.com/docs/en/sub-agents) — front-matter, tool restrictions, description quality, plugin compatibility. Read-only. |
 | [`/plugin-health`](plugin-health/SKILL.md) | One-shot audit dashboard for `acss-kit`: structural validation + canonical-shape compliance + catalog parity + bundled theme validation. Read-only. |
 | [`/validate-plugin`](validate-plugin/SKILL.md) | Deep per-plugin structural validation (semver, command bodies, fpkit URL hygiene, Python syntax). Run before publishing a specific plugin. |
 | [`/verify-plugins`](verify-plugins/SKILL.md) | Repo-wide sweep — pass/fail per plugin with no argument needed. Use to spot-check the marketplace before tagging a release. |
