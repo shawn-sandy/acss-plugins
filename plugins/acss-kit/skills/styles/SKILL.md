@@ -180,6 +180,57 @@ The validator's full pair list (10 pairs at default thresholds) is in `scripts/v
 
 ---
 
+## `/color-scale <color> [--name=<name>] [--format=css|json|both]`
+
+**Purpose:** Generate a 10-step OKLCH color scale (steps 50–900) from any seed color — a hex value, a CSS named color, or a theme role from the project's existing theme.
+
+### Input resolution
+
+Resolve `<color>` to a 6-digit hex string before calling the script:
+
+1. **Hex value** (`#rrggbb` or `#rgb`) — use directly, no lookup needed.
+2. **Theme role name** (`background`, `primary`, `surface`, `text`, `border`, etc.) — find the project's `light.css` (or `dark.css` if specified), grep for `--color-<role>:`, and extract the hex fallback from the `var(--color-<role>, <hex>)` value. If both files exist, default to `light.css`. If neither exists, halt with: `"No theme file found. Run /theme-create first or pass a hex value directly."`
+3. **CSS named color** (`red`, `cornflowerblue`, `tomato`, etc.) — resolve to hex using the W3C CSS Color 4 named-color table (Claude knows these). Example: `red` → `#ff0000`, `cornflowerblue` → `#6495ed`.
+4. **Anything else** — halt with the usage hint.
+
+Default `--name`:
+- Theme role input → use the role name (e.g. `primary` → `--color-primary-50`)
+- Named color input → use the color name (e.g. `red` → `--color-red-50`)
+- Hex input → use `scale` unless `--name` is provided
+
+### Workflow
+
+1. Resolve `<color>` to hex per the rules above.
+2. Run `${CLAUDE_PLUGIN_ROOT}/scripts/generate_color_scale.py <hex> --name=<name> --format=both`. Capture JSON+CSS stdout.
+   - If exit code 1, print the stderr message and halt.
+3. Parse the JSON to extract the 10 `steps` entries.
+4. Display results in this order:
+   a. **CSS block** — the `:root { … }` output from the script (ready to paste or write to a file).
+   b. **Scale table** — a compact Markdown table:
+
+      | Step | Hex | OKLCH |
+      |------|-----|-------|
+      | 50   | `#f3f5fc` | `oklch(0.971 0.010 273.4)` |
+      | …    | …   | …     |
+      | 900  | `#050128` | `oklch(0.137 0.080 276.5)` |
+
+5. If the user asked to write the scale to a file, write to the path they specified. Otherwise display only — no files written unless explicitly requested.
+
+### References to load
+
+- `references/palette-algorithm.md` — OKLCH color space and gamut clamping behaviour.
+
+### Error handling
+
+| Situation | Action |
+|---|---|
+| Resolved hex is invalid | Halt: `"<value>" is not a valid hex color. Use #rrggbb or #rgb.` |
+| Theme role not found in CSS file | Halt: `"--color-<role> not found in <file>. Check the role name or pass a hex directly."` |
+| `generate_color_scale.py` exits 1 | Print stderr message and halt. |
+| `generate_color_scale.py` exits 2 | Print usage hint and halt. |
+
+---
+
 ## Integration verification (all flows)
 
 After any flow writes theme CSS to disk and `validate_theme.py` succeeds, run `${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <project_root>` to confirm the entrypoint actually imports the generated theme. The verifier reads `stack.entrypointFile` from `.acss-target.json` (populated by `detect_stack.py` during `/kit-add` first-run, or after `/setup`).

@@ -4,6 +4,13 @@ All notable changes to the `acss-kit` plugin are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-05-07
+
+### Added
+
+- **`/color-scale` command** — generate a 10-step OKLCH color scale (steps 50–900) from any seed color. Accepts a hex value (`#4f46e5`), a CSS named color (`cornflowerblue`), or a theme role name (`background`, `primary`, `surface`). When given a role name the skill reads the hex fallback directly from the project's `light.css` (or `dark.css`). Output includes a ready-to-paste `:root { … }` CSS block with `var(--color-<name>-50, <hex>)` properties and a Markdown table summarising each step's hex and OKLCH values. Chroma and hue from the seed color are preserved across all steps; lightness spans 0.970 (step 50, near-white) to 0.135 (step 900, near-black) with automatic sRGB gamut clamping so every step is a valid, renderable color. Optionally write to a file via `--format=css`.
+- **`scripts/generate_color_scale.py`** — generator/validator script that produces the 10-step scale. Accepts `<hex-color> [--name=<name>] [--format=css|json|both]`. JSON output includes `seed_oklch` for transparency. CSS output follows the `var(--x, <fallback>)` convention. Reuses `_oklch.py` for all OKLCH ↔ sRGB math. Exit 0/1/2 per generator contract.
+
 ## [0.10.0] - 2026-05-04
 
 ### Added

@@ -14,7 +14,8 @@ Current scripts in `plugins/acss-kit/scripts/`:
 - `verify_integration.py` — read-only post-step that checks the user's entrypoint imports the artifacts written by `/kit-add`, `/theme-create`, and `/utility-add` (token-bridge.css, utilities.css, theme css, components dir). Also accepts theme imports living in `stack.cssEntryFile` (SCSS/CSS) instead of the TSX entrypoint. Exit 0 when all wired up, exit 1 with `reasons` listing each missing import. Detector contract; report-only — never edits user files
 - `generate_palette.py` — OKLCH palette math; outputs palette JSON
 - `oklch_shift.py` — shifts a hex color in OKLCH space (`--hue`, `--chroma`, `--lightness`); used by the `style-tune` skill for color deltas
-- `_oklch.py` — internal shared module exposing `hex_to_oklch`, `oklch_to_hex`, `in_gamut`. Imported by `generate_palette.py` and `oklch_shift.py`. Underscore prefix marks it as internal — no CLI, no detector contract.
+- `_oklch.py` — internal shared module exposing `hex_to_oklch`, `oklch_to_hex`, `in_gamut`. Imported by `generate_palette.py`, `oklch_shift.py`, and `generate_color_scale.py`. Underscore prefix marks it as internal — no CLI, no detector contract.
+- `generate_color_scale.py` — generates a 10-step OKLCH color scale (steps 50–900) from a seed hex color. Accepts `<hex-color> [--name=<name>] [--format=css|json|both]`. JSON output includes `seed_oklch` and per-step hex/oklch/css_var. CSS output follows the `var(--x, <fallback>)` convention. Reuses `_oklch.py` for all color math. Generator/validator contract.
 - `css_to_tokens.py` — converts CSS custom properties to palette JSON
 - `tokens_to_css.py` — converts palette JSON to CSS custom property files
 - `validate_theme.py` — checks theme CSS files for WCAG 2.2 AA contrast on semantic role pairs
@@ -48,7 +49,7 @@ For scripts that emit data or human-readable validation results.
 - Errors on stderr
 - Exit 0 on success, 1 on logical failure, 2 on usage / IO errors
 
-Generators / validators: `generate_palette.py`, `oklch_shift.py`, `tokens_to_css.py`, `css_to_tokens.py`, `validate_theme.py`, `hash_file.py`, `manifest_write.py`, `generate_utilities.py`, `migrate_classnames.py`.
+Generators / validators: `generate_palette.py`, `oklch_shift.py`, `generate_color_scale.py`, `tokens_to_css.py`, `css_to_tokens.py`, `validate_theme.py`, `hash_file.py`, `manifest_write.py`, `generate_utilities.py`, `migrate_classnames.py`.
 
 `oklch_shift.py` follows this contract — it transforms an input hex into a shifted hex and emits structured JSON. It exits 0 whenever a usable hex was produced (even when chroma or lightness was clamped to stay in sRGB gamut — `clamped: true` and a populated `reasons` array surface the warning), reserves exit 1 for hard failures where no hex can be produced, and exits 2 on usage / IO errors.
 
